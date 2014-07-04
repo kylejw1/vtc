@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="1ac83533-e638-420d-a3bb-e5eb1eab0edf" name="asfarley@ASFARLEY-PC 2014-06-30 21:51:05" runUser="asfarley-PC\asfarley" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Local" id="8dcec0e0-7b50-4145-aff8-4ccf1dcf64c8">
+    <Description>These are default test settings for a local test run.</Description>
+    <Deployment enabled="false" runDeploymentRoot="asfarley_ASFARLEY-PC 2014-06-30 21_51_05">
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.IO.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.Util.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.UI.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.exe" />
+    </Deployment>
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+  </TestSettings>
+  <Times creation="2014-06-30T21:51:05.4467359-04:00" queuing="2014-06-30T21:51:06.8508162-04:00" start="2014-06-30T21:51:06.9038193-04:00" finish="2014-06-30T21:51:07.2508391-04:00" />
+  <ResultSummary outcome="Failed">
+    <Counters total="1" executed="1" error="0" failed="1" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" passed="0" completed="0" inProgress="0" pending="0" />
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="FindKBestAssignmentsDoubleTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="086b060e-25d6-b13d-8b12-752fde67ffa8">
+      <Execution id="479d7f1c-f2f8-482d-84a3-43807ca676dd" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="FindKBestAssignmentsDoubleTest" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="086b060e-25d6-b13d-8b12-752fde67ffa8" executionId="479d7f1c-f2f8-482d-84a3-43807ca676dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="479d7f1c-f2f8-482d-84a3-43807ca676dd" testId="086b060e-25d6-b13d-8b12-752fde67ffa8" testName="FindKBestAssignmentsDoubleTest" computerName="ASFARLEY-PC" duration="00:00:00.0400135" startTime="2014-06-30T21:51:06.9448216-04:00" endTime="2014-06-30T21:51:07.2338381-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="479d7f1c-f2f8-482d-84a3-43807ca676dd">
+      <Output>
+        <ErrorInfo>
+          <Message>Test method OptAssignTest.OptAssignTest.FindKBestAssignmentsDoubleTest threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.</Message>
+          <StackTrace>    at VTC.OptAssign.adjusted_cost(Double[,] cost, MurtyNode node) in E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssign.cs:line 118
+   at VTC.OptAssign.FindKBestAssignments(Double[,] costs, Int32 k) in E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssign.cs:line 52
+   at OptAssignTest.OptAssignTest.FindKBestAssignmentsDoubleTest() in E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssignTest\OptAssignTest.cs:line 190
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+</TestRun>

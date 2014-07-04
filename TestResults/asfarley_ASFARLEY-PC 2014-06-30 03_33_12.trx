@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="c5dc03bc-28d6-460f-9f9a-fc626ea97399" name="asfarley@ASFARLEY-PC 2014-06-30 03:33:12" runUser="asfarley-PC\asfarley" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Local" id="8dcec0e0-7b50-4145-aff8-4ccf1dcf64c8">
+    <Description>These are default test settings for a local test run.</Description>
+    <Deployment enabled="false" runDeploymentRoot="asfarley_ASFARLEY-PC 2014-06-30 03_33_12">
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.IO.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.Util.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.UI.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.exe" />
+    </Deployment>
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+  </TestSettings>
+  <Times creation="2014-06-30T03:33:12.9640454-04:00" queuing="2014-06-30T03:33:12.9720459-04:00" start="2014-06-30T03:33:12.9750461-04:00" finish="2014-06-30T03:33:13.1330551-04:00" />
+  <ResultSummary outcome="Completed">
+    <Counters total="1" executed="1" passed="1" error="0" failed="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="adjusted_costTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8">
+      <Execution id="0d2daf9a-5ef1-4335-9323-a53db9493016" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="adjusted_costTest" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8" executionId="0d2daf9a-5ef1-4335-9323-a53db9493016" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="0d2daf9a-5ef1-4335-9323-a53db9493016" testId="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8" testName="adjusted_costTest" computerName="ASFARLEY-PC" duration="00:00:00.0104748" startTime="2014-06-30T03:33:12.9760461-04:00" endTime="2014-06-30T03:33:13.1250546-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d2daf9a-5ef1-4335-9323-a53db9493016">
+      <Output>
+        <StdOut>At 0,0, actual is 2147483647 and expected is 2147483647
+At 0,1, actual is 0 and expected is 0
+At 1,0, actual is -2147483648 and expected is -2147483648
+At 1,1, actual is 1 and expected is 1</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+</TestRun>

@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="6d52fc48-190a-4f5e-bd62-86dc06a5b3e3" name="asfarley@ASFARLEY-PC 2014-06-30 03:33:28" runUser="asfarley-PC\asfarley" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Local" id="8dcec0e0-7b50-4145-aff8-4ccf1dcf64c8">
+    <Description>These are default test settings for a local test run.</Description>
+    <Deployment enabled="false" runDeploymentRoot="asfarley_ASFARLEY-PC 2014-06-30 03_33_28">
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.IO.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.Util.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.UI.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.exe" />
+    </Deployment>
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+  </TestSettings>
+  <Times creation="2014-06-30T03:33:28.1299129-04:00" queuing="2014-06-30T03:33:28.1399134-04:00" start="2014-06-30T03:33:28.1439137-04:00" finish="2014-06-30T03:33:28.3359246-04:00" />
+  <ResultSummary outcome="Completed">
+    <Counters total="8" executed="8" passed="8" error="0" failed="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="BestAssignmentRectangularTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="bc5276c5-e84e-5b4c-7ef2-2171d957d972">
+      <Execution id="9fe0b69c-4022-4436-8c1c-9b6d883298ec" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="BestAssignmentRectangularTest" />
+    </UnitTest>
+    <UnitTest name="findBestNodeTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="83f1b5f6-5372-fb24-0e89-6d02608c380f">
+      <Execution id="e3cf6802-cfe0-4fc2-983f-2311507b81d6" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="findBestNodeTest" />
+    </UnitTest>
+    <UnitTest name="Find3x3KBestAssignmentsTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="d42c638e-4ca7-228a-bcd0-e4f06af2ac69">
+      <Execution id="fab3c3a9-3859-447a-a1c3-e130ee593183" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Find3x3KBestAssignmentsTest" />
+    </UnitTest>
+    <UnitTest name="BestAssignmentTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="b00664cb-42fe-b3b9-d602-9b021e875e90">
+      <Execution id="294122df-5173-4706-9748-e764341299e0" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="BestAssignmentTest" />
+    </UnitTest>
+    <UnitTest name="adjusted_costTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8">
+      <Execution id="2093c124-947f-4861-bd8d-57dc5bf90c06" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="adjusted_costTest" />
+    </UnitTest>
+    <UnitTest name="assignmentCostTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="2a8c1b8a-baad-7331-5e5d-4417ed65e9d6">
+      <Execution id="5a507c4a-f145-46a7-a9fb-677ac1edcd0a" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="assignmentCostTest" />
+    </UnitTest>
+    <UnitTest name="FindKBestAssignmentsTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="37bdc48d-fe36-16db-c12b-843bc8653192">
+      <Execution id="55f66867-79ca-4faa-a80c-e793db682f47" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="FindKBestAssignmentsTest" />
+    </UnitTest>
+    <UnitTest name="partition_assignmentTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="e159787f-75de-f320-ae2e-1885679bb1bd">
+      <Execution id="3255e620-97d4-4810-b6e4-d4ee2c01cd72" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="partition_assignmentTest" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8" executionId="2093c124-947f-4861-bd8d-57dc5bf90c06" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2a8c1b8a-baad-7331-5e5d-4417ed65e9d6" executionId="5a507c4a-f145-46a7-a9fb-677ac1edcd0a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc5276c5-e84e-5b4c-7ef2-2171d957d972" executionId="9fe0b69c-4022-4436-8c1c-9b6d883298ec" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b00664cb-42fe-b3b9-d602-9b021e875e90" executionId="294122df-5173-4706-9748-e764341299e0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d42c638e-4ca7-228a-bcd0-e4f06af2ac69" executionId="fab3c3a9-3859-447a-a1c3-e130ee593183" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="83f1b5f6-5372-fb24-0e89-6d02608c380f" executionId="e3cf6802-cfe0-4fc2-983f-2311507b81d6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="37bdc48d-fe36-16db-c12b-843bc8653192" executionId="55f66867-79ca-4faa-a80c-e793db682f47" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e159787f-75de-f320-ae2e-1885679bb1bd" executionId="3255e620-97d4-4810-b6e4-d4ee2c01cd72" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="2093c124-947f-4861-bd8d-57dc5bf90c06" testId="fb0c3d50-d386-9962-e1f1-0b48e47fcdd8" testName="adjusted_costTest" computerName="ASFARLEY-PC" duration="00:00:00.0106119" startTime="2014-06-30T03:33:28.1459138-04:00" endTime="2014-06-30T03:33:28.2959224-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2093c124-947f-4861-bd8d-57dc5bf90c06">
+      <Output>
+        <StdOut>At 0,0, actual is 2147483647 and expected is 2147483647
+At 0,1, actual is 0 and expected is 0
+At 1,0, actual is -2147483648 and expected is -2147483648
+At 1,1, actual is 1 and expected is 1</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5a507c4a-f145-46a7-a9fb-677ac1edcd0a" testId="2a8c1b8a-baad-7331-5e5d-4417ed65e9d6" testName="assignmentCostTest" computerName="ASFARLEY-PC" duration="00:00:00.0003301" startTime="2014-06-30T03:33:28.2969224-04:00" endTime="2014-06-30T03:33:28.2999226-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a507c4a-f145-46a7-a9fb-677ac1edcd0a">
+    </UnitTestResult>
+    <UnitTestResult executionId="9fe0b69c-4022-4436-8c1c-9b6d883298ec" testId="bc5276c5-e84e-5b4c-7ef2-2171d957d972" testName="BestAssignmentRectangularTest" computerName="ASFARLEY-PC" duration="00:00:00.0013479" startTime="2014-06-30T03:33:28.3009226-04:00" endTime="2014-06-30T03:33:28.3049229-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9fe0b69c-4022-4436-8c1c-9b6d883298ec">
+      <Output>
+        <StdOut>Answer is 1, 0, 
+Expected is 1, 0,</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="294122df-5173-4706-9748-e764341299e0" testId="b00664cb-42fe-b3b9-d602-9b021e875e90" testName="BestAssignmentTest" computerName="ASFARLEY-PC" duration="00:00:00.0003248" startTime="2014-06-30T03:33:28.3059229-04:00" endTime="2014-06-30T03:33:28.3089231-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="294122df-5173-4706-9748-e764341299e0">
+      <Output>
+        <StdOut>Answer is 1, 0, 
+Expected is 1, 0,</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fab3c3a9-3859-447a-a1c3-e130ee593183" testId="d42c638e-4ca7-228a-bcd0-e4f06af2ac69" testName="Find3x3KBestAssignmentsTest" computerName="ASFARLEY-PC" duration="00:00:00.0040442" startTime="2014-06-30T03:33:28.3099232-04:00" endTime="2014-06-30T03:33:28.3159235-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fab3c3a9-3859-447a-a1c3-e130ee593183">
+    </UnitTestResult>
+    <UnitTestResult executionId="e3cf6802-cfe0-4fc2-983f-2311507b81d6" testId="83f1b5f6-5372-fb24-0e89-6d02608c380f" testName="findBestNodeTest" computerName="ASFARLEY-PC" duration="00:00:00.0005708" startTime="2014-06-30T03:33:28.3169236-04:00" endTime="2014-06-30T03:33:28.3199237-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3cf6802-cfe0-4fc2-983f-2311507b81d6">
+    </UnitTestResult>
+    <UnitTestResult executionId="55f66867-79ca-4faa-a80c-e793db682f47" testId="37bdc48d-fe36-16db-c12b-843bc8653192" testName="FindKBestAssignmentsTest" computerName="ASFARLEY-PC" duration="00:00:00.0003629" startTime="2014-06-30T03:33:28.3209238-04:00" endTime="2014-06-30T03:33:28.3239240-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="55f66867-79ca-4faa-a80c-e793db682f47">
+    </UnitTestResult>
+    <UnitTestResult executionId="3255e620-97d4-4810-b6e4-d4ee2c01cd72" testId="e159787f-75de-f320-ae2e-1885679bb1bd" testName="partition_assignmentTest" computerName="ASFARLEY-PC" duration="00:00:00.0008279" startTime="2014-06-30T03:33:28.3239240-04:00" endTime="2014-06-30T03:33:28.3279242-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3255e620-97d4-4810-b6e4-d4ee2c01cd72">
+    </UnitTestResult>
+  </Results>
+</TestRun>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="396694cd-485d-4b2a-acf1-3c8ac18f5649" name="asfarley@ASFARLEY-PC 2014-06-30 21:55:09" runUser="asfarley-PC\asfarley" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Local" id="8dcec0e0-7b50-4145-aff8-4ccf1dcf64c8">
+    <Description>These are default test settings for a local test run.</Description>
+    <Deployment enabled="false" runDeploymentRoot="asfarley_ASFARLEY-PC 2014-06-30 21_55_09">
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.IO.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.Util.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.UI.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll" />
+      <DeploymentItem filename="E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.exe" />
+    </Deployment>
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+  </TestSettings>
+  <Times creation="2014-06-30T21:55:09.6827054-04:00" queuing="2014-06-30T21:55:10.3557439-04:00" start="2014-06-30T21:55:10.4007465-04:00" finish="2014-06-30T22:00:04.5355700-04:00" />
+  <ResultSummary outcome="Error">
+    <Counters total="1" executed="1" error="0" failed="0" timeout="0" aborted="1" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" passed="0" completed="0" inProgress="0" pending="0" />
+    <RunInfos>
+      <RunInfo computerName="ASFARLEY-PC" outcome="Error" timestamp="2014-06-30T22:00:04.5345700-04:00">
+        <Text>Test host process exited unexpectedly.</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="FindKBestAssignmentsDoubleTest" storage="e:\emgu\emgucv-windows-universal-cuda 2.9.0.1922\emgu.cv.example\trafficcounter\optassigntest\bin\debug\optassigntest.dll" id="086b060e-25d6-b13d-8b12-752fde67ffa8">
+      <Execution id="eece1ee5-233c-4c8c-9a5d-4568b6fd2363" />
+      <TestMethod codeBase="E:/Emgu/emgucv-windows-universal-cuda 2.9.0.1922/Emgu.CV.Example/TrafficCounter/OptAssignTest/bin/Debug/OptAssignTest.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="OptAssignTest.OptAssignTest, OptAssignTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="FindKBestAssignmentsDoubleTest" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="086b060e-25d6-b13d-8b12-752fde67ffa8" executionId="eece1ee5-233c-4c8c-9a5d-4568b6fd2363" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="eece1ee5-233c-4c8c-9a5d-4568b6fd2363" testId="086b060e-25d6-b13d-8b12-752fde67ffa8" testName="FindKBestAssignmentsDoubleTest" computerName="ASFARLEY-PC" duration="00:04:54.0918211" startTime="2014-06-30T21:55:10.4437489-04:00" endTime="2014-06-30T22:00:04.5355700-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Aborted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eece1ee5-233c-4c8c-9a5d-4568b6fd2363">
+    </UnitTestResult>
+  </Results>
+</TestRun>

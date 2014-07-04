@@ -1,0 +1,10 @@
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.License.txt
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.VideoSurveilance.exe
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.VideoSurveilance.pdb
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\VideoSurveilance\obj\Debug\VideoSurveilance.csprojResolveAssemblyReference.cache
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\VideoSurveilance\obj\Debug\VideoSurveilance.VideoSurveilance.resources
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\VideoSurveilance\obj\Debug\VideoSurveilance.csproj.GenerateResource.Cache
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\VideoSurveilance\obj\Debug\Example.VideoSurveilance.exe
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\VideoSurveilance\obj\Debug\Example.VideoSurveilance.pdb
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\Example.VideoSurveilance.exe
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\Example.VideoSurveilance.pdb
