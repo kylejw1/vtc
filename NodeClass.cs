@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
-using Excel = Microsoft.Office.Interop.Excel;
+//using Excel = Microsoft.Office.Interop.Excel;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -313,6 +313,7 @@ namespace TreeLib
         public double r = 35.0; // Measurement noise matrix multiplier
 
         public double dt = 0.033; //Timestep between frames
+        //public double dt = 1.00; //Timestep between frames
 
         public HypothesisTree(StateHypothesis value) : base(value)
         {
@@ -332,7 +333,7 @@ namespace TreeLib
             F[2, 3] = dt;
             F[3, 3] = 1;
 
-            Q = new DenseMatrix(4, 4); //Measurement covariance
+            Q = new DenseMatrix(4, 4); //Process covariance
             Q[0, 0] = (dt * dt * dt / 3)*q;
             Q[0, 1] = (dt * dt / 2)*q;
             Q[1, 0] = (dt * dt / 2)*q;
@@ -342,7 +343,7 @@ namespace TreeLib
             Q[3, 2] = (dt * dt / 2)*q;
             Q[3, 3] = (dt) * q;
 
-            R = new DenseMatrix(2, 2);
+            R = new DenseMatrix(2, 2); //Measurement covariance
             R[0, 0] = r;
             R[1, 1] = r;
 
@@ -448,207 +449,207 @@ namespace TreeLib
             return child;
         }
 
-        public void SaveDeleted(string file_path, int current_frame, int min_path)
-        {
-            object misValue = System.Reflection.Missing.Value;
-            int num_states = 13;
-            if (nodeData.deleted_vehicles.Count > 0)
-            {
-                Excel.Application xlApp = new Excel.Application();
-                xlApp.Application.DisplayAlerts = false;
-                Excel.Workbook xlWorkBook;
+        //public void SaveDeleted(string file_path, int current_frame, int min_path)
+        //{
+        //    object misValue = System.Reflection.Missing.Value;
+        //    int num_states = 13;
+        //    if (nodeData.deleted_vehicles.Count > 0)
+        //    {
+        //        Excel.Application xlApp = new Excel.Application();
+        //        xlApp.Application.DisplayAlerts = false;
+        //        Excel.Workbook xlWorkBook;
 
-                if (File.Exists(file_path))
-                {
-                    if (File.GetAttributes(file_path).HasFlag(FileAttributes.ReadOnly))
-                        throw new System.Exception("Read only");
+        //        if (File.Exists(file_path))
+        //        {
+        //            if (File.GetAttributes(file_path).HasFlag(FileAttributes.ReadOnly))
+        //                throw new System.Exception("Read only");
 
-                    xlWorkBook = xlApp.Workbooks.Open(file_path, 0, false, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
-                }
-                else
-                {
-                    xlWorkBook = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
-                }
+        //            xlWorkBook = xlApp.Workbooks.Open(file_path, 0, false, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+        //        }
+        //        else
+        //        {
+        //            xlWorkBook = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+        //        }
 
 
-                string currentSheet = "Sheet1";
-                Excel.Sheets excelSheets = xlWorkBook.Worksheets;
-                Excel.Worksheet xlWorkSheet = (Excel.Worksheet)excelSheets.get_Item(currentSheet);
+        //        string currentSheet = "Sheet1";
+        //        Excel.Sheets excelSheets = xlWorkBook.Worksheets;
+        //        Excel.Worksheet xlWorkSheet = (Excel.Worksheet)excelSheets.get_Item(currentSheet);
 
-                foreach (Vehicle deletedVehicle in nodeData.deleted_vehicles)
-                {
-                    if (deletedVehicle.state_history[deletedVehicle.state_history.Count - 1].path_length >= min_path && deletedVehicle.state_history[deletedVehicle.state_history.Count-1].turn != 3)
-                    {//Find the lowest unoccupied column during existance of this vehicle
-                        int current_index = 0;
-                        int x_column;
-                        int y_column;
-                        int vx_column;
-                        int vy_column;
-                        int covx_column;
-                        int covy_column;
-                        int cov_vx_column;
-                        int cov_vy_column;
-                        int is_pedestrian_column;
-                        int turn_column;
-                        int is_occupied_column;
-                        int path_length_column;
-                        int missed_detections_column;
+        //        foreach (Vehicle deletedVehicle in nodeData.deleted_vehicles)
+        //        {
+        //            if (deletedVehicle.state_history[deletedVehicle.state_history.Count - 1].path_length >= min_path && deletedVehicle.state_history[deletedVehicle.state_history.Count-1].turn != 3)
+        //            {//Find the lowest unoccupied column during existance of this vehicle
+        //                int current_index = 0;
+        //                int x_column;
+        //                int y_column;
+        //                int vx_column;
+        //                int vy_column;
+        //                int covx_column;
+        //                int covy_column;
+        //                int cov_vx_column;
+        //                int cov_vy_column;
+        //                int is_pedestrian_column;
+        //                int turn_column;
+        //                int is_occupied_column;
+        //                int path_length_column;
+        //                int missed_detections_column;
 
-                        string col_string;
-                        string cell_string;
+        //                string col_string;
+        //                string cell_string;
 
-                        bool column_located = false;
-                        while (!column_located)
-                        {//Check if columns for index current_index are free
-                            bool index_is_free = true;
-                            for (int i = 0; i < deletedVehicle.state_history.Count; i++)
-                            {
-                                is_occupied_column = (current_index) * num_states + 11;
-                                col_string = GetExcelColumnName(is_occupied_column);
-                                cell_string = col_string + (current_frame - i).ToString();
-                                Excel.Range occupationCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                                if (occupationCell.Value == 1)
-                                    index_is_free = false;
-                                Marshal.ReleaseComObject(occupationCell);
-                                occupationCell = null;
-                            }
+        //                bool column_located = false;
+        //                while (!column_located)
+        //                {//Check if columns for index current_index are free
+        //                    bool index_is_free = true;
+        //                    for (int i = 0; i < deletedVehicle.state_history.Count; i++)
+        //                    {
+        //                        is_occupied_column = (current_index) * num_states + 11;
+        //                        col_string = GetExcelColumnName(is_occupied_column);
+        //                        cell_string = col_string + (current_frame - i).ToString();
+        //                        Excel.Range occupationCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                        if (occupationCell.Value == 1)
+        //                            index_is_free = false;
+        //                        Marshal.ReleaseComObject(occupationCell);
+        //                        occupationCell = null;
+        //                    }
 
-                            if (index_is_free)
-                                column_located = true;
-                            else
-                                current_index++;
-                        }
+        //                    if (index_is_free)
+        //                        column_located = true;
+        //                    else
+        //                        current_index++;
+        //                }
 
-                        x_column = (current_index) * num_states + 1;
-                        y_column = (current_index) * num_states + 2;
-                        vx_column = (current_index) * num_states + 3;
-                        vy_column = (current_index) * num_states + 4;
-                        covx_column = (current_index) * num_states + 5;
-                        covy_column = (current_index) * num_states + 6;
-                        cov_vx_column = (current_index) * num_states + 7;
-                        cov_vy_column = (current_index) * num_states + 8;
-                        is_pedestrian_column = (current_index) * num_states + 9;
-                        turn_column = (current_index) * num_states + 10;
-                        is_occupied_column = (current_index) * num_states + 11;
-                        path_length_column = (current_index) * num_states + 12;
-                        missed_detections_column = (current_index) * num_states + 13;
+        //                x_column = (current_index) * num_states + 1;
+        //                y_column = (current_index) * num_states + 2;
+        //                vx_column = (current_index) * num_states + 3;
+        //                vy_column = (current_index) * num_states + 4;
+        //                covx_column = (current_index) * num_states + 5;
+        //                covy_column = (current_index) * num_states + 6;
+        //                cov_vx_column = (current_index) * num_states + 7;
+        //                cov_vy_column = (current_index) * num_states + 8;
+        //                is_pedestrian_column = (current_index) * num_states + 9;
+        //                turn_column = (current_index) * num_states + 10;
+        //                is_occupied_column = (current_index) * num_states + 11;
+        //                path_length_column = (current_index) * num_states + 12;
+        //                missed_detections_column = (current_index) * num_states + 13;
 
-                        //Now current_index contains a free index
-                        for (int i = 0; i < deletedVehicle.state_history.Count; i++)
-                        {
-                            col_string = GetExcelColumnName(x_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range xCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            xCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].coordinates.x;
-                            Marshal.ReleaseComObject(xCell);
-                            xCell = null;
+        //                //Now current_index contains a free index
+        //                for (int i = 0; i < deletedVehicle.state_history.Count; i++)
+        //                {
+        //                    col_string = GetExcelColumnName(x_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range xCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    xCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].coordinates.x;
+        //                    Marshal.ReleaseComObject(xCell);
+        //                    xCell = null;
 
-                            col_string = GetExcelColumnName(y_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range yCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            yCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].coordinates.y;
-                            Marshal.ReleaseComObject(yCell);
-                            yCell = null;
+        //                    col_string = GetExcelColumnName(y_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range yCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    yCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].coordinates.y;
+        //                    Marshal.ReleaseComObject(yCell);
+        //                    yCell = null;
 
-                            col_string = GetExcelColumnName(vx_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range vxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            vxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].vx;
-                            Marshal.ReleaseComObject(vxCell);
-                            vxCell = null;
+        //                    col_string = GetExcelColumnName(vx_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range vxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    vxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].vx;
+        //                    Marshal.ReleaseComObject(vxCell);
+        //                    vxCell = null;
 
-                            col_string = GetExcelColumnName(vy_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range vyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            vyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].vy;
-                            Marshal.ReleaseComObject(vyCell);
-                            vyCell = null;
+        //                    col_string = GetExcelColumnName(vy_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range vyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    vyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].vy;
+        //                    Marshal.ReleaseComObject(vyCell);
+        //                    vyCell = null;
 
-                            col_string = GetExcelColumnName(covx_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range covxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            covxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_x;
-                            Marshal.ReleaseComObject(covxCell);
-                            covxCell = null;
+        //                    col_string = GetExcelColumnName(covx_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range covxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    covxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_x;
+        //                    Marshal.ReleaseComObject(covxCell);
+        //                    covxCell = null;
 
-                            col_string = GetExcelColumnName(covy_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range covyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            covyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_y;
-                            Marshal.ReleaseComObject(covyCell);
-                            covyCell = null;
+        //                    col_string = GetExcelColumnName(covy_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range covyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    covyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_y;
+        //                    Marshal.ReleaseComObject(covyCell);
+        //                    covyCell = null;
 
-                            col_string = GetExcelColumnName(cov_vx_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range cov_vxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            cov_vxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_vx;
-                            Marshal.ReleaseComObject(cov_vxCell);
-                            cov_vxCell = null;
+        //                    col_string = GetExcelColumnName(cov_vx_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range cov_vxCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    cov_vxCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_vx;
+        //                    Marshal.ReleaseComObject(cov_vxCell);
+        //                    cov_vxCell = null;
 
-                            col_string = GetExcelColumnName(cov_vy_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range cov_vyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            cov_vyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_vy;
-                            Marshal.ReleaseComObject(cov_vyCell);
-                            cov_vyCell = null;
+        //                    col_string = GetExcelColumnName(cov_vy_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range cov_vyCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    cov_vyCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].cov_vy;
+        //                    Marshal.ReleaseComObject(cov_vyCell);
+        //                    cov_vyCell = null;
 
-                            col_string = GetExcelColumnName(is_pedestrian_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range is_pedestrianCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            is_pedestrianCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].is_pedestrian;
-                            Marshal.ReleaseComObject(is_pedestrianCell);
-                            is_pedestrianCell = null;
+        //                    col_string = GetExcelColumnName(is_pedestrian_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range is_pedestrianCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    is_pedestrianCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].is_pedestrian;
+        //                    Marshal.ReleaseComObject(is_pedestrianCell);
+        //                    is_pedestrianCell = null;
 
-                            col_string = GetExcelColumnName(path_length_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range path_lengthCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            path_lengthCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].path_length;
-                            Marshal.ReleaseComObject(path_lengthCell);
-                            path_lengthCell = null;
+        //                    col_string = GetExcelColumnName(path_length_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range path_lengthCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    path_lengthCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].path_length;
+        //                    Marshal.ReleaseComObject(path_lengthCell);
+        //                    path_lengthCell = null;
 
-                            col_string = GetExcelColumnName(missed_detections_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range missed_detectionsCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            missed_detectionsCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].missed_detections;
-                            Marshal.ReleaseComObject(missed_detectionsCell);
-                            missed_detectionsCell = null;
+        //                    col_string = GetExcelColumnName(missed_detections_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range missed_detectionsCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    missed_detectionsCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - i - 1].missed_detections;
+        //                    Marshal.ReleaseComObject(missed_detectionsCell);
+        //                    missed_detectionsCell = null;
 
-                            col_string = GetExcelColumnName(turn_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range turnCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            turnCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - 1].turn;
-                            Marshal.ReleaseComObject(turnCell);
-                            turnCell = null;
+        //                    col_string = GetExcelColumnName(turn_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range turnCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    turnCell.Value = deletedVehicle.state_history[deletedVehicle.state_history.Count - 1].turn;
+        //                    Marshal.ReleaseComObject(turnCell);
+        //                    turnCell = null;
 
-                            col_string = GetExcelColumnName(is_occupied_column);
-                            cell_string = col_string + (current_frame - i).ToString();
-                            Excel.Range occupationCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
-                            occupationCell.Value = 1;
-                            Marshal.ReleaseComObject(occupationCell);
-                            occupationCell = null;
+        //                    col_string = GetExcelColumnName(is_occupied_column);
+        //                    cell_string = col_string + (current_frame - i).ToString();
+        //                    Excel.Range occupationCell = (Excel.Range)xlWorkSheet.get_Range(cell_string, cell_string);
+        //                    occupationCell.Value = 1;
+        //                    Marshal.ReleaseComObject(occupationCell);
+        //                    occupationCell = null;
 
-                        }
+        //                }
 
-                    }
-                }
+        //            }
+        //        }
 
-                xlWorkBook.Close(true, file_path, false);
-                xlApp.Quit();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+        //        xlWorkBook.Close(true, file_path, false);
+        //        xlApp.Quit();
+        //        GC.Collect();
+        //        GC.WaitForPendingFinalizers();
 
-                Marshal.FinalReleaseComObject(xlWorkSheet);
-                Marshal.FinalReleaseComObject(excelSheets);
-                Marshal.FinalReleaseComObject(xlWorkBook);
-                //xlApp.Application.Quit();
-                //xlApp.Quit();
-                Marshal.FinalReleaseComObject(xlApp);
-                xlWorkSheet = null;
-                excelSheets = null;
-                xlWorkBook = null;
-                xlApp = null;
-            }
-        }
+        //        Marshal.FinalReleaseComObject(xlWorkSheet);
+        //        Marshal.FinalReleaseComObject(excelSheets);
+        //        Marshal.FinalReleaseComObject(xlWorkBook);
+        //        //xlApp.Application.Quit();
+        //        //xlApp.Quit();
+        //        Marshal.FinalReleaseComObject(xlApp);
+        //        xlWorkSheet = null;
+        //        excelSheets = null;
+        //        xlWorkBook = null;
+        //        xlApp = null;
+        //    }
+        //}
 
         private string GetExcelColumnName(int columnNumber)
         {

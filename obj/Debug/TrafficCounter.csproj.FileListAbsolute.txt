@@ -4,7 +4,6 @@ C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\Example.TrafficCounter.exe
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\Example.TrafficCounter.pdb
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\TrafficCounter.csprojResolveAssemblyReference.cache
-C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\VideoSurveilance.TrafficCounter.resources
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\TrafficCounter.csproj.GenerateResource.Cache
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.exe
 C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Example.TrafficCounter.pdb
@@ -26,3 +25,4 @@ E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\Example.TrafficCounter.pdb
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\VTC.TrafficCounter.resources
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\TrafficCounter.csprojResolveAssemblyReference.cache
+C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\obj\Debug\VTC.TrafficCounter.resources

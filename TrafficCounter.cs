@@ -47,11 +47,11 @@ namespace VTC
        
       HypothesisTree hypothesis_tree;
       //Multiple hypothesis tracking parameters
-      int miss_threshold = 1;               //Number of misses to consider an object gone
+      int miss_threshold = 3;               //Number of misses to consider an object gone
       int max_targets = 10;                 //Maximum number of concurrently tracked targets
       int tree_depth = 2;                   //Maximum allowed hypothesis tree depth
       int k_hypotheses = 4;                 //Branching factor for hypothesis tree
-      int validation_region_deviation = 2;  //Mahalanobis distance multiplier used in measurement gating
+      int validation_region_deviation = 5;  //Mahalanobis distance multiplier used in measurement gating
       double Pd = 0.95;                      //Probability of object detection
       double Px = 0.0001;                    //Probability of track termination
       double lambda_x = 20;                 //Termination likelihood
@@ -60,6 +60,10 @@ namespace VTC
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
       double q = 1;                       //Process noise matrix multiplier
       double r = 35;                        //Measurement noise matrix multiplier
+
+      //************* Rendering parameters ***************  
+      double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
+      double render_radius_threshold = 75.0;   // Uncertainty radius is not rendered if above this value
 
       bool VIDEO_FILE = false;
 
@@ -198,12 +202,16 @@ namespace VTC
                       hypothesis_expanded = new DenseMatrix(num_detections, 2*num_detections);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, num_detections, new_target_matrix);
-                  }
+                   }
 
                   //Console.WriteLine("Converting hypothesis to array");
                   //Calculate K-best assignment using Murty's algorithm
                   double[,] costs = hypothesis_expanded.ToArray();
                   //Console.WriteLine("Finding k-best assignment");
+                  for (int i = 0; i < costs.GetLength(0); i++)
+                      for (int j = 0; j < costs.GetLength(1); j++)
+                          costs[i, j] = -costs[i, j];
+
                   List<int[]> k_best = OptAssign.FindKBestAssignments(costs, k_hypotheses);
 
                   //Console.WriteLine("Generating hypotheses from k-best assignments");
@@ -422,7 +430,14 @@ namespace VTC
               if (radius < 2.0)
                   radius = (float) 2.0;
 
-              frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
+              float vx_render = (float) (10.0 * vehicle.state_history.Last().vx);
+              float vy_render = (float) (10.0 * vehicle.state_history.Last().vy);
+
+              if (radius < render_radius_threshold)
+              {
+                  frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
+                  frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
+              }
           }
          );
 

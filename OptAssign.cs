@@ -47,25 +47,26 @@ namespace VTC
 
         public static List<int[]> FindKBestAssignments(double[,] costs, int k)
         {
-            Console.WriteLine("Costs width: {0} height: {1}, k={2}", costs.GetLength(1), costs.GetLength(0), k);
-            int num_targets = costs.GetLength(0);
+            double[,] temp_costs = (double[,]) costs.Clone();
+            Console.WriteLine("Costs width: {0} height: {1}, k={2}", temp_costs.GetLength(1), costs.GetLength(0), k);
+            int num_targets = temp_costs.GetLength(0);
             if (k > num_targets)
                 k = num_targets;
 
-            if (costs.GetLength(1) == 4 && costs.GetLength(0) == 1)
+            if (temp_costs.GetLength(1) == 4 && temp_costs.GetLength(0) == 1)
                 Console.WriteLine("Error condition here");
 
             List<int[]> kBestAssignments = new List<int[]>();
             for (int i = 0; i < k; i++)
             {
                 Console.WriteLine("Calculating assignment {0}", i);
-                int[] this_assignment = BestAssignment(costs);
+                int[] this_assignment = BestAssignment(temp_costs);
                 kBestAssignments.Add(this_assignment);
                 if (k > (i + 1))
                 {
                     List<MurtyNode> partition = partition_assignment(this_assignment);
-                    MurtyNode best_node = findBestNode(costs, partition);
-                    costs = adjusted_cost(costs, best_node);
+                    MurtyNode best_node = findBestNode(temp_costs, partition);
+                    costs = adjusted_cost(temp_costs, best_node);
                 }
             }
 
