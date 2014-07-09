@@ -48,18 +48,16 @@ namespace VTC
         public static List<int[]> FindKBestAssignments(double[,] costs, int k)
         {
             double[,] temp_costs = (double[,]) costs.Clone();
-            Console.WriteLine("Costs width: {0} height: {1}, k={2}", temp_costs.GetLength(1), costs.GetLength(0), k);
             int num_targets = temp_costs.GetLength(0);
             if (k > num_targets)
                 k = num_targets;
 
-            if (temp_costs.GetLength(1) == 4 && temp_costs.GetLength(0) == 1)
-                Console.WriteLine("Error condition here");
+            
 
             List<int[]> kBestAssignments = new List<int[]>();
             for (int i = 0; i < k; i++)
             {
-                Console.WriteLine("Calculating assignment {0}", i);
+                
                 int[] this_assignment = BestAssignment(temp_costs);
                 kBestAssignments.Add(this_assignment);
                 if (k > (i + 1))

@@ -49,21 +49,21 @@ namespace VTC
       //Multiple hypothesis tracking parameters
       int miss_threshold = 3;               //Number of misses to consider an object gone
       int max_targets = 10;                 //Maximum number of concurrently tracked targets
-      int tree_depth = 2;                   //Maximum allowed hypothesis tree depth
-      int k_hypotheses = 4;                 //Branching factor for hypothesis tree
+      int tree_depth = 3;                   //Maximum allowed hypothesis tree depth
+      int k_hypotheses = 6;                 //Branching factor for hypothesis tree
       int validation_region_deviation = 5;  //Mahalanobis distance multiplier used in measurement gating
-      double Pd = 0.95;                      //Probability of object detection
+      double Pd = 0.85;                      //Probability of object detection
       double Px = 0.0001;                    //Probability of track termination
-      double lambda_x = 20;                 //Termination likelihood
-      double lambda_f = 0.6e-6;            //Density of Poisson-distributed false positives
-      double lambda_n = 0.9e-6;             //Density of Poission-distributed new vehicles
+      double lambda_x = 10;                 //Termination likelihood
+      double lambda_f = 0.1e-6;            //Density of Poisson-distributed false positives
+      double lambda_n = 0.5e-6;             //Density of Poission-distributed new vehicles
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 1;                       //Process noise matrix multiplier
-      double r = 35;                        //Measurement noise matrix multiplier
+      double q = 15;                       //Process noise matrix multiplier
+      double r = 15;                        //Measurement noise matrix multiplier
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
-      double render_radius_threshold = 75.0;   // Uncertainty radius is not rendered if above this value
+      double render_radius_threshold = 30.0;   // Uncertainty radius is not rendered if above this value
 
       bool VIDEO_FILE = false;
 
@@ -161,6 +161,9 @@ namespace VTC
           {
               //Console.WriteLine("Updating child node");
               int numExistingTargets = childNode.nodeData.vehicles.Count;
+              if (numExistingTargets >= 2)
+                  Console.WriteLine("How did this happen?");
+
               StateEstimate[] target_state_estimates = childNode.nodeData.GetStateEstimates();
               
               //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
@@ -243,15 +246,17 @@ namespace VTC
                       for (int j = 0; j < num_detections; j++)
                       {
 
+                          if (numExistingTargets >= 1 && num_detections >= 1)
+                              Console.WriteLine("Spawning too many trackers");
+
+
                           //Account for new vehicles
-                          if (assignment[j] > numExistingTargets + num_detections) //Add new vehicle
+                          if (assignment[j] >= numExistingTargets + num_detections) //Add new vehicle
                           {
                               //Console.WriteLine("Creating new vehicle");
                               child_hypothesis.AddVehicle(Convert.ToInt16(coordinates[j].x),Convert.ToInt16(coordinates[j].y), 0, 0);
                           }
-
-                          //Update states for vehicles with measurements
-                          if (assignment[j] > num_detections-1 && assignment[j] <= num_detections-1 + numExistingTargets)
+                          else if (assignment[j] >= num_detections && assignment[j] < num_detections + numExistingTargets) //Update states for vehicles with measurements
                           {
                              // Console.WriteLine("Updating vehicle with measurement");
                               StateEstimate last_state = childNode.nodeData.vehicles[assignment[j] - num_detections].state_history.Last();
@@ -433,11 +438,11 @@ namespace VTC
               float vx_render = (float) (10.0 * vehicle.state_history.Last().vx);
               float vy_render = (float) (10.0 * vehicle.state_history.Last().vy);
 
-              if (radius < render_radius_threshold)
-              {
+              //if (radius < render_radius_threshold)
+              //{
                   frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
                   frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
-              }
+              //}
           }
          );
 
