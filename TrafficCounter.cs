@@ -47,19 +47,19 @@ namespace VTC
        
       HypothesisTree hypothesis_tree;
       //Multiple hypothesis tracking parameters
-      int miss_threshold = 3;               //Number of misses to consider an object gone
+      int miss_threshold = 5;               //Number of misses to consider an object gone
       int max_targets = 10;                 //Maximum number of concurrently tracked targets
       int tree_depth = 3;                   //Maximum allowed hypothesis tree depth
-      int k_hypotheses = 6;                 //Branching factor for hypothesis tree
-      int validation_region_deviation = 5;  //Mahalanobis distance multiplier used in measurement gating
-      double Pd = 0.85;                      //Probability of object detection
+      int k_hypotheses = 2;                 //Branching factor for hypothesis tree
+      int validation_region_deviation = 7;  //Mahalanobis distance multiplier used in measurement gating
+      double Pd = 0.80;                      //Probability of object detection
       double Px = 0.0001;                    //Probability of track termination
-      double lambda_x = 10;                 //Termination likelihood
-      double lambda_f = 0.1e-6;            //Density of Poisson-distributed false positives
-      double lambda_n = 0.5e-6;             //Density of Poission-distributed new vehicles
+      double lambda_x = 20;                 //Termination likelihood
+      double lambda_f = 0.4e-6;            //Density of Poisson-distributed false positives
+      double lambda_n = 0.6e-6;             //Density of Poission-distributed new vehicles
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 15;                       //Process noise matrix multiplier
-      double r = 15;                        //Measurement noise matrix multiplier
+      double q = 50;                       //Process noise matrix multiplier
+      double r = 8;                        //Measurement noise matrix multiplier
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
@@ -161,8 +161,6 @@ namespace VTC
           {
               //Console.WriteLine("Updating child node");
               int numExistingTargets = childNode.nodeData.vehicles.Count;
-              if (numExistingTargets >= 2)
-                  Console.WriteLine("How did this happen?");
 
               StateEstimate[] target_state_estimates = childNode.nodeData.GetStateEstimates();
               
@@ -234,7 +232,7 @@ namespace VTC
                       for (int j = 0; j < numExistingTargets; j++)
                       {
                           //If this target is not detected
-                          if (!(assignment.Contains(j)))
+                          if (!(assignment.Contains(j+num_detections)))
                           {
                              //Console.WriteLine("Updating state for missed measurement");
                               StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
@@ -245,10 +243,6 @@ namespace VTC
                         
                       for (int j = 0; j < num_detections; j++)
                       {
-
-                          if (numExistingTargets >= 1 && num_detections >= 1)
-                              Console.WriteLine("Spawning too many trackers");
-
 
                           //Account for new vehicles
                           if (assignment[j] >= numExistingTargets + num_detections) //Add new vehicle
@@ -314,7 +308,7 @@ namespace VTC
                       ambiguity_matrix[j, i + 1] = Double.MinValue;
                   else
                   {
-                      ambiguity_matrix[j, i + 1] = Math.Log10(Pd * norm.Density(mahalanobis_distance / (1 - Pd)));
+                      ambiguity_matrix[j, i + 1] = Math.Log10(Pd * norm.Density(mahalanobis_distance) / (1 - Pd));
                   }
               }
           }
