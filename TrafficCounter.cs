@@ -58,12 +58,13 @@ namespace VTC
       double lambda_f = 0.4e-6;            //Density of Poisson-distributed false positives
       double lambda_n = 0.6e-6;             //Density of Poission-distributed new vehicles
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 50;                       //Process noise matrix multiplier
-      double r = 8;                        //Measurement noise matrix multiplier
+      double q = 40;                       //Process noise matrix multiplier
+      double r = 10;                        //Measurement noise matrix multiplier
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
       double render_radius_threshold = 30.0;   // Uncertainty radius is not rendered if above this value
+      bool render_clean = true;
 
       bool VIDEO_FILE = false;
 
@@ -144,6 +145,11 @@ namespace VTC
 
       private void MHT_Update(Coordinates[] coordinates)
       {
+          //For debugging problem detections
+          //double problem_x = 327;
+          //double problem_y = 305;
+          //CoordinatesContains(coordinates, problem_x, problem_y);
+
           //Console.WriteLine("Starting MHT Update");
           int num_detections = coordinates.Length;
           //Maintain hypothesis tree
@@ -226,8 +232,7 @@ namespace VTC
                       HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[i].nodeData);
                       child_hypothesis_tree.parent = childNode;
 
-                      double probability = OptAssign.assignmentCost(costs, assignment);
-                        
+                      child_hypothesis.probability = OptAssign.assignmentCost(costs, assignment);
                       //Update states for vehicles without measurements
                       for (int j = 0; j < numExistingTargets; j++)
                       {
@@ -265,6 +270,15 @@ namespace VTC
 
           }
 
+      }
+
+      private static void CoordinatesContains(Coordinates[] coordinates, double problem_x, double problem_y)
+      {
+          for (int i = 0; i < coordinates.Length; i++)
+          {
+              if (coordinates[i].x == problem_x && coordinates[i].y == problem_y)
+                  Console.WriteLine("Multiple detections here");
+          }
       }
 
       private DenseMatrix GenerateAmbiguityMatrix(Coordinates[] coordinates, int numExistingTargets, StateEstimate[] target_state_estimates)
@@ -421,6 +435,7 @@ namespace VTC
           Overlay = Overlay.And(ROI_image);
           Overlay.Acc(Color_Background);
 
+          
           hypothesis_tree.nodeData.vehicles.ForEach(delegate(Vehicle vehicle)
           {
               float x = (float) vehicle.state_history.Last().coordinates.x;
@@ -429,14 +444,23 @@ namespace VTC
               if (radius < 2.0)
                   radius = (float) 2.0;
 
-              float vx_render = (float) (10.0 * vehicle.state_history.Last().vx);
-              float vy_render = (float) (10.0 * vehicle.state_history.Last().vy);
+              float vx_render = (float) (velocity_render_multiplier * vehicle.state_history.Last().vx);
+              float vy_render = (float) (velocity_render_multiplier * vehicle.state_history.Last().vy);
 
-              //if (radius < render_radius_threshold)
-              //{
-                  frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
-                  frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
-              //}
+              if (render_clean)
+              {
+                  frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
+                  //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
+              }
+              else 
+              {
+                //if (radius < render_radius_threshold)
+                //{
+                frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
+                frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
+                //}
+              }
+              
           }
          );
 

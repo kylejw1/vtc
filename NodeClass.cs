@@ -374,6 +374,8 @@ namespace TreeLib
             Vehicle updated_vehicle = new Vehicle(last_frame_vehicle.state_history, current_state);
             if (!with_measurement)
                 current_state.missed_detections++;
+            else
+                current_state.missed_detections = 0; 
 
             if (current_state.missed_detections < this.nodeData.miss_detection_threshold)
                 nodeData.vehicles.Add(updated_vehicle);
@@ -393,7 +395,7 @@ namespace TreeLib
             HypothesisTree a = (HypothesisTree)x;
             HypothesisTree b = (HypothesisTree)y;
 
-            if (a.ChildProbability() >+ b.ChildProbability())
+            if (a.ChildProbability() < b.ChildProbability())
                 return 1;
             else
                 return 0;
@@ -423,12 +425,12 @@ namespace TreeLib
 
         private double TraverseChildProbabilities(Node<StateHypothesis> inputNode)
         {
-            double prob = 0;
+            double prob = double.MaxValue;
             if (inputNode.children.Count > 0)
                 foreach (Node<StateHypothesis> thisChild in inputNode.children)
                 {
                     double thisChildDepth = TraverseChildProbabilities(thisChild);
-                    if (thisChildDepth > prob)
+                    if (thisChildDepth < prob)
                         prob = thisChildDepth;
                 }
             else
