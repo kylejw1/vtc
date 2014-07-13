@@ -61,10 +61,11 @@ namespace VTC
           this.splitContainer2 = new System.Windows.Forms.SplitContainer();
           this.imageBox2 = new Emgu.CV.UI.ImageBox();
           this.panel2 = new System.Windows.Forms.Panel();
-          this.imageBox3 = new Emgu.CV.UI.ImageBox();
           this.label2 = new System.Windows.Forms.Label();
-          this.label3 = new System.Windows.Forms.Label();
+          this.imageBox3 = new Emgu.CV.UI.ImageBox();
           this.panel3 = new System.Windows.Forms.Panel();
+          this.label3 = new System.Windows.Forms.Label();
+          this.showPolygonsCheckbox = new System.Windows.Forms.CheckBox();
           ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
           this.splitContainer1.Panel1.SuspendLayout();
           this.splitContainer1.Panel2.SuspendLayout();
@@ -118,6 +119,7 @@ namespace VTC
           // 
           // splitContainer3.Panel2
           // 
+          this.splitContainer3.Panel2.Controls.Add(this.showPolygonsCheckbox);
           this.splitContainer3.Panel2.Controls.Add(this.label10);
           this.splitContainer3.Panel2.Controls.Add(this.trackCountBox);
           this.splitContainer3.Panel2.Controls.Add(this.pushStateCheckbox);
@@ -419,6 +421,15 @@ namespace VTC
           this.panel2.Size = new System.Drawing.Size(530, 20);
           this.panel2.TabIndex = 9;
           // 
+          // label2
+          // 
+          this.label2.AutoSize = true;
+          this.label2.Location = new System.Drawing.Point(3, 0);
+          this.label2.Name = "label2";
+          this.label2.Size = new System.Drawing.Size(65, 13);
+          this.label2.TabIndex = 0;
+          this.label2.Text = "Background";
+          // 
           // imageBox3
           // 
           this.imageBox3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -428,14 +439,14 @@ namespace VTC
           this.imageBox3.TabIndex = 6;
           this.imageBox3.TabStop = false;
           // 
-          // label2
+          // panel3
           // 
-          this.label2.AutoSize = true;
-          this.label2.Location = new System.Drawing.Point(3, 0);
-          this.label2.Name = "label2";
-          this.label2.Size = new System.Drawing.Size(65, 13);
-          this.label2.TabIndex = 0;
-          this.label2.Text = "Background";
+          this.panel3.Controls.Add(this.label3);
+          this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+          this.panel3.Location = new System.Drawing.Point(0, 0);
+          this.panel3.Name = "panel3";
+          this.panel3.Size = new System.Drawing.Size(530, 20);
+          this.panel3.TabIndex = 5;
           // 
           // label3
           // 
@@ -446,14 +457,15 @@ namespace VTC
           this.label3.TabIndex = 0;
           this.label3.Text = "Movement Mask";
           // 
-          // panel3
+          // showPolygonsCheckbox
           // 
-          this.panel3.Controls.Add(this.label3);
-          this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
-          this.panel3.Location = new System.Drawing.Point(0, 0);
-          this.panel3.Name = "panel3";
-          this.panel3.Size = new System.Drawing.Size(530, 20);
-          this.panel3.TabIndex = 5;
+          this.showPolygonsCheckbox.AutoSize = true;
+          this.showPolygonsCheckbox.Location = new System.Drawing.Point(330, 245);
+          this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
+          this.showPolygonsCheckbox.Size = new System.Drawing.Size(98, 17);
+          this.showPolygonsCheckbox.TabIndex = 23;
+          this.showPolygonsCheckbox.Text = "Show polygons";
+          this.showPolygonsCheckbox.UseVisualStyleBackColor = true;
           // 
           // TrafficCounter
           // 
@@ -528,5 +540,6 @@ namespace VTC
       private System.Windows.Forms.Label label2;
       private System.Windows.Forms.Panel panel3;
       private System.Windows.Forms.Label label3;
+      private System.Windows.Forms.CheckBox showPolygonsCheckbox;
    }
 }

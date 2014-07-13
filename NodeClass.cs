@@ -309,8 +309,8 @@ namespace TreeLib
 
         public double compensation_gain = 30; //Gain applied to process noise when a measurement is missed
 
-        public double q = 50.0; // Process noise matrix multiplier
-        public double r = 8.0; // Measurement noise matrix multiplier
+        public double q = 10.0; // Process noise matrix multiplier
+        public double r = 10.0; // Measurement noise matrix multiplier
 
         public double dt = 0.033; //Timestep between frames
         //public double dt = 1.00; //Timestep between frames

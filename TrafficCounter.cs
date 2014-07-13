@@ -13,6 +13,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.Distributions;
 using System.Linq;
+using System.Threading;
 
 using Emgu.CV;
 using Emgu.CV.UI;
@@ -47,7 +48,7 @@ namespace VTC
        
       HypothesisTree hypothesis_tree;
       //Multiple hypothesis tracking parameters
-      int miss_threshold = 5;               //Number of misses to consider an object gone
+      int miss_threshold = 30;               //Number of misses to consider an object gone
       int max_targets = 10;                 //Maximum number of concurrently tracked targets
       int tree_depth = 3;                   //Maximum allowed hypothesis tree depth
       int k_hypotheses = 2;                 //Branching factor for hypothesis tree
@@ -58,7 +59,7 @@ namespace VTC
       double lambda_f = 0.4e-6;            //Density of Poisson-distributed false positives
       double lambda_n = 0.6e-6;             //Density of Poission-distributed new vehicles
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 40;                       //Process noise matrix multiplier
+      double q = 10;                       //Process noise matrix multiplier
       double r = 10;                        //Measurement noise matrix multiplier
 
       //************* Rendering parameters ***************  
@@ -108,6 +109,7 @@ namespace VTC
          }
          
          Application.Idle += ProcessFrame;
+         Application.Idle += PushStateProcess;
       }
 
       void ProcessFrame(object sender, EventArgs e)
@@ -135,13 +137,21 @@ namespace VTC
 
                  MHT_Update(coordinates);
 
-                 if (VIDEO_FILE == false && pushStateCheckbox.Checked)
-                     pushState(count, coordinates);
              }
 
              renderUI(frame);
          }
       }
+
+      void PushStateProcess(object sender, EventArgs e)
+      {
+        if (pushStateCheckbox.Checked)
+        {
+            Thread pushThread = new Thread(pushState);
+            pushThread.Start();
+        }
+      }
+
 
       private void MHT_Update(Coordinates[] coordinates)
       {
@@ -206,10 +216,10 @@ namespace VTC
                   else
                   {
                       //Console.WriteLine("Expanded hypothesis: no targets");
-                      hypothesis_expanded = new DenseMatrix(num_detections, 2*num_detections);
+                      hypothesis_expanded = new DenseMatrix(num_detections, 2 * num_detections);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, num_detections, new_target_matrix);
-                   }
+                  }
 
                   //Console.WriteLine("Converting hypothesis to array");
                   //Calculate K-best assignment using Murty's algorithm
@@ -237,15 +247,15 @@ namespace VTC
                       for (int j = 0; j < numExistingTargets; j++)
                       {
                           //If this target is not detected
-                          if (!(assignment.Contains(j+num_detections)))
+                          if (!(assignment.Contains(j + num_detections)))
                           {
-                             //Console.WriteLine("Updating state for missed measurement");
+                              //Console.WriteLine("Updating state for missed measurement");
                               StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
                               StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
                               child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
                           }
                       }
-                        
+
                       for (int j = 0; j < num_detections; j++)
                       {
 
@@ -253,11 +263,11 @@ namespace VTC
                           if (assignment[j] >= numExistingTargets + num_detections) //Add new vehicle
                           {
                               //Console.WriteLine("Creating new vehicle");
-                              child_hypothesis.AddVehicle(Convert.ToInt16(coordinates[j].x),Convert.ToInt16(coordinates[j].y), 0, 0);
+                              child_hypothesis.AddVehicle(Convert.ToInt16(coordinates[j].x), Convert.ToInt16(coordinates[j].y), 0, 0);
                           }
                           else if (assignment[j] >= num_detections && assignment[j] < num_detections + numExistingTargets) //Update states for vehicles with measurements
                           {
-                             // Console.WriteLine("Updating vehicle with measurement");
+                              // Console.WriteLine("Updating vehicle with measurement");
                               StateEstimate last_state = childNode.nodeData.vehicles[assignment[j] - num_detections].state_history.Last();
                               StateEstimate measurement_update = last_state.PropagateState(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, coordinates[j]);
                               child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - num_detections, measurement_update, true);
@@ -266,6 +276,23 @@ namespace VTC
                       }
                   }
 
+              }
+              else
+              {
+                StateHypothesis child_hypothesis = new StateHypothesis(miss_threshold);
+                childNode.AddChild(child_hypothesis);
+                HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[0].nodeData);
+                child_hypothesis_tree.parent = childNode;
+
+                child_hypothesis.probability = Math.Pow((1 - Pd), numExistingTargets);
+                //Update states for vehicles without measurements
+                for (int j = 0; j < numExistingTargets; j++)
+                {
+                //Console.WriteLine("Updating state for missed measurement");
+                StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
+                StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
+                child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);   
+                }
               }
 
           }
@@ -382,21 +409,25 @@ namespace VTC
           return count;
       }
 
-      private static void pushState(int count, Coordinates[] coordinates)
+      private void pushState()
       {
           try
           {
+             
+              StateEstimate[] state_estimates = hypothesis_tree.nodeData.vehicles.Select(v => v.state_history.Last()).ToArray();
               Dictionary<string, string> post_values = new Dictionary<string, string>();
-              for (int detection_count = 0; detection_count < count; detection_count++)
+              for (int vehicle_count = 0; vehicle_count < state_estimates.Length; vehicle_count++)
               {
-                  String x = coordinates[detection_count].x.ToString();
-                  String y = coordinates[detection_count].y.ToString();
+                  String x = state_estimates[vehicle_count].coordinates.x.ToString();
+                  String y = state_estimates[vehicle_count].coordinates.y.ToString();
+                  String vx = state_estimates[vehicle_count].vx.ToString();
+                  String vy = state_estimates[vehicle_count].vy.ToString();
                   String zero = "0";
-                  post_values.Add("state_sample[states_attributes][" + detection_count.ToString() + "][x]", x);
-                  post_values.Add("state_sample[states_attributes][" + detection_count.ToString() + "][vx]", zero);
-                  post_values.Add("state_sample[states_attributes][" + detection_count.ToString() + "][y]", y);
-                  post_values.Add("state_sample[states_attributes][" + detection_count.ToString() + "][vy]", zero);
-                  post_values.Add("state_sample[states_attributes][" + detection_count.ToString() + "][_destroy]", zero);
+                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][x]", x);
+                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vx]", vx);
+                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][y]", y);
+                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vy]", vy);
+                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][_destroy]", zero);
               }
 
 
@@ -421,7 +452,8 @@ namespace VTC
               myWriter.Write(post_string);
               myWriter.Close();
               objRequest.Abort();
-              System.Threading.Thread.Sleep(1000);
+              System.Threading.Thread.Sleep(4000);
+
           }
           catch (Exception ex)
           {
@@ -467,8 +499,11 @@ namespace VTC
           trackCountBox.Text = hypothesis_tree.nodeData.vehicles.Count().ToString();
 
           imageBox1.Image = frame;
-          //imageBox2.Image = Color_Background;
-          imageBox2.Image = Overlay;
+          if (showPolygonsCheckbox.Checked)
+              imageBox2.Image = Overlay;
+          else
+            imageBox2.Image = Color_Background;
+          
           imageBox3.Image = Movement_Mask;
           
       }
