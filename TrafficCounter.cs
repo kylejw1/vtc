@@ -69,10 +69,14 @@ namespace VTC
 
       bool VIDEO_FILE = false;
 
+      //************* Server connection parameters ***************  
+      string intersection_id = "";
+
       public TrafficCounter()
       {
          StateHypothesis initial_hypothesis = new StateHypothesis(miss_threshold);
          hypothesis_tree = new HypothesisTree(initial_hypothesis);
+         intersection_id = ConfigurationSettings.AppSettings["IntersectionId"];
          InitializeComponent();
          Run();
       }
@@ -429,6 +433,7 @@ namespace VTC
                   post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vy]", vy);
                   post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][_destroy]", zero);
               }
+              post_values.Add("intersection_id", intersection_id);
 
 
               String post_string = "";
