@@ -108,7 +108,8 @@ namespace VTC
          }
          catch (Exception e)
          {
-            MessageBox.Show(e.Message);
+            //MessageBox.Show(e.Message);
+             Console.WriteLine(e.Message);
             return;
          }
          
@@ -462,7 +463,8 @@ namespace VTC
           }
           catch (Exception ex)
           {
-              MessageBox.Show(ex.Message);
+              //MessageBox.Show(ex.Message);
+              Console.WriteLine(ex.Message);
           }
       }
 
