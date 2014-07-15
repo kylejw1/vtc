@@ -34,6 +34,7 @@ namespace VTC
           this.imageBox1 = new Emgu.CV.UI.ImageBox();
           this.panel1 = new System.Windows.Forms.Panel();
           this.label1 = new System.Windows.Forms.Label();
+          this.showPolygonsCheckbox = new System.Windows.Forms.CheckBox();
           this.label10 = new System.Windows.Forms.Label();
           this.trackCountBox = new System.Windows.Forms.TextBox();
           this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
@@ -65,7 +66,7 @@ namespace VTC
           this.imageBox3 = new Emgu.CV.UI.ImageBox();
           this.panel3 = new System.Windows.Forms.Panel();
           this.label3 = new System.Windows.Forms.Label();
-          this.showPolygonsCheckbox = new System.Windows.Forms.CheckBox();
+          this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
           ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
           this.splitContainer1.Panel1.SuspendLayout();
           this.splitContainer1.Panel2.SuspendLayout();
@@ -175,6 +176,16 @@ namespace VTC
           this.label1.Size = new System.Drawing.Size(75, 13);
           this.label1.TabIndex = 0;
           this.label1.Text = "Camera Frame";
+          // 
+          // showPolygonsCheckbox
+          // 
+          this.showPolygonsCheckbox.AutoSize = true;
+          this.showPolygonsCheckbox.Location = new System.Drawing.Point(330, 245);
+          this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
+          this.showPolygonsCheckbox.Size = new System.Drawing.Size(98, 17);
+          this.showPolygonsCheckbox.TabIndex = 23;
+          this.showPolygonsCheckbox.Text = "Show polygons";
+          this.showPolygonsCheckbox.UseVisualStyleBackColor = true;
           // 
           // label10
           // 
@@ -457,15 +468,11 @@ namespace VTC
           this.label3.TabIndex = 0;
           this.label3.Text = "Movement Mask";
           // 
-          // showPolygonsCheckbox
+          // pushStateTimer
           // 
-          this.showPolygonsCheckbox.AutoSize = true;
-          this.showPolygonsCheckbox.Location = new System.Drawing.Point(330, 245);
-          this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
-          this.showPolygonsCheckbox.Size = new System.Drawing.Size(98, 17);
-          this.showPolygonsCheckbox.TabIndex = 23;
-          this.showPolygonsCheckbox.Text = "Show polygons";
-          this.showPolygonsCheckbox.UseVisualStyleBackColor = true;
+          this.pushStateTimer.Enabled = true;
+          this.pushStateTimer.Interval = 30000;
+          this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
           // 
           // TrafficCounter
           // 
@@ -541,5 +548,6 @@ namespace VTC
       private System.Windows.Forms.Panel panel3;
       private System.Windows.Forms.Label label3;
       private System.Windows.Forms.CheckBox showPolygonsCheckbox;
+      private System.Windows.Forms.Timer pushStateTimer;
    }
 }

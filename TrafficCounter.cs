@@ -114,7 +114,7 @@ namespace VTC
          }
          
          Application.Idle += ProcessFrame;
-         Application.Idle += PushStateProcess;
+         //Application.Idle += PushStateProcess;
       }
 
       void ProcessFrame(object sender, EventArgs e)
@@ -448,6 +448,9 @@ namespace VTC
               String post_url = "http://www.traffic-camera.com/state_samples";
 
               HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
+              objRequest.KeepAlive = true;
+              objRequest.Pipelined = true;
+              objRequest.Timeout = 2000;
               objRequest.Method = "POST";
               objRequest.ContentLength = post_string.Length;
               objRequest.ContentType = "application/x-www-form-urlencoded";
@@ -457,9 +460,8 @@ namespace VTC
               myWriter = new StreamWriter(objRequest.GetRequestStream());
               myWriter.Write(post_string);
               myWriter.Close();
-              objRequest.Abort();
-              System.Threading.Thread.Sleep(4000);
-
+              objRequest.GetResponse();
+              
           }
           catch (Exception ex)
           {
