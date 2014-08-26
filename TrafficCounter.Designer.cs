@@ -471,7 +471,7 @@ namespace VTC
           // pushStateTimer
           // 
           this.pushStateTimer.Enabled = true;
-          this.pushStateTimer.Interval = 30000;
+          this.pushStateTimer.Interval = 10000;
           this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
           // 
           // TrafficCounter
