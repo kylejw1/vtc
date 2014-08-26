@@ -21,6 +21,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.VideoSurveillance;
 using TreeLib;
+using VTC.ServerReporting.ReportItems;
 
 namespace VTC
 {
@@ -71,7 +72,8 @@ namespace VTC
 
       //************* Server connection parameters ***************  
       string intersection_id = "";
-
+      private int FRAME_UPLOAD_INTERVAL_MINUTES = 15;
+       
       public TrafficCounter()
       {
          StateHypothesis initial_hypothesis = new StateHypothesis(miss_threshold);
@@ -104,7 +106,7 @@ namespace VTC
                  _cameraCapture = new Capture(ConfigurationSettings.AppSettings["VideoFilePath"]);
              }
 
-            ROI_image = new Image<Bgr, float>("ROIMask.png");//
+             ROI_image = new Image<Bgr, float>(ConfigurationSettings.AppSettings["RoiMaskPath"]);//
          }
          catch (Exception e)
          {
@@ -115,6 +117,34 @@ namespace VTC
          
          Application.Idle += ProcessFrame;
          //Application.Idle += PushStateProcess;
+
+          //TODO: Where d othe credentials come from?
+         ServerReporter.INSTANCE.AddReportItem(
+             new FtpSendFileReportItem(
+                 FRAME_UPLOAD_INTERVAL_MINUTES,
+                 new Uri(@"ftp://traffic-camera.com/assets/kyletest.png"),
+                  new NetworkCredential("imloader@traffic-camera.com", "traffic"),
+                  GetCameraFrameBytes
+                 ));
+         ServerReporter.INSTANCE.Start();
+      }
+
+      private Byte[] GetCameraFrameBytes()
+      {
+          // TODO:  Want PNG?
+
+          var bmp = Color_Background.ToBitmap();
+
+          byte[] byteArray;
+          using (MemoryStream stream = new MemoryStream())
+          {
+              bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+              stream.Close();
+
+              byteArray = stream.ToArray();
+          }
+
+          return byteArray;
       }
 
       void ProcessFrame(object sender, EventArgs e)
@@ -525,6 +555,17 @@ namespace VTC
           int horizontalScrollBarValue = imageBox1.HorizontalScrollBar.Visible ? (int)imageBox1.HorizontalScrollBar.Value : 0;
           int verticalScrollBarValue = imageBox1.VerticalScrollBar.Visible ? (int)imageBox1.VerticalScrollBar.Value : 0;
           coordinateTextBox.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." + Convert.ToString(offsetY + verticalScrollBarValue);
+      }
+
+      private void btnSelectIntersectionMask_Click(object sender, EventArgs e)
+      {
+          var selectRoi = new SelectROI(Color_Background);
+
+          if (selectRoi.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+          {
+              ROI_image = selectRoi.GetRoiMask();
+              ROI_image.Save(ConfigurationSettings.AppSettings["RoiMaskPath"]);
+          }
       }
    }
 }
