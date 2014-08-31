@@ -46,7 +46,8 @@ namespace VTC
       double noise_mass = 000000.0;         //Background movement noise
       double per_car = 40000.0;             //White pixels per car in image
       int max_object_count = 20;            //Maximum number of blobs to detect
-       
+      private RegionConfig _regionConfig;
+
       HypothesisTree hypothesis_tree;
       //Multiple hypothesis tracking parameters
       int miss_threshold = 30;               //Number of misses to consider an object gone
@@ -94,6 +95,20 @@ namespace VTC
           Run();
       }
 
+		private RegionConfig RegionConfig
+		{
+			get
+			{
+				return _regionConfig;
+			}
+			set
+			{
+				_regionConfig = value;
+				
+				ROI_image = RegionConfig.RoiMask.GetMask(_cameraCapture.Width, _cameraCapture.Height, new Bgr(Color.White));
+			}
+		}
+
       void Run()
       {
          try
@@ -106,7 +121,7 @@ namespace VTC
                  _cameraCapture = new Capture(ConfigurationSettings.AppSettings["VideoFilePath"]);
              }
 
-             ROI_image = new Image<Bgr, float>(ConfigurationSettings.AppSettings["RoiMaskPath"]);//
+             RegionConfig = RegionConfig.Load(ConfigurationSettings.AppSettings["RegionConfig"]);
          }
          catch (Exception e)
          {
@@ -115,6 +130,7 @@ namespace VTC
             return;
          }
          
+         // TODO: Should be detaching this on TrafficCounter.Dispose() as it is a static event
          Application.Idle += ProcessFrame;
          //Application.Idle += PushStateProcess;
 
@@ -557,14 +573,13 @@ namespace VTC
           coordinateTextBox.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." + Convert.ToString(offsetY + verticalScrollBarValue);
       }
 
-      private void btnSelectIntersectionMask_Click(object sender, EventArgs e)
+      private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
-          var selectRoi = new SelectROI(Color_Background);
-
-          if (selectRoi.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+          RegionEditor r = new RegionEditor(Color_Background, RegionConfig);
+          if (r.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
-              ROI_image = selectRoi.GetRoiMask();
-              ROI_image.Save(ConfigurationSettings.AppSettings["RoiMaskPath"]);
+              RegionConfig = r.GetRegionConfig();
+              RegionConfig.Save(ConfigurationSettings.AppSettings["RegionConfig"]);
           }
       }
    }
