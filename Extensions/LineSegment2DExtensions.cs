@@ -120,5 +120,17 @@ namespace VTC
 
             return true;
         }
+
+        public static bool CrossesAny(this LineSegment2D line, IEnumerable<LineSegment2D> collection)
+        {
+            foreach (var l in collection)
+            {
+                if (line.Equals(l)) continue;
+
+                if (line.Crosses(l)) return true;
+            }
+
+            return false;
+        }
     }
 }

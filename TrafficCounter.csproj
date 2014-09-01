@@ -86,6 +86,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
@@ -93,22 +94,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\CommonAssemblyInfo.cs" />
-    <Compile Include="FtpSendFileReportItem.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
-    <Compile Include="LineSegment2DExtensions.cs" />
+    <Compile Include="RegionConfig\Polygon.cs" />
+    <Compile Include="RegionConfig\PolygonBuilderControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RegionConfig\PolygonBuilderControl.Designer.cs">
+      <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RegionConfig\RegionConfig.cs" />
+    <Compile Include="Extensions\LineSegment2DExtensions.cs" />
     <Compile Include="NodeClass.cs" />
     <Compile Include="OptAssign.cs" />
-    <Compile Include="PointExtensions.cs" />
+    <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReportItem.cs" />
-    <Compile Include="SelectROI.cs">
+    <Compile Include="RegionConfig\RegionEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectROI.Designer.cs">
-      <DependentUpon>SelectROI.cs</DependentUpon>
+    <Compile Include="RegionConfig\RegionEditor.Designer.cs">
+      <DependentUpon>RegionEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="ServerReporter.cs" />
+    <Compile Include="ServerReporting\ReportItem.cs" />
+    <Compile Include="ServerReporting\ReportItems\FtpSendFileReportItem.cs" />
+    <Compile Include="ServerReporting\ServerReporter.cs" />
     <Compile Include="TrafficCounter.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,8 +129,11 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SelectROI.resx">
-      <DependentUpon>SelectROI.cs</DependentUpon>
+    <EmbeddedResource Include="RegionConfig\PolygonBuilderControl.resx">
+      <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RegionConfig\RegionEditor.resx">
+      <DependentUpon>RegionEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TrafficCounter.resx">
       <SubType>Designer</SubType>
@@ -162,6 +174,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
