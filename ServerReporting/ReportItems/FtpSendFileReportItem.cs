@@ -35,7 +35,7 @@ namespace VTC.ServerReporting.ReportItems
 
         void wc_UploadDataCompleted(object sender, UploadDataCompletedEventArgs e)
         {
-            bool kyle = true;
+            bool finished = true;
         }
     }
 }

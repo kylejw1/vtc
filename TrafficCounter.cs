@@ -73,7 +73,7 @@ namespace VTC
 
       //************* Server connection parameters ***************  
       string intersection_id = "";
-      private int FRAME_UPLOAD_INTERVAL_MINUTES = 15;
+      private int FRAME_UPLOAD_INTERVAL_MINUTES = 1;
        
       public TrafficCounter()
       {
@@ -135,10 +135,11 @@ namespace VTC
          //Application.Idle += PushStateProcess;
 
           //TODO: Where d othe credentials come from?
+         String IntersectionImagePath = "ftp://traffic-camera.com/assets/intersection_" + ConfigurationSettings.AppSettings["IntersectionId"] + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  FRAME_UPLOAD_INTERVAL_MINUTES,
-                 new Uri(@"ftp://traffic-camera.com/assets/kyletest.png"),
+                 new Uri(@IntersectionImagePath),
                   new NetworkCredential("imloader@traffic-camera.com", "traffic"),
                   GetCameraFrameBytes
                  ));
@@ -178,9 +179,11 @@ namespace VTC
              {
                  frame.Clone();
                  Frame = frame;
-                 imageSizeTextbox.Text = Frame.Size.ToString();
+                 
 
                  int count = CountObjects();
+                 if (count > max_object_count)
+                     count = max_object_count;
 
                  UpdateBackground(frame);
 
@@ -206,12 +209,6 @@ namespace VTC
 
       private void MHT_Update(Coordinates[] coordinates)
       {
-          //For debugging problem detections
-          //double problem_x = 327;
-          //double problem_y = 305;
-          //CoordinatesContains(coordinates, problem_x, problem_y);
-
-          //Console.WriteLine("Starting MHT Update");
           int num_detections = coordinates.Length;
           //Maintain hypothesis tree
           if (hypothesis_tree.children.Count > 0)
@@ -226,7 +223,7 @@ namespace VTC
           List<Node<StateHypothesis>> childNodeList = hypothesis_tree.GetLeafNodes();
           foreach (Node<StateHypothesis> childNode in childNodeList) //For each lowest-level hypothesis node
           {
-              //Console.WriteLine("Updating child node");
+              // Update child node
               int numExistingTargets = childNode.nodeData.vehicles.Count;
 
               StateEstimate[] target_state_estimates = childNode.nodeData.GetStateEstimates();
@@ -234,7 +231,7 @@ namespace VTC
               //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
               if (num_detections > 0)
               {
-                  //Console.WriteLine("Got detections");
+                  //Got detections
                   DenseMatrix ambiguity_matrix;
                   DenseMatrix false_assignment_matrix = new DenseMatrix(num_detections, num_detections, Double.MinValue);
                   double[] false_assignment_diagonal = Enumerable.Repeat(Math.Log10(lambda_f), num_detections).ToArray();
@@ -249,12 +246,12 @@ namespace VTC
                   //The value in each cell is the probability of the row's measurement occuring for the column's object
                   ambiguity_matrix = GenerateAmbiguityMatrix(coordinates, numExistingTargets, target_state_estimates);
 
-                  //Console.WriteLine("Generating expanded hypothesis");
+                  //Generating expanded hypothesis
                   //Hypothesis matrix needs to have a unique column for each detection being treated as a false positive or new object
                   DenseMatrix hypothesis_expanded;
                   if (numExistingTargets > 0)
                   {
-                      //Console.WriteLine("Expanded hypothesis: targets exist");
+                      //Expanded hypothesis: targets exist
                       DenseMatrix target_assignment_matrix = (DenseMatrix)ambiguity_matrix.SubMatrix(0, num_detections, 1, numExistingTargets);
 
                       hypothesis_expanded = new DenseMatrix(num_detections, 2 * num_detections + numExistingTargets);
@@ -262,17 +259,16 @@ namespace VTC
                       hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, numExistingTargets, target_assignment_matrix);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections + numExistingTargets, num_detections, new_target_matrix);
-                      //Console.WriteLine("Expanded hypothesis created.");
+                      
                   }
                   else
                   {
-                      //Console.WriteLine("Expanded hypothesis: no targets");
+                      //Expanded hypothesis: no targets
                       hypothesis_expanded = new DenseMatrix(num_detections, 2 * num_detections);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
                       hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, num_detections, new_target_matrix);
                   }
-
-                  //Console.WriteLine("Converting hypothesis to array");
+                  
                   //Calculate K-best assignment using Murty's algorithm
                   double[,] costs = hypothesis_expanded.ToArray();
                   //Console.WriteLine("Finding k-best assignment");
@@ -282,8 +278,7 @@ namespace VTC
 
                   List<int[]> k_best = OptAssign.FindKBestAssignments(costs, k_hypotheses);
 
-                  //Console.WriteLine("Generating hypotheses from k-best assignments");
-                  //Generate child hypotheses from assignments
+                  //Generate child hypotheses from k-best assignments
                   for (int i = 0; i < k_best.Count; i++)
                   {
                       //Console.WriteLine("Generating hypothesis {0}", i);
@@ -300,7 +295,7 @@ namespace VTC
                           //If this target is not detected
                           if (!(assignment.Contains(j + num_detections)))
                           {
-                              //Console.WriteLine("Updating state for missed measurement");
+                              //Updating state for missed measurement
                               StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
                               StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
                               child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
@@ -311,14 +306,14 @@ namespace VTC
                       {
 
                           //Account for new vehicles
-                          if (assignment[j] >= numExistingTargets + num_detections) //Add new vehicle
+                          if (assignment[j] >= numExistingTargets + num_detections && numExistingTargets < max_targets) //Add new vehicle
                           {
-                              //Console.WriteLine("Creating new vehicle");
+                              //Creating new vehicle
                               child_hypothesis.AddVehicle(Convert.ToInt16(coordinates[j].x), Convert.ToInt16(coordinates[j].y), 0, 0);
                           }
                           else if (assignment[j] >= num_detections && assignment[j] < num_detections + numExistingTargets) //Update states for vehicles with measurements
                           {
-                              // Console.WriteLine("Updating vehicle with measurement");
+                              //Updating vehicle with measurement
                               StateEstimate last_state = childNode.nodeData.vehicles[assignment[j] - num_detections].state_history.Last();
                               StateEstimate measurement_update = last_state.PropagateState(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, coordinates[j]);
                               child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - num_detections, measurement_update, true);
@@ -339,7 +334,7 @@ namespace VTC
                 //Update states for vehicles without measurements
                 for (int j = 0; j < numExistingTargets; j++)
                 {
-                //Console.WriteLine("Updating state for missed measurement");
+                //Updating state for missed measurement
                 StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
                 StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
                 child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);   
@@ -409,6 +404,7 @@ namespace VTC
 
       private Coordinates[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
       {
+          Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone();
           Coordinates[] coordinates = new Coordinates[count];
           for (int detection_count = 0; detection_count < count; detection_count++)
           {
@@ -416,10 +412,9 @@ namespace VTC
               double[] maxValues;
               System.Drawing.Point[] minLocations;
               System.Drawing.Point[] maxLocations;
-              Movement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
+              tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
               int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-              Movement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
-              //frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 5), new Bgr(255.0, 255.0, 255.0), 3);
+              tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
               frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
               coordinates[detection_count].x = maxLocation[0];
               coordinates[detection_count].y = maxLocation[1];
@@ -511,7 +506,6 @@ namespace VTC
           }
           catch (Exception ex)
           {
-              //MessageBox.Show(ex.Message);
               Console.WriteLine(ex.Message);
           }
       }
@@ -537,11 +531,11 @@ namespace VTC
               if (render_clean)
               {
                   frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
-                  //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
+                  //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1); //Render velocity vector
               }
               else 
               {
-                //if (radius < render_radius_threshold)
+                //if (radius < render_radius_threshold) //For hiding vehicles whose position is uncertain
                 //{
                 frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
                 frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
@@ -570,7 +564,6 @@ namespace VTC
           int offsetY = (int)(e.Location.Y / imageBox1.ZoomScale);
           int horizontalScrollBarValue = imageBox1.HorizontalScrollBar.Visible ? (int)imageBox1.HorizontalScrollBar.Value : 0;
           int verticalScrollBarValue = imageBox1.VerticalScrollBar.Visible ? (int)imageBox1.VerticalScrollBar.Value : 0;
-          coordinateTextBox.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." + Convert.ToString(offsetY + verticalScrollBarValue);
       }
 
       private void btnConfigureRegions_Click(object sender, EventArgs e)
@@ -581,6 +574,11 @@ namespace VTC
               RegionConfig = r.GetRegionConfig();
               RegionConfig.Save(ConfigurationSettings.AppSettings["RegionConfig"]);
           }
+      }
+
+      private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
+      {
+          Application.Idle -= ProcessFrame;
       }
    }
 }
