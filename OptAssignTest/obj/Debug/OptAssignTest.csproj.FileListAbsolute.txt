@@ -24,3 +24,4 @@ E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssignTest\obj\Debug\OptAssignTest.csprojResolveAssemblyReference.cache
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssignTest\obj\Debug\OptAssignTest.dll
 E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssignTest\obj\Debug\OptAssignTest.pdb
+E:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\Emgu.CV.Example\TrafficCounter\OptAssignTest\bin\Debug\DirectShowLib-2005.dll

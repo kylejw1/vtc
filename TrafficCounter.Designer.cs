@@ -56,6 +56,7 @@ namespace VTC
           this.panel3 = new System.Windows.Forms.Panel();
           this.label3 = new System.Windows.Forms.Label();
           this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
+            this.CameraComboBox = new System.Windows.Forms.ComboBox();
           ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
           this.splitContainer1.Panel1.SuspendLayout();
           this.splitContainer1.Panel2.SuspendLayout();
@@ -109,6 +110,7 @@ namespace VTC
           // 
           // splitContainer3.Panel2
           // 
+            this.splitContainer3.Panel2.Controls.Add(this.CameraComboBox);
           this.splitContainer3.Panel2.Controls.Add(this.btnConfigureRegions);
           this.splitContainer3.Panel2.Controls.Add(this.showPolygonsCheckbox);
           this.splitContainer3.Panel2.Controls.Add(this.label10);
@@ -347,6 +349,12 @@ namespace VTC
           this.pushStateTimer.Interval = 10000;
           this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
           // 
+            this.CameraComboBox.FormattingEnabled = true;
+            this.CameraComboBox.Location = new System.Drawing.Point(255, 223);
+            this.CameraComboBox.Name = "CameraComboBox";
+            this.CameraComboBox.Size = new System.Drawing.Size(196, 21);
+            this.CameraComboBox.TabIndex = 25;
+            this.CameraComboBox.SelectedIndexChanged += new System.EventHandler(this.CameraComboBox_SelectedIndexChanged);
           // TrafficCounter
           // 
           this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -412,5 +420,6 @@ namespace VTC
       private System.Windows.Forms.CheckBox showPolygonsCheckbox;
       private System.Windows.Forms.Timer pushStateTimer;
       private System.Windows.Forms.Button btnConfigureRegions;
+      private System.Windows.Forms.ComboBox CameraComboBox;
    }
 }

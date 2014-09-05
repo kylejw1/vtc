@@ -15,6 +15,8 @@ using MathNet.Numerics.Distributions;
 using System.Linq;
 using System.Threading;
 
+using DirectShowLib;
+
 using Emgu.CV;
 using Emgu.CV.UI;
 using Emgu.CV.CvEnum;
@@ -30,6 +32,10 @@ namespace VTC
       private static MCvFont _font = new MCvFont(Emgu.CV.CvEnum.FONT.CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0);
       private static Capture _cameraCapture;
 
+      List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
+      bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
+                                            //using a prerecorded video.
+      
       //************* Main image variables ***************
       Image<Bgr, Byte> Frame;               //current Frame from camera
       Image<Bgr, float> Color_Background;   //Average Background being formed
@@ -45,29 +51,29 @@ namespace VTC
       int car_radius = 12;                  //Radius of car image in pixels
       double noise_mass = 000000.0;         //Background movement noise
       double per_car = 40000.0;             //White pixels per car in image
+      double per_car_minimum = 1000.0;      //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
       int max_object_count = 20;            //Maximum number of blobs to detect
-      private RegionConfig _regionConfig;
+      private RegionConfig _regionConfig;   //Used to select ROI polygons
 
-      HypothesisTree hypothesis_tree;
-      //Multiple hypothesis tracking parameters
-      int miss_threshold = 30;               //Number of misses to consider an object gone
+      //************* Multiple hypothesis tracking parameters ***************  
+      int miss_threshold = 30;              //Number of misses to consider an object gone
       int max_targets = 10;                 //Maximum number of concurrently tracked targets
-      int tree_depth = 3;                   //Maximum allowed hypothesis tree depth
+      int tree_depth = 2;                   //Maximum allowed hypothesis tree depth
       int k_hypotheses = 2;                 //Branching factor for hypothesis tree
       int validation_region_deviation = 7;  //Mahalanobis distance multiplier used in measurement gating
-      double Pd = 0.80;                      //Probability of object detection
-      double Px = 0.0001;                    //Probability of track termination
+      double Pd = 0.80;                     //Probability of object detection
+      double Px = 0.0001;                   //Probability of track termination
       double lambda_x = 20;                 //Termination likelihood
-      double lambda_f = 0.4e-6;            //Density of Poisson-distributed false positives
+      double lambda_f = 0.4e-6;             //Density of Poisson-distributed false positives
       double lambda_n = 0.6e-6;             //Density of Poission-distributed new vehicles
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 10;                       //Process noise matrix multiplier
+      double q = 10;                        //Process noise matrix multiplier
       double r = 10;                        //Measurement noise matrix multiplier
+      HypothesisTree hypothesis_tree;       //Main object-tracking structure 
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
-      double render_radius_threshold = 30.0;   // Uncertainty radius is not rendered if above this value
-      bool render_clean = true;
+      bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
 
       bool VIDEO_FILE = false;
 
@@ -79,8 +85,12 @@ namespace VTC
       {
          StateHypothesis initial_hypothesis = new StateHypothesis(miss_threshold);
          hypothesis_tree = new HypothesisTree(initial_hypothesis);
-         intersection_id = ConfigurationSettings.AppSettings["IntersectionId"];
+         intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
          InitializeComponent();
+
+         //Initialize the camera selection combobox.
+         InitializeCameraSelection();
+
          Run();
       }
 
@@ -92,6 +102,10 @@ namespace VTC
       
           hypothesis_tree = new HypothesisTree(initial_hypothesis);
           InitializeComponent();
+
+          //Initialize the camera selection combobox.
+          InitializeCameraSelection();
+
           Run();
       }
 
@@ -113,29 +127,27 @@ namespace VTC
       {
          try
          {
-
              if(VIDEO_FILE==false)
-            _cameraCapture = new Capture();
+             {
+                _cameraCapture = new Capture(0);
+             }
              else 
              {
-                 _cameraCapture = new Capture(ConfigurationSettings.AppSettings["VideoFilePath"]);
+                 _cameraCapture = new Capture(ConfigurationManager.AppSettings["VideoFilePath"]);
              }
 
-             RegionConfig = RegionConfig.Load(ConfigurationSettings.AppSettings["RegionConfig"]);
+             RegionConfig = RegionConfig.Load(ConfigurationManager.AppSettings["RegionConfig"]);
          }
          catch (Exception e)
          {
-            //MessageBox.Show(e.Message);
              Console.WriteLine(e.Message);
             return;
          }
          
-         // TODO: Should be detaching this on TrafficCounter.Dispose() as it is a static event
          Application.Idle += ProcessFrame;
-         //Application.Idle += PushStateProcess;
 
-          //TODO: Where d othe credentials come from?
-         String IntersectionImagePath = "ftp://traffic-camera.com/assets/intersection_" + ConfigurationSettings.AppSettings["IntersectionId"] + ".png";
+          //TODO: Move server credentials to configuration file
+         String IntersectionImagePath = "ftp://traffic-camera.com/assets/intersection_" + ConfigurationManager.AppSettings["IntersectionId"] + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  FRAME_UPLOAD_INTERVAL_MINUTES,
@@ -144,6 +156,59 @@ namespace VTC
                   GetCameraFrameBytes
                  ));
          ServerReporter.INSTANCE.Start();
+      }
+
+      /// <summary>
+      /// Method for initializing the camera selection combobox.
+      /// </summary>
+      void InitializeCameraSelection()
+      {
+          //List all video input devices.
+          DsDevice[] _systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+
+          //Variable to indicate the device´s index.
+          int _deviceIndex = 0;
+
+          //Add every device to the global variable and to the camera combobox
+          foreach (DirectShowLib.DsDevice _camera in _systemCameras)
+          {
+              //Add Device with an index and a name to the List.
+              _cameraDevices.Add(new KeyValuePair<int, string>(_deviceIndex, _camera.Name));
+
+              //Add a combobox item.
+              CameraComboBox.Items.Add(_camera.Name);
+
+              //Increment the index.
+              _deviceIndex++;
+          }
+
+          //Disable eventhandler for the changing combobox index.
+          CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
+
+          //Set the index if a device could be found.
+          if (_cameraDevices.Count > 0)
+          {
+              CameraComboBox.SelectedIndex = 0;
+          }
+
+          //Enable eventhandler for the changing combobox index.
+          CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
+      }
+
+      /// <summary>
+      /// Method which reacts to the change of the camera selection combobox.
+      /// </summary>
+      private void CameraComboBox_SelectedIndexChanged(object sender, EventArgs e)
+      {
+          //Continue if it´s allowed to select a camera during the use of an prerecorded video.
+          if (_changeInFileMode == true)
+          {
+              //Change the capture device.
+              _cameraCapture = new Capture(CameraComboBox.SelectedIndex);
+
+              //TODO: Reset processing variables.
+              //...
+          }
       }
 
       private Byte[] GetCameraFrameBytes()
@@ -213,8 +278,11 @@ namespace VTC
           //Maintain hypothesis tree
           if (hypothesis_tree.children.Count > 0)
           {
-                hypothesis_tree.Prune(1);
-                hypothesis_tree = hypothesis_tree.GetChild(0);
+              if (hypothesis_tree.TreeDepth() > tree_depth)
+              {
+                  hypothesis_tree.Prune(1);
+                  hypothesis_tree = hypothesis_tree.GetChild(0);
+              }
 
               //To do: save deleted
               //hypothesis_tree.SaveDeleted(file path, length threshold);
@@ -441,8 +509,8 @@ namespace VTC
           double raw_mass = (int_img[lim_y, lim_x].Blue + int_img[lim_y, lim_x].Red + int_img[lim_y, lim_x].Green);
           noise_mass = Convert.ToInt32(avgNoiseTextbox.Text);
           per_car = Convert.ToInt32(avgAreaTextbox.Text);
-          if (per_car <= 0)
-              per_car = 1000;
+          if (per_car <= per_car_minimum)
+              per_car = per_car_minimum;
 
           int count = Convert.ToInt32((raw_mass - noise_mass) / per_car);
           if (count < 0)
@@ -535,11 +603,8 @@ namespace VTC
               }
               else 
               {
-                //if (radius < render_radius_threshold) //For hiding vehicles whose position is uncertain
-                //{
                 frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
                 frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
-                //}
               }
               
           }
@@ -572,7 +637,7 @@ namespace VTC
           if (r.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
               RegionConfig = r.GetRegionConfig();
-              RegionConfig.Save(ConfigurationSettings.AppSettings["RegionConfig"]);
+              RegionConfig.Save(ConfigurationManager.AppSettings["RegionConfig"]);
           }
       }
 
