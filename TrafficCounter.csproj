@@ -99,6 +99,7 @@
   <ItemGroup>
     <Compile Include="..\..\CommonAssemblyInfo.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
+    <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="RegionConfig\Polygon.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>

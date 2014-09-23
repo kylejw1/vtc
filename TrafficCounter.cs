@@ -50,26 +50,16 @@ namespace VTC
       //************* Object detection parameters ***************  
       int car_radius = 12;                  //Radius of car image in pixels
       double noise_mass = 000000.0;         //Background movement noise
-      double per_car = 40000.0;             //White pixels per car in image
-      double per_car_minimum = 1000.0;      //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
+      double per_car = Convert.ToDouble(ConfigurationManager.AppSettings["PerCar"]);                //White pixels per car in image
+      double per_car_minimum = Convert.ToDouble(ConfigurationManager.AppSettings["PerCarMin"]);     //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
       int max_object_count = 20;            //Maximum number of blobs to detect
       private RegionConfig _regionConfig;   //Used to select ROI polygons
 
       //************* Multiple hypothesis tracking parameters ***************  
-      int miss_threshold = 30;              //Number of misses to consider an object gone
-      int max_targets = 10;                 //Maximum number of concurrently tracked targets
-      int tree_depth = 2;                   //Maximum allowed hypothesis tree depth
-      int k_hypotheses = 2;                 //Branching factor for hypothesis tree
-      int validation_region_deviation = 7;  //Mahalanobis distance multiplier used in measurement gating
-      double Pd = 0.80;                     //Probability of object detection
-      double Px = 0.0001;                   //Probability of track termination
-      double lambda_x = 20;                 //Termination likelihood
-      double lambda_f = 0.4e-6;             //Density of Poisson-distributed false positives
-      double lambda_n = 0.6e-6;             //Density of Poission-distributed new vehicles
+      private MultipleHypothesisTracker MHT = null;
       double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
       double q = 10;                        //Process noise matrix multiplier
       double r = 10;                        //Measurement noise matrix multiplier
-      HypothesisTree hypothesis_tree;       //Main object-tracking structure 
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
@@ -83,28 +73,33 @@ namespace VTC
        
       public TrafficCounter()
       {
-         StateHypothesis initial_hypothesis = new StateHypothesis(miss_threshold);
-         hypothesis_tree = new HypothesisTree(initial_hypothesis);
+         MHT = new MultipleHypothesisTracker();
+
          intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
          InitializeComponent();
 
          //Initialize the camera selection combobox.
          InitializeCameraSelection();
 
+         //Initialize parameters.
+         LoadParameters();
          Run();
       }
 
       public TrafficCounter(string argument)
       {
-          StateHypothesis initial_hypothesis = new StateHypothesis(miss_threshold);
+          MHT = new MultipleHypothesisTracker();
+
           if (argument == "VIDEO_FILE")
               VIDEO_FILE = true;
       
-          hypothesis_tree = new HypothesisTree(initial_hypothesis);
           InitializeComponent();
 
           //Initialize the camera selection combobox.
           InitializeCameraSelection();
+
+          //Initialize parameters.
+          LoadParameters();
 
           Run();
       }
@@ -210,6 +205,32 @@ namespace VTC
               //...
           }
       }
+      
+       /// <summary>
+      /// Method to load user settings.
+      /// </summary>
+      private void LoadParameters()
+      {
+          Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+          avgAreaTextbox.Text = config.AppSettings.Settings["PerCar"].Value;
+          avgNoiseTextbox.Text = config.AppSettings.Settings["PerCarMin"].Value;
+      }
+
+      /// <summary>
+      /// Method to save user settings.
+      /// </summary>
+      private void SaveParametersBtn_Click(object sender, EventArgs e)
+      {
+          Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+          
+          config.AppSettings.Settings["PerCar"].Value = avgAreaTextbox.Text;
+          config.AppSettings.Settings["PerCarMin"].Value = avgNoiseTextbox.Text;
+
+          config.Save(ConfigurationSaveMode.Modified);
+
+          ConfigurationManager.RefreshSection("appSettings");
+      }
 
       private Byte[] GetCameraFrameBytes()
       {
@@ -231,35 +252,33 @@ namespace VTC
 
       void ProcessFrame(object sender, EventArgs e)
       {
-         Image<Bgr, Byte> frame = _cameraCapture.QueryFrame();
+          Image<Bgr, Byte> frame = _cameraCapture.QueryFrame();
 
-         if (frame != null)
-         {
-             if (Frame == null) //we need at least one frame to initialize the background
-             {
-                 Frame = frame;
-                 Color_Background = frame.Convert<Bgr, float>();
-             }
-             else
-             {
-                 frame.Clone();
-                 Frame = frame;
-                 
+          if (frame == null)
+              return;
 
-                 int count = CountObjects();
-                 if (count > max_object_count)
-                     count = max_object_count;
+          Frame = frame;
 
-                 UpdateBackground(frame);
+          if (Color_Background == null) //we need at least one frame to initialize the background
+          {
+              Color_Background = frame.Convert<Bgr, float>();
+          }
+          else
+          {
+              int count = CountObjects();
+              if (count > max_object_count)
+                  count = max_object_count;
 
-                 Coordinates[] coordinates = FindBlobCenters(frame, count);
+              UpdateBackground(frame);
 
-                 MHT_Update(coordinates);
+              Coordinates[] coordinates = FindBlobCenters(frame, count);
 
-             }
+              if (null != MHT)
+                MHT.Update(coordinates);
+          }
 
-             renderUI(frame);
-         }
+          renderUI(frame);
+
       }
 
       void PushStateProcess(object sender, EventArgs e)
@@ -271,148 +290,6 @@ namespace VTC
         }
       }
 
-
-      private void MHT_Update(Coordinates[] coordinates)
-      {
-          int num_detections = coordinates.Length;
-          //Maintain hypothesis tree
-          if (hypothesis_tree.children.Count > 0)
-          {
-              if (hypothesis_tree.TreeDepth() > tree_depth)
-              {
-                  hypothesis_tree.Prune(1);
-                  hypothesis_tree = hypothesis_tree.GetChild(0);
-              }
-
-              //To do: save deleted
-              //hypothesis_tree.SaveDeleted(file path, length threshold);
-          }
-
-          List<Node<StateHypothesis>> childNodeList = hypothesis_tree.GetLeafNodes();
-          foreach (Node<StateHypothesis> childNode in childNodeList) //For each lowest-level hypothesis node
-          {
-              // Update child node
-              int numExistingTargets = childNode.nodeData.vehicles.Count;
-
-              StateEstimate[] target_state_estimates = childNode.nodeData.GetStateEstimates();
-              
-              //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
-              if (num_detections > 0)
-              {
-                  //Got detections
-                  DenseMatrix ambiguity_matrix;
-                  DenseMatrix false_assignment_matrix = new DenseMatrix(num_detections, num_detections, Double.MinValue);
-                  double[] false_assignment_diagonal = Enumerable.Repeat(Math.Log10(lambda_f), num_detections).ToArray();
-                  false_assignment_matrix.SetDiagonal(false_assignment_diagonal); //Represents a false positive
-
-                  DenseMatrix new_target_matrix = new DenseMatrix(num_detections, num_detections, Double.MinValue);
-                  double[] new_target_diagonal = Enumerable.Repeat(Math.Log10(lambda_n), num_detections).ToArray();
-                  new_target_matrix.SetDiagonal(new_target_diagonal); //Represents a new object to track
-
-
-                  //Generate a matrix where each row signifies a detection and each column signifies an existing target
-                  //The value in each cell is the probability of the row's measurement occuring for the column's object
-                  ambiguity_matrix = GenerateAmbiguityMatrix(coordinates, numExistingTargets, target_state_estimates);
-
-                  //Generating expanded hypothesis
-                  //Hypothesis matrix needs to have a unique column for each detection being treated as a false positive or new object
-                  DenseMatrix hypothesis_expanded;
-                  if (numExistingTargets > 0)
-                  {
-                      //Expanded hypothesis: targets exist
-                      DenseMatrix target_assignment_matrix = (DenseMatrix)ambiguity_matrix.SubMatrix(0, num_detections, 1, numExistingTargets);
-
-                      hypothesis_expanded = new DenseMatrix(num_detections, 2 * num_detections + numExistingTargets);
-
-                      hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
-                      hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, numExistingTargets, target_assignment_matrix);
-                      hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections + numExistingTargets, num_detections, new_target_matrix);
-                      
-                  }
-                  else
-                  {
-                      //Expanded hypothesis: no targets
-                      hypothesis_expanded = new DenseMatrix(num_detections, 2 * num_detections);
-                      hypothesis_expanded.SetSubMatrix(0, num_detections, 0, num_detections, false_assignment_matrix);
-                      hypothesis_expanded.SetSubMatrix(0, num_detections, num_detections, num_detections, new_target_matrix);
-                  }
-                  
-                  //Calculate K-best assignment using Murty's algorithm
-                  double[,] costs = hypothesis_expanded.ToArray();
-                  //Console.WriteLine("Finding k-best assignment");
-                  for (int i = 0; i < costs.GetLength(0); i++)
-                      for (int j = 0; j < costs.GetLength(1); j++)
-                          costs[i, j] = -costs[i, j];
-
-                  List<int[]> k_best = OptAssign.FindKBestAssignments(costs, k_hypotheses);
-
-                  //Generate child hypotheses from k-best assignments
-                  for (int i = 0; i < k_best.Count; i++)
-                  {
-                      //Console.WriteLine("Generating hypothesis {0}", i);
-                      int[] assignment = k_best[i];
-                      StateHypothesis child_hypothesis = new StateHypothesis(miss_threshold);
-                      childNode.AddChild(child_hypothesis);
-                      HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[i].nodeData);
-                      child_hypothesis_tree.parent = childNode;
-
-                      child_hypothesis.probability = OptAssign.assignmentCost(costs, assignment);
-                      //Update states for vehicles without measurements
-                      for (int j = 0; j < numExistingTargets; j++)
-                      {
-                          //If this target is not detected
-                          if (!(assignment.Contains(j + num_detections)))
-                          {
-                              //Updating state for missed measurement
-                              StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
-                              StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
-                              child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
-                          }
-                      }
-
-                      for (int j = 0; j < num_detections; j++)
-                      {
-
-                          //Account for new vehicles
-                          if (assignment[j] >= numExistingTargets + num_detections && numExistingTargets < max_targets) //Add new vehicle
-                          {
-                              //Creating new vehicle
-                              child_hypothesis.AddVehicle(Convert.ToInt16(coordinates[j].x), Convert.ToInt16(coordinates[j].y), 0, 0);
-                          }
-                          else if (assignment[j] >= num_detections && assignment[j] < num_detections + numExistingTargets) //Update states for vehicles with measurements
-                          {
-                              //Updating vehicle with measurement
-                              StateEstimate last_state = childNode.nodeData.vehicles[assignment[j] - num_detections].state_history.Last();
-                              StateEstimate measurement_update = last_state.PropagateState(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, coordinates[j]);
-                              child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - num_detections, measurement_update, true);
-                          }
-
-                      }
-                  }
-
-              }
-              else
-              {
-                StateHypothesis child_hypothesis = new StateHypothesis(miss_threshold);
-                childNode.AddChild(child_hypothesis);
-                HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[0].nodeData);
-                child_hypothesis_tree.parent = childNode;
-
-                child_hypothesis.probability = Math.Pow((1 - Pd), numExistingTargets);
-                //Update states for vehicles without measurements
-                for (int j = 0; j < numExistingTargets; j++)
-                {
-                //Updating state for missed measurement
-                StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
-                StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
-                child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);   
-                }
-              }
-
-          }
-
-      }
-
       private static void CoordinatesContains(Coordinates[] coordinates, double problem_x, double problem_y)
       {
           for (int i = 0; i < coordinates.Length; i++)
@@ -420,54 +297,6 @@ namespace VTC
               if (coordinates[i].x == problem_x && coordinates[i].y == problem_y)
                   Console.WriteLine("Multiple detections here");
           }
-      }
-
-      private DenseMatrix GenerateAmbiguityMatrix(Coordinates[] coordinates, int numExistingTargets, StateEstimate[] target_state_estimates)
-      {
-          DenseMatrix ambiguity_matrix;
-          int num_detections = coordinates.Length;
-          ambiguity_matrix = new DenseMatrix(num_detections, numExistingTargets + 2);
-          Normal norm = new MathNet.Numerics.Distributions.Normal();
-
-          for (int i = 0; i < numExistingTargets; i++)
-          {
-              //Get this car's estimated next position using Kalman predictor
-              StateEstimate no_measurement_estimate = target_state_estimates[i].PropagateStateNoMeasurement(0.033, hypothesis_tree.H, hypothesis_tree.R, hypothesis_tree.F, hypothesis_tree.Q, hypothesis_tree.compensation_gain);
-
-              DenseMatrix P_bar = new DenseMatrix(4, 4);
-              P_bar[0, 0] = no_measurement_estimate.cov_x;
-              P_bar[1, 1] = no_measurement_estimate.cov_vx;
-              P_bar[2, 2] = no_measurement_estimate.cov_y;
-              P_bar[3, 3] = no_measurement_estimate.cov_vy;
-
-              DenseMatrix H_trans = (DenseMatrix) hypothesis_tree.H.Transpose();
-              DenseMatrix B = hypothesis_tree.H * P_bar*H_trans + hypothesis_tree.R;
-              DenseMatrix B_inverse = (DenseMatrix)B.Inverse();
-
-              for (int j = 0; j < num_detections; j++)
-              {
-                  DenseMatrix z_meas = new DenseMatrix(2, 1);
-                  z_meas[0, 0] = coordinates[j].x;
-                  z_meas[1, 0] = coordinates[j].y;
-
-                  DenseMatrix z_est = new DenseMatrix(2, 1);
-                  z_est[0, 0] = no_measurement_estimate.coordinates.x;
-                  z_est[1, 0] = no_measurement_estimate.coordinates.y;
-
-                  DenseMatrix residual = StateEstimate.residual(z_est, z_meas);
-                  DenseMatrix residual_transpose = (DenseMatrix)residual.Transpose();
-                  DenseMatrix mahalanobis = residual_transpose * B_inverse * residual;
-                  double mahalanobis_distance = Math.Sqrt(mahalanobis[0, 0]);
-
-                  if (mahalanobis_distance > validation_region_deviation)
-                      ambiguity_matrix[j, i + 1] = Double.MinValue;
-                  else
-                  {
-                      ambiguity_matrix[j, i + 1] = Math.Log10(Pd * norm.Density(mahalanobis_distance) / (1 - Pd));
-                  }
-              }
-          }
-          return ambiguity_matrix;
       }
 
       private Coordinates[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
@@ -527,8 +356,8 @@ namespace VTC
       {
           try
           {
-             
-              StateEstimate[] state_estimates = hypothesis_tree.nodeData.vehicles.Select(v => v.state_history.Last()).ToArray();
+
+              StateEstimate[] state_estimates = MHT.Vehicles.Select(v => v.state_history.Last()).ToArray();
               Dictionary<string, string> post_values = new Dictionary<string, string>();
               for (int vehicle_count = 0; vehicle_count < state_estimates.Length; vehicle_count++)
               {
@@ -584,11 +413,18 @@ namespace VTC
           Overlay = Overlay.And(ROI_image);
           Overlay.Acc(Color_Background);
 
-          
-          hypothesis_tree.nodeData.vehicles.ForEach(delegate(Vehicle vehicle)
+          if (null == MHT) 
+              return;
+
+          var vehicles = MHT.Vehicles;
+
+          vehicles.ForEach(delegate(Vehicle vehicle)
           {
               float x = (float) vehicle.state_history.Last().coordinates.x;
               float y = (float) vehicle.state_history.Last().coordinates.y;
+
+              var validation_region_deviation = MHT.ValidationRegionDeviation;
+
               float radius = validation_region_deviation*((float)Math.Sqrt(Math.Pow(vehicle.state_history.Last().cov_x,2) + (float) Math.Pow(vehicle.state_history.Last().cov_y,2)));
               if (radius < 2.0)
                   radius = (float) 2.0;
@@ -610,7 +446,7 @@ namespace VTC
           }
          );
 
-          trackCountBox.Text = hypothesis_tree.nodeData.vehicles.Count().ToString();
+          trackCountBox.Text = vehicles.Count().ToString();
 
           imageBox1.Image = frame;
           if (showPolygonsCheckbox.Checked)
