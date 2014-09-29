@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Configuration;
 using TreeLib;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -15,17 +16,17 @@ namespace VTC
     /// </summary>
     public class MultipleHypothesisTracker
     {
-        private int MissThreshold = 30;              //Number of misses to consider an object gone
-        private int MaxHypothesisTreeDepth = 2;      //Maximum allowed hypothesis tree depth
-        private int MaxTargets = 10;                 //Maximum number of concurrently tracked targets
-        private int k_hypotheses = 2;                 //Branching factor for hypothesis tree
-        private int _validationRegionDeviation = 7;  //Mahalanobis distance multiplier used in measurement gating
+        private int MissThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["MissThreshold"]);                 //Number of misses to consider an object gone
+        private int MaxHypothesisTreeDepth = Convert.ToInt32(ConfigurationManager.AppSettings["MaxHypTreeDepth"]);      //Maximum allowed hypothesis tree depth
+        private int MaxTargets = Convert.ToInt32(ConfigurationManager.AppSettings["MaxTargets"]);                       //Maximum number of concurrently tracked targets
+        private int k_hypotheses = Convert.ToInt32(ConfigurationManager.AppSettings["KHypotheses"]);                    //Branching factor for hypothesis tree
+        private int _validationRegionDeviation = Convert.ToInt32(ConfigurationManager.AppSettings["ValRegDeviation"]);  //Mahalanobis distance multiplier used in measurement gating
 
-        private double LambdaX = 20;                 //Termination likelihood
-        private double LambdaF = 0.4e-6;             //Density of Poisson-distributed false positives
-        private double LambdaN = 0.6e-6;             //Density of Poission-distributed new vehicles
-        private double Pd = 0.80;                     //Probability of object detection
-        private double Px = 0.0001;                   //Probability of track termination
+        private double LambdaX = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaX"]);     //Termination likelihood
+        private double LambdaF = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaF"]);     //Density of Poisson-distributed false positives
+        private double LambdaN = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaN"]);     //Density of Poission-distributed new vehicles
+        private double Pd = Convert.ToDouble(ConfigurationManager.AppSettings["Pd"]);               //Probability of object detection
+        private double Px = Convert.ToDouble(ConfigurationManager.AppSettings["Px"]);               //Probability of track termination
 
         private HypothesisTree HypothesisTree = null;
 
