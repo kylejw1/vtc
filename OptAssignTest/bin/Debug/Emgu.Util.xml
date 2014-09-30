@@ -4,240 +4,69 @@
         <name>Emgu.Util</name>
     </assembly>
     <members>
-        <member name="T:Emgu.Util.BinaryFileStorage`1">
+        <member name="T:Emgu.Util.TypeEnum.OS">
             <summary>
-            A raw data storage
-            </summary>
-            <typeparam name="T">The type of elments in the storage</typeparam>
-        </member>
-        <member name="F:Emgu.Util.BinaryFileStorage`1._fileInfo">
-            <summary>
-            The file info
+            Type of operating system
             </summary>
         </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String)">
+        <member name="F:Emgu.Util.TypeEnum.OS.Windows">
             <summary>
-            Create a binary File Storage
-            </summary>
-            <param name="fileName">The file name of the storage</param>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String,System.Int32)">
-            <summary>
-            Create a binary File Storage
-            </summary>
-            <param name="fileName">The file name of the storage</param>
-            <param name="trunkSize">The data will be read in trunk of this size internally. Can be use to seed up the file read. A good number will be 4096</param>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String,System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Create a binary File Storage with the specific data
-            </summary>
-            <param name="fileName">The file name of the storage, all data in the existing file will be replaced</param>
-            <param name="samples">The data which will be stored in the storage</param>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.Append(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Append the samples to the end of the storage
-            </summary>
-            <param name="samples">The samples to be appended to the storage</param>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.Clear">
-            <summary>
-            Delete all data in the existing storage, if there is any.
+            Windows
             </summary>
         </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.EstimateSize">
+        <member name="F:Emgu.Util.TypeEnum.OS.Linux">
             <summary>
-            Estimate the number of elements in this storage as the size of the storage divided by the size of the elements
-            </summary>
-            <returns>An estimation of the number of elements in this storage</returns>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.Peek">
-            <summary>
-            Get a copy of the first element in the storage. If the storage is empty, a default value will be returned
-            </summary>
-            <returns>A copy of the first element in the storage. If the storage is empty, a default value will be returned</returns>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.GetSubsamples(System.Int32)">
-            <summary>
-            Get the subsampled data in this storage
-            </summary>
-            <param name="subsampleRate">The subsample rate</param>
-            <returns>The subsampled data in this storage</returns>
-        </member>
-        <member name="M:Emgu.Util.BinaryFileStorage`1.GetEnumerator">
-            <summary>
-            Get the data in this storage
-            </summary>
-            <returns>The data in this storage</returns>
-        </member>
-        <member name="P:Emgu.Util.BinaryFileStorage`1.FileName">
-            <summary>
-            The file name of the storage
+            Linux
             </summary>
         </member>
-        <member name="T:Emgu.Util.DisposableObject">
+        <member name="F:Emgu.Util.TypeEnum.OS.MacOSX">
             <summary>
-            An abstract class that wrap around a disposable object
+            Mac OSX
             </summary>
         </member>
-        <member name="F:Emgu.Util.DisposableObject._disposed">
-            <summary> Track whether Dispose has been called. </summary>
-        </member>
-        <member name="M:Emgu.Util.DisposableObject.Dispose">
+        <member name="F:Emgu.Util.TypeEnum.OS.IOS">
             <summary>
-            The dispose function that implements IDisposable interface
+            iOS devices. iPhone, iPad, iPod Touch
             </summary>
         </member>
-        <member name="M:Emgu.Util.DisposableObject.Dispose(System.Boolean)">
-            <summary> 
-             Dispose(bool disposing) executes in two distinct scenarios.
-             If disposing equals true, the method has been called directly
-             or indirectly by a user's code. Managed and unmanaged resources
-             can be disposed.
-             If disposing equals false, the method has been called by the
-             runtime from inside the finalizer and you should not reference
-             other objects. Only unmanaged resources can be disposed.
-            </summary>
-             <param name="disposing">
-             If disposing equals false, the method has been called by the
-             runtime from inside the finalizer and you should not reference
-             other objects. Only unmanaged resources can be disposed.
-             </param>
-        </member>
-        <member name="M:Emgu.Util.DisposableObject.ReleaseManagedResources">
+        <member name="F:Emgu.Util.TypeEnum.OS.Android">
             <summary>
-            Release the managed resources. This function will be called during the disposal of the current object.
-            override ride this function if you need to call the Dispose() function on any managed IDisposable object created by the current object
+            Android devices
             </summary>
         </member>
-        <member name="M:Emgu.Util.DisposableObject.DisposeObject">
+        <member name="T:Emgu.Util.TypeEnum.ClrType">
             <summary>
-            Release the unmanaged resources
+            The runtime environment
             </summary>
         </member>
-        <member name="M:Emgu.Util.DisposableObject.Finalize">
+        <member name="F:Emgu.Util.TypeEnum.ClrType.DotNet">
             <summary>
-            Destructor
+            .Net runtime
             </summary>
         </member>
-        <member name="T:Emgu.Util.EventArgs`1">
+        <member name="F:Emgu.Util.TypeEnum.ClrType.NetFxCore">
             <summary>
-            A generic EventArgs
-            </summary>
-            <typeparam name="T">The type of arguments</typeparam>
-        </member>
-        <member name="M:Emgu.Util.EventArgs`1.#ctor(`0)">
-            <summary>
-            Create a generic EventArgs with the specific value
-            </summary>
-            <param name="value">The value</param>
-        </member>
-        <member name="P:Emgu.Util.EventArgs`1.Value">
-            <summary>
-            The value of the EventArgs
+            Windows Store app runtime
             </summary>
         </member>
-        <member name="T:Emgu.Util.EventArgs`2">
+        <member name="F:Emgu.Util.TypeEnum.ClrType.Mono">
             <summary>
-            A generic EventArgs
-            </summary>
-            <typeparam name="T1">The type of the first value</typeparam>
-            <typeparam name="T2">The type of the second value</typeparam>
-        </member>
-        <member name="M:Emgu.Util.EventArgs`2.#ctor(`0,`1)">
-            <summary>
-            Create a generic EventArgs with two values
-            </summary>
-            <param name="value1">The first value</param>
-            <param name="value2">The second value</param>
-        </member>
-        <member name="P:Emgu.Util.EventArgs`2.Value1">
-            <summary>
-            The first value
+            Mono runtime
             </summary>
         </member>
-        <member name="P:Emgu.Util.EventArgs`2.Value2">
+        <member name="T:Emgu.Util.TypeEnum.ProgrammingLanguage">
             <summary>
-            The second value
+            The type of Programming languages
             </summary>
         </member>
-        <member name="T:Emgu.Util.ICodeGenerable">
+        <member name="F:Emgu.Util.TypeEnum.ProgrammingLanguage.CSharp">
             <summary>
-            Implement this interface if the object can output code to generate it self.
+            C#
             </summary>
         </member>
-        <member name="M:Emgu.Util.ICodeGenerable.ToCode(Emgu.Util.TypeEnum.ProgrammingLanguage)">
+        <member name="F:Emgu.Util.TypeEnum.ProgrammingLanguage.CPlusPlus">
             <summary>
-            Return the code to generate the object itself from the specific language
-            </summary>
-            <param name="language">The programming language to output code</param>
-            <returns>The code to generate the object from the specific language</returns>
-        </member>
-        <member name="T:Emgu.Util.IInterpolatable`1">
-            <summary>
-            An object that can be interpolated
-            </summary>
-        </member>
-        <member name="M:Emgu.Util.IInterpolatable`1.LinearInterpolate(`0,System.Double)">
-            <summary>
-            Interpolate base on this point and the other point with the given index
-            </summary>
-            <param name="other">The other point</param>
-            <param name="index">The interpolation index</param>
-            <returns>The interpolated point</returns>
-        </member>
-        <member name="P:Emgu.Util.IInterpolatable`1.InterpolationIndex">
-            <summary>
-            The index that will be used for interpolation
-            </summary>
-        </member>
-        <member name="T:Emgu.Util.PinnedArray`1">
-            <summary>
-            A Pinnned array of the specific type
-            </summary>
-            <typeparam name="T">The type of the array</typeparam>
-        </member>
-        <member name="M:Emgu.Util.PinnedArray`1.#ctor(System.Int32)">
-            <summary>
-            Create a Pinnned array of the specific type
-            </summary>
-            <param name="size">The size of the array</param>
-        </member>
-        <member name="M:Emgu.Util.PinnedArray`1.AddrOfPinnedObject">
-            <summary>
-            Get the address of the pinned array
-            </summary>
-            <returns>A pointer to the address of the the pinned array</returns>
-        </member>
-        <member name="M:Emgu.Util.PinnedArray`1.ReleaseManagedResources">
-            <summary>
-            Release the GCHandle
-            </summary>
-        </member>
-        <member name="M:Emgu.Util.PinnedArray`1.DisposeObject">
-            <summary>
-            Disposed the unmanaged data
-            </summary>
-        </member>
-        <member name="P:Emgu.Util.PinnedArray`1.Array">
-            <summary>
-            Get the array
-            </summary>
-        </member>
-        <member name="T:Emgu.Util.Platform">
-            <summary>
-            Provide information for the platform which is using. 
-            </summary>
-        </member>
-        <member name="P:Emgu.Util.Platform.OperationSystem">
-            <summary>
-            Get the type of the current operating system
-            </summary>
-        </member>
-        <member name="P:Emgu.Util.Platform.ClrType">
-            <summary>
-            Get the type of the current runtime environment
+            C++
             </summary>
         </member>
         <member name="T:Emgu.Util.Toolbox">
@@ -396,74 +225,185 @@
             <param name="path">The directory to be searched for DLLs</param>
             <returns>True if success</returns>
         </member>
-        <member name="T:Emgu.Util.TypeEnum.OS">
+        <member name="T:Emgu.Util.IInterpolatable`1">
             <summary>
-            Type of operating system
+            An object that can be interpolated
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.OS.Windows">
+        <member name="M:Emgu.Util.IInterpolatable`1.LinearInterpolate(`0,System.Double)">
             <summary>
-            Windows
+            Interpolate base on this point and the other point with the given index
+            </summary>
+            <param name="other">The other point</param>
+            <param name="index">The interpolation index</param>
+            <returns>The interpolated point</returns>
+        </member>
+        <member name="P:Emgu.Util.IInterpolatable`1.InterpolationIndex">
+            <summary>
+            The index that will be used for interpolation
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.OS.Linux">
+        <member name="T:Emgu.Util.EventArgs`1">
             <summary>
-            Linux
+            A generic EventArgs
+            </summary>
+            <typeparam name="T">The type of arguments</typeparam>
+        </member>
+        <member name="M:Emgu.Util.EventArgs`1.#ctor(`0)">
+            <summary>
+            Create a generic EventArgs with the specific value
+            </summary>
+            <param name="value">The value</param>
+        </member>
+        <member name="P:Emgu.Util.EventArgs`1.Value">
+            <summary>
+            The value of the EventArgs
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.OS.MacOSX">
+        <member name="T:Emgu.Util.EventArgs`2">
             <summary>
-            Mac OSX
+            A generic EventArgs
+            </summary>
+            <typeparam name="T1">The type of the first value</typeparam>
+            <typeparam name="T2">The type of the second value</typeparam>
+        </member>
+        <member name="M:Emgu.Util.EventArgs`2.#ctor(`0,`1)">
+            <summary>
+            Create a generic EventArgs with two values
+            </summary>
+            <param name="value1">The first value</param>
+            <param name="value2">The second value</param>
+        </member>
+        <member name="P:Emgu.Util.EventArgs`2.Value1">
+            <summary>
+            The first value
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.OS.IOS">
+        <member name="P:Emgu.Util.EventArgs`2.Value2">
             <summary>
-            iOS devices. iPhone, iPad, iPod Touch
+            The second value
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.OS.Android">
+        <member name="T:Emgu.Util.BinaryFileStorage`1">
             <summary>
-            Android devices
+            A raw data storage
+            </summary>
+            <typeparam name="T">The type of elments in the storage</typeparam>
+        </member>
+        <member name="F:Emgu.Util.BinaryFileStorage`1._fileInfo">
+            <summary>
+            The file info
             </summary>
         </member>
-        <member name="T:Emgu.Util.TypeEnum.ClrType">
+        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String)">
             <summary>
-            The runtime environment
+            Create a binary File Storage
+            </summary>
+            <param name="fileName">The file name of the storage</param>
+        </member>
+        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String,System.Int32)">
+            <summary>
+            Create a binary File Storage
+            </summary>
+            <param name="fileName">The file name of the storage</param>
+            <param name="trunkSize">The data will be read in trunk of this size internally. Can be use to seed up the file read. A good number will be 4096</param>
+        </member>
+        <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Create a binary File Storage with the specific data
+            </summary>
+            <param name="fileName">The file name of the storage, all data in the existing file will be replaced</param>
+            <param name="samples">The data which will be stored in the storage</param>
+        </member>
+        <member name="M:Emgu.Util.BinaryFileStorage`1.Append(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Append the samples to the end of the storage
+            </summary>
+            <param name="samples">The samples to be appended to the storage</param>
+        </member>
+        <member name="M:Emgu.Util.BinaryFileStorage`1.Clear">
+            <summary>
+            Delete all data in the existing storage, if there is any.
             </summary>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.ClrType.DotNet">
+        <member name="M:Emgu.Util.BinaryFileStorage`1.EstimateSize">
             <summary>
-            .Net runtime
+            Estimate the number of elements in this storage as the size of the storage divided by the size of the elements
             </summary>
+            <returns>An estimation of the number of elements in this storage</returns>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.ClrType.NetFxCore">
+        <member name="M:Emgu.Util.BinaryFileStorage`1.Peek">
             <summary>
-            Windows Store app runtime
+            Get a copy of the first element in the storage. If the storage is empty, a default value will be returned
             </summary>
+            <returns>A copy of the first element in the storage. If the storage is empty, a default value will be returned</returns>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.ClrType.Mono">
+        <member name="M:Emgu.Util.BinaryFileStorage`1.GetSubsamples(System.Int32)">
             <summary>
-            Mono runtime
+            Get the subsampled data in this storage
             </summary>
+            <param name="subsampleRate">The subsample rate</param>
+            <returns>The subsampled data in this storage</returns>
         </member>
-        <member name="T:Emgu.Util.TypeEnum.ProgrammingLanguage">
+        <member name="M:Emgu.Util.BinaryFileStorage`1.GetEnumerator">
             <summary>
-            The type of Programming languages
+            Get the data in this storage
             </summary>
+            <returns>The data in this storage</returns>
         </member>
-        <member name="F:Emgu.Util.TypeEnum.ProgrammingLanguage.CSharp">
+        <member name="P:Emgu.Util.BinaryFileStorage`1.FileName">
             <summary>
-            C#
-            </summary>
-        </member>
-        <member name="F:Emgu.Util.TypeEnum.ProgrammingLanguage.CPlusPlus">
-            <summary>
-            C++
+            The file name of the storage
             </summary>
         </member>
         <member name="T:Emgu.Util.UnmanagedObject">
             <summary>
             An Unmanaged Object is a disposable object with a Ptr property pointing to the unmanaged object
+            </summary>
+        </member>
+        <member name="T:Emgu.Util.DisposableObject">
+            <summary>
+            An abstract class that wrap around a disposable object
+            </summary>
+        </member>
+        <member name="F:Emgu.Util.DisposableObject._disposed">
+            <summary> Track whether Dispose has been called. </summary>
+        </member>
+        <member name="M:Emgu.Util.DisposableObject.Dispose">
+            <summary>
+            The dispose function that implements IDisposable interface
+            </summary>
+        </member>
+        <member name="M:Emgu.Util.DisposableObject.Dispose(System.Boolean)">
+            <summary> 
+             Dispose(bool disposing) executes in two distinct scenarios.
+             If disposing equals true, the method has been called directly
+             or indirectly by a user's code. Managed and unmanaged resources
+             can be disposed.
+             If disposing equals false, the method has been called by the
+             runtime from inside the finalizer and you should not reference
+             other objects. Only unmanaged resources can be disposed.
+            </summary>
+             <param name="disposing">
+             If disposing equals false, the method has been called by the
+             runtime from inside the finalizer and you should not reference
+             other objects. Only unmanaged resources can be disposed.
+             </param>
+        </member>
+        <member name="M:Emgu.Util.DisposableObject.ReleaseManagedResources">
+            <summary>
+            Release the managed resources. This function will be called during the disposal of the current object.
+            override ride this function if you need to call the Dispose() function on any managed IDisposable object created by the current object
+            </summary>
+        </member>
+        <member name="M:Emgu.Util.DisposableObject.DisposeObject">
+            <summary>
+            Release the unmanaged resources
+            </summary>
+        </member>
+        <member name="M:Emgu.Util.DisposableObject.Finalize">
+            <summary>
+            Destructor
             </summary>
         </member>
         <member name="F:Emgu.Util.UnmanagedObject._ptr">
@@ -482,6 +422,66 @@
             <summary>
             Pointer to the unmanaged object
             </summary>
+        </member>
+        <member name="T:Emgu.Util.PinnedArray`1">
+            <summary>
+            A Pinnned array of the specific type
+            </summary>
+            <typeparam name="T">The type of the array</typeparam>
+        </member>
+        <member name="M:Emgu.Util.PinnedArray`1.#ctor(System.Int32)">
+            <summary>
+            Create a Pinnned array of the specific type
+            </summary>
+            <param name="size">The size of the array</param>
+        </member>
+        <member name="M:Emgu.Util.PinnedArray`1.AddrOfPinnedObject">
+            <summary>
+            Get the address of the pinned array
+            </summary>
+            <returns>A pointer to the address of the the pinned array</returns>
+        </member>
+        <member name="M:Emgu.Util.PinnedArray`1.ReleaseManagedResources">
+            <summary>
+            Release the GCHandle
+            </summary>
+        </member>
+        <member name="M:Emgu.Util.PinnedArray`1.DisposeObject">
+            <summary>
+            Disposed the unmanaged data
+            </summary>
+        </member>
+        <member name="P:Emgu.Util.PinnedArray`1.Array">
+            <summary>
+            Get the array
+            </summary>
+        </member>
+        <member name="T:Emgu.Util.Platform">
+            <summary>
+            Provide information for the platform which is using. 
+            </summary>
+        </member>
+        <member name="P:Emgu.Util.Platform.OperationSystem">
+            <summary>
+            Get the type of the current operating system
+            </summary>
+        </member>
+        <member name="P:Emgu.Util.Platform.ClrType">
+            <summary>
+            Get the type of the current runtime environment
+            </summary>
+        </member>
+        <member name="T:Emgu.Util.ICodeGenerable">
+            <summary>
+            Implement this interface if the object can output code to generate it self.
+            </summary>
+        </member>
+        <member name="M:Emgu.Util.ICodeGenerable.ToCode(Emgu.Util.TypeEnum.ProgrammingLanguage)">
+            <summary>
+            Return the code to generate the object itself from the specific language
+            </summary>
+            <param name="language">The programming language to output code</param>
+            <returns>The code to generate the object from the specific language</returns>
         </member>
     </members>
 </doc>
