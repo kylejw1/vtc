@@ -3,7 +3,7 @@ vtc
 
 Video Traffic Counter
 
-Live: [www.traffic-camera.com](www.traffic-camera.com) Development: [dev.traffic-camera.com](dev.traffic-camera.com)
+Live: [www.traffic-camera.com](http://www.traffic-camera.com) Development: [dev.traffic-camera.com](http://dev.traffic-camera.com)
 
 Realtime video-based object tracking software. Written in C# using Emgu CV. Requires a webcam. 
 
