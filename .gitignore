@@ -19,6 +19,10 @@ bin/
 bld/
 [Bb]in/
 [Oo]bj/
+obj/Debug/
+obj/Release/
+OptAssignTest/bin/
+OptAssignTest/obj/
 
 # Roslyn cache directories
 *.ide/
