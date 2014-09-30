@@ -44,22 +44,22 @@ namespace VTC
       Image<Bgr, float> ROI_image;          //Area occupied by traffic
 
       //************* Background subtraction parameters ***************
-      double alpha = 0.001;                 //stores alpha for thread access
-      int color_threshold = 40;             //Threshold below which frame-movement is ignored
+      double alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"]);                   //stores alpha for thread access
+      int color_threshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"]);    //Threshold below which frame-movement is ignored
 
       //************* Object detection parameters ***************  
-      int car_radius = 12;                  //Radius of car image in pixels
-      double noise_mass = 000000.0;         //Background movement noise
+      int car_radius = Convert.ToInt32(ConfigurationManager.AppSettings["CarRadius"]);              //Radius of car image in pixels
+      double noise_mass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"]);          //Background movement noise
       double per_car = Convert.ToDouble(ConfigurationManager.AppSettings["PerCar"]);                //White pixels per car in image
       double per_car_minimum = Convert.ToDouble(ConfigurationManager.AppSettings["PerCarMin"]);     //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
-      int max_object_count = 20;            //Maximum number of blobs to detect
-      private RegionConfig _regionConfig;   //Used to select ROI polygons
+      int max_object_count = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);      //Maximum number of blobs to detect
+      private RegionConfig _regionConfig;                                                           //Used to select ROI polygons
 
       //************* Multiple hypothesis tracking parameters ***************  
       private MultipleHypothesisTracker MHT = null;
-      double pruning_ratio = 0.001;         //Probability ratio at which hypotheses are pruned
-      double q = 10;                        //Process noise matrix multiplier
-      double r = 10;                        //Measurement noise matrix multiplier
+      double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
+      double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"]);                           //Process noise matrix multiplier
+      double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"]);                           //Measurement noise matrix multiplier
 
       //************* Rendering parameters ***************  
       double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
