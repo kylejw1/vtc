@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using VTC.ServerReporting;
+using System.Diagnostics;
 
 namespace VTC
 {
@@ -70,7 +71,18 @@ namespace VTC
                 }
                 catch (Exception ex)
                 {
-                    // TODO:  Report the error somewhere... Log file, text box, etc
+                    #if(DEBUG)
+                    {
+                        throw (ex);
+                    }
+                    #else
+                    {
+                        Trace.WriteLine(ex.Message);
+                        Trace.WriteLine(ex.InnerException);
+                        Trace.WriteLine(ex.StackTrace);
+                        Trace.WriteLine(ex.TargetSite);
+                    }
+                    #endif
                 }
             }
         }

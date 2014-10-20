@@ -14,7 +14,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.Distributions;
 using System.Linq;
 using System.Threading;
-
+using System.Diagnostics;
 using DirectShowLib;
 
 using Emgu.CV;
@@ -68,14 +68,17 @@ namespace VTC
       bool VIDEO_FILE = false;
 
       //************* Server connection parameters ***************  
-      string intersection_id = "";
-      private int FRAME_UPLOAD_INTERVAL_MINUTES = 1;
+      string intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
+      private int FRAME_UPLOAD_INTERVAL_MINUTES =Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
+      string ftp_password = ConfigurationManager.AppSettings["FTPpassword"];
+      string ftp_username = ConfigurationManager.AppSettings["FTPusername"];
+      private int state_upload_interval_ms = Convert.ToInt32(ConfigurationManager.AppSettings["state_upload_interval_ms"]);
        
       public TrafficCounter()
       {
+         Trace.WriteLine("Initializing VTC...");
          MHT = new MultipleHypothesisTracker();
 
-         intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
          InitializeComponent();
 
          //Initialize the camera selection combobox.
@@ -84,10 +87,12 @@ namespace VTC
          //Initialize parameters.
          LoadParameters();
          Run();
+         Trace.WriteLine("Initializing finished.");
       }
 
       public TrafficCounter(string argument)
       {
+          Trace.WriteLine("Initializing VTC with canned video...");
           MHT = new MultipleHypothesisTracker();
 
           if (argument == "VIDEO_FILE")
@@ -102,6 +107,7 @@ namespace VTC
           LoadParameters();
 
           Run();
+          Trace.WriteLine("Initializing finished.");
       }
 
 		private RegionConfig RegionConfig
@@ -142,15 +148,14 @@ namespace VTC
          Application.Idle += ProcessFrame;
 
           //TODO: Move server credentials to configuration file
-         String IntersectionImagePath = "ftp://traffic-camera.com/assets/intersection_" + ConfigurationManager.AppSettings["IntersectionId"] + ".png";
+         String IntersectionImagePath = "ftp://www.traffic-camera.com/intersection_" + intersection_id + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  FRAME_UPLOAD_INTERVAL_MINUTES,
                  new Uri(@IntersectionImagePath),
-                  new NetworkCredential("imloader@traffic-camera.com", "traffic"),
+                  new NetworkCredential(ftp_username, ftp_password),
                   GetCameraFrameBytes
                  ));
-         ServerReporter.INSTANCE.Start();
       }
 
       /// <summary>
@@ -212,9 +217,13 @@ namespace VTC
       private void LoadParameters()
       {
           Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+          configPathBox.Text = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).FilePath;
 
           avgAreaTextbox.Text = config.AppSettings.Settings["PerCar"].Value;
           avgNoiseTextbox.Text = config.AppSettings.Settings["PerCarMin"].Value;
+
+          intersectionIDTextBox.Text = intersection_id.ToString();
+          pushStateTimer.Interval = state_upload_interval_ms;
       }
 
       /// <summary>
@@ -226,6 +235,7 @@ namespace VTC
           
           config.AppSettings.Settings["PerCar"].Value = avgAreaTextbox.Text;
           config.AppSettings.Settings["PerCarMin"].Value = avgNoiseTextbox.Text;
+          config.AppSettings.Settings["IntersectionID"].Value = intersectionIDTextBox.Text;
 
           config.Save(ConfigurationSaveMode.Modified);
 
@@ -372,6 +382,10 @@ namespace VTC
                   post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vy]", vy);
                   post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][_destroy]", zero);
               }
+              
+              if(state_estimates.Length == 0)
+                  post_values.Add("state_sample[states_attributes][]", "");
+
               post_values.Add("intersection_id", intersection_id);
 
 
@@ -399,11 +413,22 @@ namespace VTC
               myWriter.Write(post_string);
               myWriter.Close();
               objRequest.GetResponse();
-              
           }
           catch (Exception ex)
           {
-              Console.WriteLine(ex.Message);
+            #if(DEBUG)
+            {
+                Console.WriteLine(ex.Message);
+                throw (ex);
+            }
+            #else
+            {
+                Trace.WriteLine(ex.Message);
+                Trace.WriteLine(ex.InnerException);
+                Trace.WriteLine(ex.StackTrace);
+                Trace.WriteLine(ex.TargetSite);
+            }
+            #endif
           }
       }
 
@@ -480,6 +505,18 @@ namespace VTC
       private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
       {
           Application.Idle -= ProcessFrame;
+      }
+
+      private void pushStateCheckbox_CheckedChanged(object sender, EventArgs e)
+      {
+          if (pushStateCheckbox.Checked)
+          {
+              ServerReporter.INSTANCE.Start();
+          }
+          else
+          {
+              ServerReporter.INSTANCE.Stop();
+          }
       }
    }
 }
