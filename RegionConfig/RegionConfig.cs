@@ -9,39 +9,51 @@ using System.Text;
 
 namespace VTC
 { 
-    public class ApproachExit
-    {
-        public Polygon Approach = new Polygon();
-        public Polygon Exit = new Polygon();
-
-        public ApproachExit() { }
-    }
-
+    [DataContract]
     public class RegionConfig
     {
+        [DataMember]
         public Polygon RoiMask;
-        public List<ApproachExit> ApproachExits;
+        [DataMember]
+        public Dictionary<string, Polygon> Regions;
+        [DataMember]
+        private int ConfigVersion = 0;
 
-        public RegionConfig(int numApproachExits)
+        // Required to update this class.  See "Load"
+        private static readonly int CurrentConfigVersion = 1;
+
+        public RegionConfig()
         {
             RoiMask = new Polygon();
-            ApproachExits = new List<ApproachExit>();
-
-            for (int i = 0; i < numApproachExits; i++)
-            {
-                ApproachExits.Add(new ApproachExit());
-            }
+            Regions = new Dictionary<string, Polygon>();
         }
 
-        public RegionConfig() : this(4)
+        public RegionConfig DeepCopy()
         {
+            var copy = new RegionConfig();
 
+            foreach (var pt in RoiMask)
+            {
+                copy.RoiMask.Add(new Point(pt.X, pt.Y));
+            }
+
+            foreach (var kvp in Regions)
+            {
+                copy.Regions[kvp.Key] = new Polygon();
+                foreach (var pt in kvp.Value)
+                {
+                    copy.Regions[kvp.Key].Add(new Point(pt.X, pt.Y));
+                }
+            }
+
+            return copy;
         }
 
         public void Save(string path)
         {
             using (var f = System.IO.File.Create(path))
             {
+                this.ConfigVersion = CurrentConfigVersion;
                 DataContractSerializer s = new DataContractSerializer(this.GetType());
                 s.WriteObject(f, this);
             }
@@ -56,12 +68,17 @@ namespace VTC
                     DataContractSerializer s = new DataContractSerializer(typeof(RegionConfig));
                     var pgr = (RegionConfig)s.ReadObject(f);
 
+                    if (pgr.ConfigVersion < CurrentConfigVersion)
+                    {
+                        return null;
+                    }
+
                     return pgr;
                 }
             }
             catch
             {
-                return new RegionConfig();
+                return null;
             }
         }
 

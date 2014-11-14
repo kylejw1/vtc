@@ -21,7 +21,6 @@ using Emgu.CV;
 using Emgu.CV.UI;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
-using Emgu.CV.VideoSurveillance;
 using TreeLib;
 using VTC.ServerReporting.ReportItems;
 
@@ -35,40 +34,19 @@ namespace VTC
       List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
       bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
                                             //using a prerecorded video.
-      
-      //************* Main image variables ***************
-      Image<Bgr, Byte> Frame;               //current Frame from camera
-      Image<Bgr, float> Color_Background;   //Average Background being formed
-      Image<Bgr, float> Color_Difference;   //Difference between the two frames
-      Image<Gray, byte> Movement_Mask;      //Thresholded, b&w movement mask
-      Image<Bgr, float> ROI_image;          //Area occupied by traffic
-
-      //************* Background subtraction parameters ***************
-      double alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"]);                   //stores alpha for thread access
-      int color_threshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"]);    //Threshold below which frame-movement is ignored
-
-      //************* Object detection parameters ***************  
-      int car_radius = Convert.ToInt32(ConfigurationManager.AppSettings["CarRadius"]);              //Radius of car image in pixels
-      double noise_mass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"]);          //Background movement noise
-      double per_car = Convert.ToDouble(ConfigurationManager.AppSettings["PerCar"]);                //White pixels per car in image
-      double per_car_minimum = Convert.ToDouble(ConfigurationManager.AppSettings["PerCarMin"]);     //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
-      int max_object_count = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);      //Maximum number of blobs to detect
-      private RegionConfig _regionConfig;                                                           //Used to select ROI polygons
 
       //************* Multiple hypothesis tracking parameters ***************  
-      private MultipleHypothesisTracker MHT = null;
+      Vista Vista = null;
+       
+       //private MultipleHypothesisTracker MHT = null;
       double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
       double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"]);                           //Process noise matrix multiplier
       double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"]);                           //Measurement noise matrix multiplier
 
-      //************* Rendering parameters ***************  
-      double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
-      bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
-
       bool VIDEO_FILE = false;
 
       //************* Server connection parameters ***************  
-      string intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
+      string intersection_id = "";
       private int FRAME_UPLOAD_INTERVAL_MINUTES =Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
       string ftp_password = ConfigurationManager.AppSettings["FTPpassword"];
       string ftp_username = ConfigurationManager.AppSettings["FTPusername"];
@@ -76,9 +54,7 @@ namespace VTC
        
       public TrafficCounter()
       {
-         Trace.WriteLine("Initializing VTC...");
-         MHT = new MultipleHypothesisTracker();
-
+         intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
          InitializeComponent();
 
          //Initialize the camera selection combobox.
@@ -86,15 +62,12 @@ namespace VTC
 
          //Initialize parameters.
          LoadParameters();
-         Run();
-         Trace.WriteLine("Initializing finished.");
+
+          Run();
       }
 
       public TrafficCounter(string argument)
       {
-          Trace.WriteLine("Initializing VTC with canned video...");
-          MHT = new MultipleHypothesisTracker();
-
           if (argument == "VIDEO_FILE")
               VIDEO_FILE = true;
       
@@ -107,22 +80,7 @@ namespace VTC
           LoadParameters();
 
           Run();
-          Trace.WriteLine("Initializing finished.");
       }
-
-		private RegionConfig RegionConfig
-		{
-			get
-			{
-				return _regionConfig;
-			}
-			set
-			{
-				_regionConfig = value;
-				
-				ROI_image = RegionConfig.RoiMask.GetMask(_cameraCapture.Width, _cameraCapture.Height, new Bgr(Color.White));
-			}
-		}
 
       void Run()
       {
@@ -137,7 +95,10 @@ namespace VTC
                  _cameraCapture = new Capture(ConfigurationManager.AppSettings["VideoFilePath"]);
              }
 
-             RegionConfig = RegionConfig.Load(ConfigurationManager.AppSettings["RegionConfig"]);
+             Vista = new IntersectionVista(_cameraCapture.Width, _cameraCapture.Height);
+
+             var regionConfig = RegionConfig.Load(ConfigurationManager.AppSettings["RegionConfig"]);
+             if (null != regionConfig) Vista.RegionConfiguration = regionConfig;
          }
          catch (Exception e)
          {
@@ -156,6 +117,7 @@ namespace VTC
                   new NetworkCredential(ftp_username, ftp_password),
                   GetCameraFrameBytes
                  ));
+         ServerReporter.INSTANCE.Start();
       }
 
       /// <summary>
@@ -242,11 +204,13 @@ namespace VTC
           ConfigurationManager.RefreshSection("appSettings");
       }
 
+       /// <summary>
+       /// Get the current frame in the form of a PNG byte array
+       /// </summary>
+       /// <returns>Byte array containing the current frame in PNG format</returns>
       private Byte[] GetCameraFrameBytes()
       {
-          // TODO:  Want PNG?
-
-          var bmp = Color_Background.ToBitmap();
+          var bmp = Vista.Color_Background.ToBitmap();
 
           byte[] byteArray;
           using (MemoryStream stream = new MemoryStream())
@@ -267,28 +231,28 @@ namespace VTC
           if (frame == null)
               return;
 
-          Frame = frame;
+          // Send options text box data to the Vista
+          // TODO:  'Vista' class has a per_car_minimum that should be set in the text box if the 
+          // user specifies a value that is too low.
+          // Also, do we want an "apply" button?  I feel like if the frame updates while a user has helf-changed the 
+          // per_car value, we could get some bad values?
+          Vista.noise_mass = Convert.ToInt32(avgNoiseTextbox.Text);
+          Vista.per_car = Convert.ToInt32(avgAreaTextbox.Text);
 
-          if (Color_Background == null) //we need at least one frame to initialize the background
-          {
-              Color_Background = frame.Convert<Bgr, float>();
-          }
-          else
-          {
-              int count = CountObjects();
-              if (count > max_object_count)
-                  count = max_object_count;
+          // Send the new image frame to the vista for processing
+          Vista.Update(frame);
 
-              UpdateBackground(frame);
+          // Update image boxes
+          imageBox1.Image = Vista.GetCurrentStateImage();
+          imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
+          imageBox3.Image = Vista.Movement_Mask;
 
-              Coordinates[] coordinates = FindBlobCenters(frame, count);
+          // Update statistics
+          trackCountBox.Text = Vista.CurrentVehicles.Count().ToString();
+          movementMassBox.Text = Vista.RawMass.ToString();
+          detectionCountBox.Text = Vista.LastDetectionCount.ToString();
 
-              if (null != MHT)
-                MHT.Update(coordinates);
-          }
-
-          renderUI(frame);
-
+          tbVistaStats.Text = Vista.GetStatString();
       }
 
       void PushStateProcess(object sender, EventArgs e)
@@ -309,65 +273,12 @@ namespace VTC
           }
       }
 
-      private Coordinates[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
-      {
-          Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone();
-          Coordinates[] coordinates = new Coordinates[count];
-          for (int detection_count = 0; detection_count < count; detection_count++)
-          {
-              double[] minValues;
-              double[] maxValues;
-              System.Drawing.Point[] minLocations;
-              System.Drawing.Point[] maxLocations;
-              tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
-              int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-              tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
-              frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
-              coordinates[detection_count].x = maxLocation[0];
-              coordinates[detection_count].y = maxLocation[1];
-          }
-          return coordinates;
-      }
-
-      private void UpdateBackground(Image<Bgr, Byte> frame)
-      {
-          Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>();
-          Color_Background.RunningAvg(BackgroundUpdate, alpha);
-      }
-
-      private int CountObjects()
-      {
-          Color_Difference = Color_Background.AbsDiff(Frame.Convert<Bgr, float>());
-          Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image);
-          Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), new Bgr(Color.White));
-          Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
-          Movement_Mask._SmoothGaussian(5, 5, 1, 1);
-          Image<Bgr, double> int_img = Masked_Difference.Integral();
-          int lim_x = Masked_Difference.Width - 1;
-          int lim_y = Masked_Difference.Height - 1;
-          double raw_mass = (int_img[lim_y, lim_x].Blue + int_img[lim_y, lim_x].Red + int_img[lim_y, lim_x].Green);
-          noise_mass = Convert.ToInt32(avgNoiseTextbox.Text);
-          per_car = Convert.ToInt32(avgAreaTextbox.Text);
-          if (per_car <= per_car_minimum)
-              per_car = per_car_minimum;
-
-          int count = Convert.ToInt32((raw_mass - noise_mass) / per_car);
-          if (count < 0)
-              count = 0;
-          if (count > max_object_count)
-              count = max_object_count;
-
-          movementMassBox.Text = raw_mass.ToString();
-          detectionCountBox.Text = count.ToString();
-          return count;
-      }
-
       private void pushState()
       {
           try
           {
 
-              StateEstimate[] state_estimates = MHT.Vehicles.Select(v => v.state_history.Last()).ToArray();
+              StateEstimate[] state_estimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
               Dictionary<string, string> post_values = new Dictionary<string, string>();
               for (int vehicle_count = 0; vehicle_count < state_estimates.Length; vehicle_count++)
               {
@@ -413,6 +324,7 @@ namespace VTC
               myWriter.Write(post_string);
               myWriter.Close();
               objRequest.GetResponse();
+              
           }
           catch (Exception ex)
           {
@@ -432,58 +344,6 @@ namespace VTC
           }
       }
 
-      private void renderUI(Image<Bgr, Byte> frame)
-      {
-          Image<Bgr, float> Overlay = new Image<Bgr, float>(ROI_image.Width, ROI_image.Height, new Bgr(Color.Green));
-          Overlay = Overlay.And(ROI_image);
-          Overlay.Acc(Color_Background);
-
-          if (null == MHT) 
-              return;
-
-          var vehicles = MHT.Vehicles;
-
-          vehicles.ForEach(delegate(Vehicle vehicle)
-          {
-              float x = (float) vehicle.state_history.Last().coordinates.x;
-              float y = (float) vehicle.state_history.Last().coordinates.y;
-
-              var validation_region_deviation = MHT.ValidationRegionDeviation;
-
-              float radius = validation_region_deviation*((float)Math.Sqrt(Math.Pow(vehicle.state_history.Last().cov_x,2) + (float) Math.Pow(vehicle.state_history.Last().cov_y,2)));
-              if (radius < 2.0)
-                  radius = (float) 2.0;
-
-              float vx_render = (float) (velocity_render_multiplier * vehicle.state_history.Last().vx);
-              float vy_render = (float) (velocity_render_multiplier * vehicle.state_history.Last().vy);
-
-              if (render_clean)
-              {
-                  frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
-                  //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1); //Render velocity vector
-              }
-              else 
-              {
-                frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
-                frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
-              }
-              
-          }
-         );
-
-          trackCountBox.Text = vehicles.Count().ToString();
-
-          imageBox1.Image = frame;
-          if (showPolygonsCheckbox.Checked)
-              imageBox2.Image = Overlay;
-          else
-            imageBox2.Image = Color_Background;
-          
-          imageBox3.Image = Movement_Mask;
-          
-      }
-
-
       private void imageBox1_MouseDown(object sender, MouseEventArgs e)
       {
           int offsetX = (int)(e.Location.X / imageBox1.ZoomScale);
@@ -494,11 +354,11 @@ namespace VTC
 
       private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
-          RegionEditor r = new RegionEditor(Color_Background, RegionConfig);
+          RegionEditor r = new RegionEditor(Vista.Color_Background, Vista.RegionConfiguration);
           if (r.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
-              RegionConfig = r.GetRegionConfig();
-              RegionConfig.Save(ConfigurationManager.AppSettings["RegionConfig"]);
+              Vista.RegionConfiguration = r.RegionConfig;
+              Vista.RegionConfiguration.Save(ConfigurationManager.AppSettings["RegionConfig"]);
           }
       }
 

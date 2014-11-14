@@ -43,7 +43,7 @@ namespace VTC
             }
         }
 
-        public List<Vehicle> Vehicles
+        public List<Vehicle> CurrentVehicles
         {
             get
             {
@@ -51,6 +51,17 @@ namespace VTC
                     return null;
 
                 return HypothesisTree.nodeData.vehicles;
+            }
+        }
+
+        public List<Vehicle> DeletedVehicles
+        {
+            get
+            {
+                if (null == HypothesisTree || null == HypothesisTree.nodeData)
+                    return null;
+
+                return HypothesisTree.nodeData.deleted_vehicles;
             }
         }
 

@@ -13,8 +13,8 @@ namespace VTC
 {
     public partial class RegionEditor : Form
     {
-        private Image<Bgr, float> BackgroundImage { get; set; }
-        private RegionConfig RegionConfig;
+        private Image<Bgr, float> BgImage { get; set; }
+        public RegionConfig RegionConfig { get; private set; }
 
         private Dictionary<Button, Polygon> PolygonLookup;
         private Button ActiveButton = null;
@@ -26,43 +26,14 @@ namespace VTC
         {
             InitializeComponent();
 
-            RegionConfig = regionConfig;
-            BackgroundImage = bgImage;
+            RegionConfig = regionConfig.DeepCopy();
+            BgImage = bgImage;
 
-            Preview.Size = BackgroundImage.Size;
-            Preview.Image = BackgroundImage.ToBitmap();
+            Preview.Size = BgImage.Size;
+            Preview.Image = BgImage.ToBitmap();
             panelImage.Controls.Add(Preview);
 
             InitializeToggleButtons();
-        }
-
-        public RegionConfig GetRegionConfig()
-        {
-            var rc = new RegionConfig(tlpPolygonToggles.RowCount - 1);
-
-            for (int i = 0; i < PolygonLookup.Values.Count; i++)
-            {
-                var polygon = PolygonLookup.Values.ElementAt(i);
-
-                if (i == 0)
-                {
-                    rc.RoiMask = polygon;
-                    continue;
-                }
-
-                if (i % 2 == 1)
-                {
-                    rc.ApproachExits.ElementAt((i - 1) / 2).Approach = polygon;
-                }
-                else
-                {
-                    rc.ApproachExits.ElementAt((i - 1) / 2).Exit = polygon;
-                }
-
-
-            }
-
-            return rc;
         }
 
         private void InitializeToggleButtons()
@@ -71,7 +42,9 @@ namespace VTC
 
             if (null == RegionConfig) return;
 
-            tlpPolygonToggles.RowCount = RegionConfig.ApproachExits.Count() + 1;
+            // Set table rows
+            var rows = ((RegionConfig.Regions.Count() + 1) / 2) + 1;
+            tlpPolygonToggles.RowCount = rows;
 
             PolygonLookup = new Dictionary<Button, Polygon>();
 
@@ -80,20 +53,12 @@ namespace VTC
             tlpPolygonToggles.Controls.Add(rb);
             tlpPolygonToggles.SetColumnSpan(rb, 2);
             
-            int i = 0;
-            foreach (var approachExit in RegionConfig.ApproachExits)
+            foreach (var regionKvp in RegionConfig.Regions)
             {
-                rb = BuildEditButton("Approach " + (i+1));
-                PolygonLookup[rb] = RegionConfig.ApproachExits[i].Approach;
+                rb = BuildEditButton(regionKvp.Key);
+                PolygonLookup[rb] = regionKvp.Value;
                 tlpPolygonToggles.Controls.Add(rb);
-                
-                rb = BuildEditButton("Exit " + (i + 1));
-                PolygonLookup[rb] = RegionConfig.ApproachExits[i].Exit;
-                tlpPolygonToggles.Controls.Add(rb);
-
-                i++;
             }
-
         }
 
         private Button BuildEditButton(string text)
@@ -106,9 +71,15 @@ namespace VTC
             tb.TextAlign = ContentAlignment.MiddleCenter;
 
             tb.MouseEnter += tb_MouseEnter;
+            tb.MouseLeave += tb_MouseLeave;
             tb.Click += tb_Clicked;
             
             return tb;
+        }
+
+        void tb_MouseLeave(object sender, EventArgs e)
+        {
+            Preview.Image = BgImage.ToBitmap();
         }
 
         void tb_MouseEnter(object sender, EventArgs e)
@@ -116,9 +87,9 @@ namespace VTC
             var rb = sender as Button;
 
             var polygon = PolygonLookup[rb];
-            var mask = polygon.GetMask(BackgroundImage.Width, BackgroundImage.Height, new Bgr(Color.Blue));
+            var mask = polygon.GetMask(BgImage.Width, BgImage.Height, new Bgr(Color.Blue));
 
-            Preview.Image = BackgroundImage.Add(mask).ToBitmap();
+            Preview.Image = BgImage.Add(mask).ToBitmap();
         }
 
         void tb_Clicked(object sender, EventArgs e)
@@ -145,7 +116,7 @@ namespace VTC
 
                 if (null != activeButton)
                 {
-                    var control = new PolygonBuilderControl(BackgroundImage, PolygonLookup[activeButton]);
+                    var control = new PolygonBuilderControl(BgImage, PolygonLookup[activeButton]);
                     control.Dock = DockStyle.Fill;
                     control.OnCancelClicked += control_OnCancelClicked;
                     control.OnDoneClicked += control_OnDoneClicked;
@@ -167,7 +138,7 @@ namespace VTC
 
                 // Restore the preview image
                 PolygonBuilder = null;
-                Preview.Image = BackgroundImage.ToBitmap();
+                Preview.Image = BgImage.ToBitmap();
                 panelImage.Controls.Clear();
                 panelImage.Controls.Add(Preview);
             }
@@ -175,7 +146,10 @@ namespace VTC
 
         void control_OnDoneClicked(object sender, EventArgs e)
         {
-            PolygonLookup[ActiveButton] = PolygonBuilder.Coordinates;
+            PolygonLookup[ActiveButton].Clear();
+            foreach (var coord in PolygonBuilder.Coordinates) {
+                PolygonLookup[ActiveButton].Add(coord);
+            }
             
             SetEditing(false, null);
         }

@@ -64,13 +64,19 @@
     <ManifestKeyFile>TrafficCounter_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Logo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
@@ -113,8 +119,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\CommonAssemblyInfo.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
+    <Compile Include="Vistas\IntersectionVista.cs" />
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="RegionConfig\Polygon.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
@@ -145,6 +151,7 @@
     <Compile Include="TrafficCounter.Designer.cs">
       <DependentUpon>TrafficCounter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Vistas\Vista.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
@@ -192,10 +199,8 @@
   <ItemGroup>
     <None Include="app.config">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="TrafficCounter_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="config\regionConfig.xml">

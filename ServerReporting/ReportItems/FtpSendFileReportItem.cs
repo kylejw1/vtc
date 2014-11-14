@@ -24,7 +24,6 @@ namespace VTC.ServerReporting.ReportItems
         {
             if (null == GetData) return;
 
-
             var data = GetData();
 
             var wc = new WebClient();
