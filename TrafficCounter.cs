@@ -46,6 +46,7 @@ namespace VTC
       bool VIDEO_FILE = false;
 
       //************* Server connection parameters ***************  
+      string server_url = "";
       string intersection_id = "";
       private int FRAME_UPLOAD_INTERVAL_MINUTES =Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
       string ftp_password = ConfigurationManager.AppSettings["FTPpassword"];
@@ -109,7 +110,7 @@ namespace VTC
          Application.Idle += ProcessFrame;
 
           //TODO: Move server credentials to configuration file
-         String IntersectionImagePath = "ftp://www.traffic-camera.com/intersection_" + intersection_id + ".png";
+         String IntersectionImagePath = "ftp://"+server_url+"/intersection_" + intersection_id + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  FRAME_UPLOAD_INTERVAL_MINUTES,
@@ -186,6 +187,8 @@ namespace VTC
 
           intersectionIDTextBox.Text = intersection_id.ToString();
           pushStateTimer.Interval = state_upload_interval_ms;
+
+          server_url = config.AppSettings.Settings["server_url"].Value;
       }
 
       /// <summary>
@@ -308,7 +311,7 @@ namespace VTC
               post_string = post_string.TrimEnd('&');
 
               //Upload state to server
-              String post_url = "http://www.traffic-camera.com/state_samples";
+              String post_url = "http://"+server_url+"/state_samples";
 
               HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
               objRequest.KeepAlive = true;
@@ -331,7 +334,7 @@ namespace VTC
             #if(DEBUG)
             {
                 Console.WriteLine(ex.Message);
-                throw (ex);
+                //throw (ex);
             }
             #else
             {

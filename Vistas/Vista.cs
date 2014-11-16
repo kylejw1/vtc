@@ -43,6 +43,9 @@ namespace VTC
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
 
+        //************* Event detection parameters ***************
+        private Dictionary<RegionTransition, string> Events;          //Map from region transitions to event types
+
         //************* Rendering parameters ***************  
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
         bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
@@ -70,6 +73,23 @@ namespace VTC
             }
         }
 
+        private EventConfig _eventConfiguration = null;
+        public EventConfig EventConfiguration
+        {
+            get
+            {
+                return _eventConfiguration;
+            }
+            set
+            {
+                if (_eventConfiguration == value) return;
+
+                _eventConfiguration = value;
+
+                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, new Bgr(Color.White));
+            }
+        }
+
         public List<Vehicle> CurrentVehicles
         {
             get
@@ -86,6 +106,7 @@ namespace VTC
             Height = height;
             MHT = new MultipleHypothesisTracker();
             RegionConfiguration = new RegionConfig();
+            EventConfiguration = new EventConfig();
 
             LastDetectionCount = 0;
             RawMass = 0;

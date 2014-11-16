@@ -45,10 +45,6 @@
     <Reference Include="Emgu.Util">
       <HintPath>..\..\..\bin\Emgu.Util.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.Microsoft.Office.Core">
-      <HintPath>..\obj\Debug\Interop.Microsoft.Office.Core.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
