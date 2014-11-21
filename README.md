@@ -27,8 +27,7 @@ Make sure you have NuGet extension (applicable for VS2010).
 #Running app
 
 ##Using existing video for debugging
-* In app.config update VideoFilePath key with pathname of local video.
-* Pass VIDEO_FILE as command line argument.
+Pass pathname of local video as command line argument.
 
 ##First run
 > You need to go through the "Configure Regions" dialog the first time you use the application, or whenever it's recompiled, or whenever the intersection is switched.
