@@ -334,14 +334,25 @@ namespace TreeLib
             F[3, 3] = 1;
 
             Q = new DenseMatrix(4, 4); //Process covariance
-            Q[0, 0] = (dt * dt * dt / 3)*q;
-            Q[0, 1] = (dt * dt / 2)*q;
-            Q[1, 0] = (dt * dt / 2)*q;
-            Q[1, 1] = (dt)*q;
-            Q[2, 2] = (dt * dt * dt / 3)*q;
-            Q[2, 3] = (dt * dt / 2)*q;
-            Q[3, 2] = (dt * dt / 2)*q;
-            Q[3, 3] = (dt) * q;
+            Q[0, 0] = (dt * dt * dt *dt / 4) * q;
+            Q[0, 1] = (dt * dt * dt / 3) * q;
+            Q[1, 0] = (dt * dt * dt / 3) * q;
+            Q[1, 1] = (dt * dt / 2) * q;
+            Q[2, 2] = (dt * dt * dt * dt/ 4) * q;
+            Q[2, 3] = (dt * dt * dt / 3) * q;
+            Q[3, 2] = (dt * dt * dt / 3) * q;
+            Q[3, 3] = (dt * dt / 2) * q;
+
+            //Previously used covariances (probably incorrect after reviewing a Wikipedia example of Kalman filter implementation)
+            //Q[0, 0] = (dt * dt * dt / 3)*q;
+            //Q[0, 1] = (dt * dt / 2)*q;
+            //Q[1, 0] = (dt * dt / 2)*q;
+            //Q[1, 1] = (dt)*q;
+            //Q[2, 2] = (dt * dt * dt / 3)*q;
+            //Q[2, 3] = (dt * dt / 2)*q;
+            //Q[3, 2] = (dt * dt / 2)*q;
+            //Q[3, 3] = (dt) * q;
+                        
 
             R = new DenseMatrix(2, 2); //Measurement covariance
             R[0, 0] = r;
@@ -746,7 +757,7 @@ namespace TreeLib
             z_est[2, 0] = this.coordinates.y;
             z_est[3, 0] = this.vy;
 
-            DenseMatrix z_meas = new DenseMatrix(2, 1); //4-Row state vector: x, vx, y, vy
+            DenseMatrix z_meas = new DenseMatrix(2, 1); //2-Row state vector: x, y
             z_meas[0, 0] = measurement.x;
             z_meas[1, 0] = measurement.y;
 
