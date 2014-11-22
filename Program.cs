@@ -3,11 +3,7 @@
 //----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Emgu.CV;
 
 namespace VTC
 {
@@ -21,10 +17,11 @@ namespace VTC
       {
          Application.EnableVisualStyles();
          Application.SetCompatibleTextRenderingDefault(false);
-         if (args.Length == 1)
-          Application.Run(new TrafficCounter("VIDEO_FILE"));
-         else
-         Application.Run(new TrafficCounter());
+
+         string filename = null;
+         if (args.Length == 1) filename = args[0];
+
+         Application.Run(new TrafficCounter(filename));
       }
    }
 }

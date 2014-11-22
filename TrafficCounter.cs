@@ -16,7 +16,6 @@ using System.Linq;
 using System.Threading;
 using System.Diagnostics;
 using DirectShowLib;
-
 using Emgu.CV;
 using Emgu.CV.UI;
 using Emgu.CV.CvEnum;
@@ -29,6 +28,7 @@ namespace VTC
    public partial class TrafficCounter : Form
    {
       private static MCvFont _font = new MCvFont(Emgu.CV.CvEnum.FONT.CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0);
+      private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
       List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
@@ -43,8 +43,6 @@ namespace VTC
       double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"]);                           //Process noise matrix multiplier
       double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"]);                           //Measurement noise matrix multiplier
 
-      bool VIDEO_FILE = false;
-
       //************* Server connection parameters ***************  
       string server_url = "";
       string intersection_id = "";
@@ -53,24 +51,15 @@ namespace VTC
       string ftp_username = ConfigurationManager.AppSettings["FTPusername"];
       private int state_upload_interval_ms = Convert.ToInt32(ConfigurationManager.AppSettings["state_upload_interval_ms"]);
        
-      public TrafficCounter()
+      /// <summary>
+      /// Constructor.
+      /// </summary>
+      /// <param name="filename">Local file with video.</param>
+      public TrafficCounter(string filename = null)
       {
-         intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
-         InitializeComponent();
+          _filename = filename;
 
-         //Initialize the camera selection combobox.
-         InitializeCameraSelection();
-
-         //Initialize parameters.
-         LoadParameters();
-
-          Run();
-      }
-
-      public TrafficCounter(string argument)
-      {
-          if (argument == "VIDEO_FILE")
-              VIDEO_FILE = true;
+          intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
       
           InitializeComponent();
 
@@ -87,13 +76,13 @@ namespace VTC
       {
          try
          {
-             if(VIDEO_FILE==false)
+             if (UseLocalVideo(_filename))
              {
-                _cameraCapture = new Capture(0);
+                 _cameraCapture = new Capture(_filename);
              }
-             else 
+             else
              {
-                 _cameraCapture = new Capture(ConfigurationManager.AppSettings["VideoFilePath"]);
+                 _cameraCapture = new Capture(0);
              }
 
              Vista = new IntersectionVista(_cameraCapture.Width, _cameraCapture.Height);
@@ -120,6 +109,31 @@ namespace VTC
                  ));
          ServerReporter.INSTANCE.Start();
       }
+
+       /// <summary>
+       /// Write log message.
+       /// </summary>
+       /// <param name="format">Message format.</param>
+       /// <param name="args">Format argument.</param>
+       private static void Log(string format, params object[] args)
+       {
+           Console.WriteLine(format, args);
+       }
+
+       /// <summary>
+       /// Check if video file exists.
+       /// </summary>
+       /// <param name="filename">Pathname to check.</param>
+       /// <returns><c>true</c> for existing file.</returns>
+       private static bool UseLocalVideo(string filename)
+       {
+           if (string.IsNullOrWhiteSpace(filename)) return false;
+           if (File.Exists(filename)) return true;
+
+           Log("Video file is not found ('{0}').", filename);
+
+           return false;
+       }
 
       /// <summary>
       /// Method for initializing the camera selection combobox.
