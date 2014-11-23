@@ -153,22 +153,30 @@ namespace VTC
 
         private void UpdateBackground(Image<Bgr, Byte> frame)
         {
-            Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>();
-            Color_Background.RunningAvg(BackgroundUpdate, alpha);
+            using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
+            {
+                Color_Background.RunningAvg(BackgroundUpdate, alpha);
+            }
         }
 
         private int CountObjects()
         {
             Color_Difference = Color_Background.AbsDiff(Frame.Convert<Bgr, float>());
-            Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image);
-            Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), new Bgr(Color.White));
-            Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
-            Movement_Mask._SmoothGaussian(5, 5, 1, 1);
-            Image<Bgr, double> int_img = Masked_Difference.Integral();
-            int lim_x = Masked_Difference.Width - 1;
-            int lim_y = Masked_Difference.Height - 1;
-            double raw_mass = (int_img[lim_y, lim_x].Blue + int_img[lim_y, lim_x].Red + int_img[lim_y, lim_x].Green);
-            
+
+            double raw_mass;
+            using (Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image))
+            {
+                Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), new Bgr(Color.White));
+                Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
+                Movement_Mask._SmoothGaussian(5, 5, 1, 1);
+                using (Image<Bgr, double> int_img = Masked_Difference.Integral())
+                {
+                    int lim_x = Masked_Difference.Width - 1;
+                    int lim_y = Masked_Difference.Height - 1;
+                    raw_mass = (int_img[lim_y, lim_x].Blue + int_img[lim_y, lim_x].Red + int_img[lim_y, lim_x].Green);
+                }
+            }
+
             if (per_car <= per_car_minimum)
                 per_car = per_car_minimum;
 
@@ -183,20 +191,23 @@ namespace VTC
 
         private Coordinates[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
         {
-            Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone();
-            Coordinates[] coordinates = new Coordinates[count];
-            for (int detection_count = 0; detection_count < count; detection_count++)
+            Coordinates[] coordinates;
+            using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
             {
-                double[] minValues;
-                double[] maxValues;
-                System.Drawing.Point[] minLocations;
-                System.Drawing.Point[] maxLocations;
-                tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
-                int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-                tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
-                frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                coordinates[detection_count].x = maxLocation[0];
-                coordinates[detection_count].y = maxLocation[1];
+                coordinates = new Coordinates[count];
+                for (int detection_count = 0; detection_count < count; detection_count++)
+                {
+                    double[] minValues;
+                    double[] maxValues;
+                    System.Drawing.Point[] minLocations;
+                    System.Drawing.Point[] maxLocations;
+                    tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
+                    int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
+                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
+                    frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                    coordinates[detection_count].x = maxLocation[0];
+                    coordinates[detection_count].y = maxLocation[1];
+                }
             }
             return coordinates;
         }
