@@ -50,7 +50,7 @@ namespace VTC
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
         bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
 
-        private readonly MultipleHypothesisTracker MHT;
+        private readonly MultipleHypothesisTracker MHT = new MultipleHypothesisTracker();
 
         private int TotalDeleted = 0;
 
@@ -99,7 +99,6 @@ namespace VTC
         {
             Width = width;
             Height = height;
-            MHT = new MultipleHypothesisTracker();
             RegionConfiguration = new RegionConfig();
             EventConfiguration = new EventConfig();
 
