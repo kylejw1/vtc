@@ -18,6 +18,17 @@ namespace VTC
     /// </summary>
     public abstract class Vista
     {
+        #region Static colors
+
+        private static readonly Bgr _whiteColor = new Bgr(Color.White);
+        private static readonly Gray _tempMovementGray = new Gray(0);
+        private static readonly Bgr _blobCenterColor = new Bgr(255.0, 255.0, 255.0);
+        private static readonly Bgr _greenColor = new Bgr(Color.Green);
+        private static readonly Bgr _stateColorGreen = new Bgr(0.0, 255.0, 0.0);
+        private static readonly Bgr _stateColorRed = new Bgr(0.0, 0.0, 255.0);
+
+        #endregion
+        
         //************* Abstract methods ****************
         protected abstract void UpdateChildClassStats(List<Vehicle> deleted);
 
@@ -67,13 +78,14 @@ namespace VTC
 
                 _regionConfiguration = value;
 
-                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, new Bgr(Color.White));
+                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, _whiteColor);
 
                 ResetStats();
             }
         }
 
         private EventConfig _eventConfiguration = null;
+
         public EventConfig EventConfiguration
         {
             get
@@ -86,7 +98,7 @@ namespace VTC
 
                 _eventConfiguration = value;
 
-                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, new Bgr(Color.White));
+                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, _whiteColor);
             }
         }
 
@@ -166,7 +178,7 @@ namespace VTC
             double raw_mass;
             using (Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image))
             {
-                Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), new Bgr(Color.White));
+                Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), _whiteColor);
                 Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
                 Movement_Mask._SmoothGaussian(5, 5, 1, 1);
                 using (Image<Bgr, double> int_img = Masked_Difference.Integral())
@@ -203,8 +215,8 @@ namespace VTC
                     System.Drawing.Point[] maxLocations;
                     tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
                     int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
-                    frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), _tempMovementGray, 0);
+                    frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), _blobCenterColor, 1);
                     coordinates[detection_count].x = maxLocation[0];
                     coordinates[detection_count].y = maxLocation[1];
                 }
@@ -216,7 +228,7 @@ namespace VTC
         {
             if (drawMaskPolygons)
             {
-                Image<Bgr, float> Overlay = new Image<Bgr, float>(Width, Height, new Bgr(Color.Green));
+                Image<Bgr, float> Overlay = new Image<Bgr, float>(Width, Height, _greenColor);
                 Overlay = Overlay.And(ROI_image);
                 Overlay.Acc(Color_Background);
 
@@ -237,28 +249,30 @@ namespace VTC
 
             vehicles.ForEach(delegate(Vehicle vehicle)
             {
-                float x = (float)vehicle.state_history.Last().coordinates.x;
-                float y = (float)vehicle.state_history.Last().coordinates.y;
+                var lastState = vehicle.state_history.Last();
+
+                float x = (float)lastState.coordinates.x;
+                float y = (float)lastState.coordinates.y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
 
-                float radius = validation_region_deviation * ((float)Math.Sqrt(Math.Pow(vehicle.state_history.Last().cov_x, 2) + (float)Math.Pow(vehicle.state_history.Last().cov_y, 2)));
+                float radius = validation_region_deviation * ((float)Math.Sqrt(Math.Pow(lastState.cov_x, 2) + (float)Math.Pow(lastState.cov_y, 2)));
                 if (radius < 2.0)
                     radius = (float)2.0;
 
-                float vx_render = (float)(velocity_render_multiplier * vehicle.state_history.Last().vx);
-                float vy_render = (float)(velocity_render_multiplier * vehicle.state_history.Last().vy);
+                float vx_render = (float)(velocity_render_multiplier * lastState.vx);
+                float vy_render = (float)(velocity_render_multiplier * lastState.vy);
 
 
                 if (render_clean)
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
+                    frame.Draw(new CircleF(new PointF(x, y), 10), _stateColorGreen, 2);
                     //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1); //Render velocity vector
                 }
                 else
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), radius), new Bgr(0.0, 255.0, 0.0), 1);
-                    frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1);
+                    frame.Draw(new CircleF(new PointF(x, y), radius), _stateColorGreen, 1);
+                    frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), _stateColorRed, 1);
                 }
 
             }
