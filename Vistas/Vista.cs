@@ -50,7 +50,7 @@ namespace VTC
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
         bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
 
-        private MultipleHypothesisTracker MHT;
+        private readonly MultipleHypothesisTracker MHT;
 
         private int TotalDeleted = 0;
 
@@ -92,12 +92,7 @@ namespace VTC
 
         public List<Vehicle> CurrentVehicles
         {
-            get
-            {
-                if (null == MHT) return null;
-
-                return MHT.CurrentVehicles;
-            }
+            get { return MHT.CurrentVehicles; }
         }
 
         protected Vista(int width, int height)
@@ -141,17 +136,13 @@ namespace VTC
                 UpdateBackground(newFrame);
 
                 Coordinates[] coordinates = FindBlobCenters(newFrame, count);
+                MHT.Update(coordinates);
 
-                if (null != MHT)
-                {
-                    MHT.Update(coordinates);
+                // First update base class stats
+                UpdateVistaStats(MHT.DeletedVehicles);
 
-                    // First update base class stats
-                    UpdateVistaStats(MHT.DeletedVehicles);
-
-                    // Now update child class specific stats
-                    UpdateChildClassStats(MHT.DeletedVehicles);
-                }
+                // Now update child class specific stats
+                UpdateChildClassStats(MHT.DeletedVehicles);
             }
         }
 
@@ -230,9 +221,6 @@ namespace VTC
 
         public Image<Bgr, byte> GetCurrentStateImage()
         {
-            if (null == MHT)
-                return null;
-
             var frame = Frame.Clone();
 
             var vehicles = MHT.CurrentVehicles;
