@@ -1,12 +1,11 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using TreeLib;
+using VTC.Settings;
 
 namespace VTC
 {
@@ -18,6 +17,8 @@ namespace VTC
     /// </summary>
     public abstract class Vista
     {
+        protected ISettings Settings { get; private set; }
+
         #region Static colors
 
         private static readonly Bgr _whiteColor = new Bgr(Color.White);
@@ -26,6 +27,7 @@ namespace VTC
         private static readonly Bgr _greenColor = new Bgr(Color.Green);
         private static readonly Bgr _stateColorGreen = new Bgr(0.0, 255.0, 0.0);
         private static readonly Bgr _stateColorRed = new Bgr(0.0, 0.0, 255.0);
+        private readonly Bgr _thresholdColor;
 
         #endregion
         
@@ -36,23 +38,17 @@ namespace VTC
         private Image<Bgr, Byte> Frame;               //current Frame from camera
         private Image<Bgr, float> Color_Difference;   //Difference between the two frames
         private Image<Bgr, float> ROI_image;          //Area occupied by traffic
-        private int Width;
-        private int Height;
+        private readonly int Width;
+        private readonly int Height;
         public Image<Gray, byte> Movement_Mask { get; private set; }      //Thresholded, b&w movement mask
         public Image<Bgr, float> Color_Background { get; private set; }   //Average Background being formed
 
-        //************* Background subtraction parameters ***************
-        private double alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"]);                   //stores alpha for thread access
-        private int color_threshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"]);    //Threshold below which frame-movement is ignored
-
         //************* Object detection parameters ***************  
-        private int car_radius = Convert.ToInt32(ConfigurationManager.AppSettings["CarRadius"]);              //Radius of car image in pixels
-        private double per_car_minimum = Convert.ToDouble(ConfigurationManager.AppSettings["PerCarMin"]);     //Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox
-        private int max_object_count = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);      //Maximum number of blobs to detect
-        public double per_car = Convert.ToDouble(ConfigurationManager.AppSettings["PerCar"]);                //White pixels per car in image
-        public double noise_mass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"]);          //Background movement noise
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
+
+        public double PerCar { get; set; }
+        public double NoiseMass { get; set; }
 
         //************* Event detection parameters ***************
         private Dictionary<RegionTransition, string> Events;          //Map from region transitions to event types
@@ -61,7 +57,7 @@ namespace VTC
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
         bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
 
-        private readonly MultipleHypothesisTracker MHT = new MultipleHypothesisTracker();
+        private readonly MultipleHypothesisTracker MHT;
 
         private int TotalDeleted = 0;
 
@@ -107,8 +103,9 @@ namespace VTC
             get { return MHT.CurrentVehicles; }
         }
 
-        protected Vista(int width, int height)
+        protected Vista(ISettings settings, int width, int height)
         {
+            Settings = settings;
             Width = width;
             Height = height;
             RegionConfiguration = new RegionConfig();
@@ -116,6 +113,15 @@ namespace VTC
 
             LastDetectionCount = 0;
             RawMass = 0;
+
+            _thresholdColor = new Bgr(Settings.ColorThreshold, Settings.ColorThreshold, Settings.ColorThreshold);
+            MHT = new MultipleHypothesisTracker(settings);
+
+            PerCar = Settings.PerCar;
+            if (PerCar <= Settings.PerCarMinimum)
+                PerCar = Settings.PerCarMinimum;
+
+            NoiseMass = Settings.NoiseMass;
         }
 
         public virtual void ResetStats()
@@ -141,8 +147,8 @@ namespace VTC
             {
                 int count = CountObjects();
 
-                if (count > max_object_count)
-                    count = max_object_count;
+                if (count > Settings.MaxObjectCount)
+                    count = Settings.MaxObjectCount;
 
                 UpdateBackground(newFrame);
 
@@ -167,7 +173,7 @@ namespace VTC
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
-                Color_Background.RunningAvg(BackgroundUpdate, alpha);
+                Color_Background.RunningAvg(BackgroundUpdate, Settings.Alpha);
             }
         }
 
@@ -178,7 +184,7 @@ namespace VTC
             double raw_mass;
             using (Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image))
             {
-                Masked_Difference._ThresholdBinary(new Bgr(color_threshold, color_threshold, color_threshold), _whiteColor);
+                Masked_Difference._ThresholdBinary(_thresholdColor, _whiteColor);
                 Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
                 Movement_Mask._SmoothGaussian(5, 5, 1, 1);
                 using (Image<Bgr, double> int_img = Masked_Difference.Integral())
@@ -189,14 +195,11 @@ namespace VTC
                 }
             }
 
-            if (per_car <= per_car_minimum)
-                per_car = per_car_minimum;
-
-            int count = Convert.ToInt32((raw_mass - noise_mass) / per_car);
+            int count = Convert.ToInt32((raw_mass - NoiseMass) / PerCar);
             if (count < 0)
                 count = 0;
-            if (count > max_object_count)
-                count = max_object_count;
+            if (count > Settings.MaxObjectCount)
+                count = Settings.MaxObjectCount;
 
             return count;
         }
@@ -211,11 +214,11 @@ namespace VTC
                 {
                     double[] minValues;
                     double[] maxValues;
-                    System.Drawing.Point[] minLocations;
-                    System.Drawing.Point[] maxLocations;
+                    Point[] minLocations;
+                    Point[] maxLocations;
                     tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
                     int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), _tempMovementGray, 0);
+                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), Settings.CarRadius), _tempMovementGray, 0);
                     frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), _blobCenterColor, 1);
                     coordinates[detection_count].x = maxLocation[0];
                     coordinates[detection_count].y = maxLocation[1];
