@@ -121,6 +121,9 @@
   <ItemGroup>
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
+    <Compile Include="Settings\AppSettings.cs" />
+    <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
+    <Compile Include="Settings\ISettings.cs" />
     <Compile Include="Vistas\IntersectionVista.cs" />
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="RegionConfig\Polygon.cs" />
@@ -197,7 +200,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="config\regionConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

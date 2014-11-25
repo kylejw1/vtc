@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Web;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Web;
 using TreeLib;
-
+using VTC.Settings;
 
 namespace VTC
 {
@@ -16,13 +15,11 @@ namespace VTC
     {
         private static readonly string ApproachText = "Approach";
         private static readonly string ExitText = "Exit";
-        private string server_url;
-        private string intersection_id;
 
         private Dictionary<string, long> TurnStats = new Dictionary<string, long>();
 
-        public IntersectionVista(int Width, int Height)
-            : base(Width, Height)
+        public IntersectionVista(ISettings settings, int Width, int Height)
+            : base(settings, Width, Height)
         {
             for (int i = 1; i <= 4; i++) {
                 this.RegionConfiguration.Regions.Add(ApproachName(i), new Polygon());
@@ -45,8 +42,6 @@ namespace VTC
             this.EventConfiguration.Events.Add(new RegionTransition(2, 1), "right");
             this.EventConfiguration.Events.Add(new RegionTransition(3, 2), "right");
             this.EventConfiguration.Events.Add(new RegionTransition(4, 3), "right");
-
-            LoadParameters();
         }
 
         private string ApproachName(int number)
@@ -112,7 +107,7 @@ namespace VTC
             try
             {
                 Dictionary<string, string> post_values = new Dictionary<string, string>();
-                post_values.Add("event_report[intersection_id]", intersection_id);
+                post_values.Add("event_report[intersection_id]", Settings.IntersectionID);
                 post_values.Add("event_report[event_type]", "Turn");
                 post_values.Add("event_report[content]", content);
 
@@ -124,7 +119,7 @@ namespace VTC
                 post_string = post_string.TrimEnd('&');
 
                 //Upload state to server
-                String post_url = "http://" + server_url + "/event_reports";
+                String post_url = "http://" + Settings.ServerUrl + "/event_reports";
 
                 HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
                 objRequest.KeepAlive = true;
@@ -180,13 +175,5 @@ namespace VTC
 
             return sb.ToString();
         }
-
-        private void LoadParameters()
-      {
-          Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-          server_url = config.AppSettings.Settings["server_url"].Value;
-          intersection_id = config.AppSettings.Settings["IntersectionId"].Value;
-      }
     }
 }
