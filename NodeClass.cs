@@ -263,13 +263,15 @@ namespace TreeLib
             return newVehicleStateEstimates;
         }
 
-        public void AddVehicle(int x, int y, int vx, int vy)
+        public void AddVehicle(int x, int y, int vx, int vy, int red, int green, int blue)
         {
             StateEstimate initial_state = new StateEstimate();
-            Coordinates vehicleLocation = new Coordinates();
-            vehicleLocation.x = x;
-            vehicleLocation.y = y;
-            initial_state.coordinates = vehicleLocation;
+            initial_state.x = x;
+            initial_state.y = y;
+            initial_state.red = red;
+            initial_state.green = green;
+            initial_state.blue = blue;
+
             initial_state.vx = vx;
             initial_state.vy = vy;
             initial_state.is_pedestrian = false;
@@ -278,13 +280,15 @@ namespace TreeLib
             new_vehicles.Add(newVehicle);
         }
 
-        public void AddPedestrian(int x, int y,int vx, int vy)
+        public void AddPedestrian(int x, int y, int vx, int vy, int red, int green, int blue)
         {
             StateEstimate initial_state = new StateEstimate();
-            Coordinates vehicleLocation = new Coordinates();
-            vehicleLocation.x = x;
-            vehicleLocation.y = y;
-            initial_state.coordinates = vehicleLocation;
+            initial_state.x = x;
+            initial_state.y = y;
+            initial_state.red = red;
+            initial_state.green = green;
+            initial_state.blue = blue;
+
             initial_state.vx = vx;
             initial_state.vy = vy;
             initial_state.is_pedestrian = true;
@@ -310,53 +314,62 @@ namespace TreeLib
         public double compensation_gain = 30; //Gain applied to process noise when a measurement is missed
 
         public double q = 10.0; // Process noise matrix multiplier
-        public double r = 10.0; // Measurement noise matrix multiplier
+        public double r_position = 10.0; // Position easurement noise matrix multiplier
+        // TODO: What value for r_colour?
+        public double r_colour = 50.0; // Colour measurement noise matrix multiplier
 
         public double dt = 0.033; //Timestep between frames
         //public double dt = 1.00; //Timestep between frames
 
         public HypothesisTree(StateHypothesis value) : base(value)
         {
-            H = new DenseMatrix(2, 4); // Measurement equation: only x and y are directly observed
+            H = new DenseMatrix(5, 7); // Measurement equation: x,y,R,G,B are observed (not velocities)
             H[0, 0] = 1;
             H[1, 2] = 1;
+            H[2, 4] = 1;
+            H[3, 5] = 1;
+            H[4, 6] = 1;
 
             //  x_new  = x_old + dt*vx;
             //  vy_new = vy_old
             //  y_new  = y_old + dt*vy
             //  vx_new = vx_old
-            F = new DenseMatrix(4, 4); //Motion equation
-            F[0, 0] = 1;
+            //  R_new = R_old
+            //  G_new = G_old
+            //  B_new = B_old
+            F = new DenseMatrix(7, 7); //Motion equation
+            F[0, 0] = 1;    
             F[0, 1] = dt;
             F[1, 1] = 1;
             F[2, 2] = 1;
             F[2, 3] = dt;
             F[3, 3] = 1;
+            F[4, 4] = 1;
+            F[5, 5] = 1;
+            F[6, 6] = 1;
 
-            Q = new DenseMatrix(4, 4); //Process covariance
-            Q[0, 0] = (dt * dt * dt *dt / 4) * q;
+            Q = new DenseMatrix(7, 7); //Process covariance
+            Q[0, 0] = (dt * dt * dt * dt / 4) * q;
             Q[0, 1] = (dt * dt * dt / 3) * q;
             Q[1, 0] = (dt * dt * dt / 3) * q;
             Q[1, 1] = (dt * dt / 2) * q;
-            Q[2, 2] = (dt * dt * dt * dt/ 4) * q;
+            Q[2, 2] = (dt * dt * dt * dt / 4) * q;
             Q[2, 3] = (dt * dt * dt / 3) * q;
             Q[3, 2] = (dt * dt * dt / 3) * q;
             Q[3, 3] = (dt * dt / 2) * q;
+            //Q[4, 4] = 0; //Interpreted to mean that the actual color is not changing at all
+            //Q[5, 5] = 0;
+            //Q[6, 6] = 0;
+            Q[4, 4] = 20.0; //Interpreted to mean that the actual color is not changing at all
+            Q[5, 5] = 20.0;
+            Q[6, 6] = 20.0;
 
-            //Previously used covariances (probably incorrect after reviewing a Wikipedia example of Kalman filter implementation)
-            //Q[0, 0] = (dt * dt * dt / 3)*q;
-            //Q[0, 1] = (dt * dt / 2)*q;
-            //Q[1, 0] = (dt * dt / 2)*q;
-            //Q[1, 1] = (dt)*q;
-            //Q[2, 2] = (dt * dt * dt / 3)*q;
-            //Q[2, 3] = (dt * dt / 2)*q;
-            //Q[3, 2] = (dt * dt / 2)*q;
-            //Q[3, 3] = (dt) * q;
-                        
-
-            R = new DenseMatrix(2, 2); //Measurement covariance
-            R[0, 0] = r;
-            R[1, 1] = r;
+            R = new DenseMatrix(5, 5); //Measurement covariance
+            R[0, 0] = r_position;
+            R[1, 1] = r_position;
+            R[2, 2] = r_colour;
+            R[3, 3] = r_colour;
+            R[4, 4] = r_colour;
 
         }
 
@@ -686,7 +699,9 @@ namespace TreeLib
     /// </summary>
     public struct StateEstimate
     {
-        public Coordinates coordinates;
+        //public Measurements measurements;
+        public double x;
+        public double y;
         public double cov_x;          //Location covariances
         public double cov_y;
 
@@ -694,6 +709,14 @@ namespace TreeLib
         public double vy;
         public double cov_vx;         //Velocity covariances
         public double cov_vy;
+
+        public double red;
+        public double green;
+        public double blue;
+
+        public double cov_red;
+        public double cov_green;
+        public double cov_blue;
 
         public double path_length;    //Total path length travelled so far
         public int turn;              //enum Turn to indicate turn decision (left, right or straight)
@@ -712,17 +735,23 @@ namespace TreeLib
             updatedState.missed_detections = this.missed_detections + 1;
             updatedState.path_length = this.path_length + Math.Sqrt(Math.Pow((timestep * this.vx), 2) + Math.Pow((timestep * this.vy), 2));
 
-            DenseMatrix z_est = new DenseMatrix(4, 1); //4-Row state vector: x, vx, y, vy
-            z_est[0, 0] = this.coordinates.x;
+            DenseMatrix z_est = new DenseMatrix(7, 1); //4-Row state vector: x, vx, y, vy
+            z_est[0, 0] = this.x;
             z_est[1, 0] = this.vx;
-            z_est[2, 0] = this.coordinates.y;
+            z_est[2, 0] = this.y;
             z_est[3, 0] = this.vy;
+            z_est[4, 0] = this.red;
+            z_est[5, 0] = this.green;
+            z_est[6, 0] = this.blue;
 
-            DenseMatrix P_bar = new DenseMatrix(4, 4);
+            DenseMatrix P_bar = new DenseMatrix(7, 7);
             P_bar[0, 0] = this.cov_x;
             P_bar[1, 1] = this.cov_vx;
             P_bar[2, 2] = this.cov_y;
             P_bar[3, 3] = this.cov_vy;
+            P_bar[4, 4] = this.cov_red;
+            P_bar[5, 5] = this.cov_green;
+            P_bar[6, 6] = this.cov_blue;
 
             //DenseMatrix B = H * P_bar * H;
             DenseMatrix z_next = F * z_est;
@@ -730,20 +759,26 @@ namespace TreeLib
             DenseMatrix P_next = (F * P_bar * F_transpose) + compensation_gain * Q;
 
             //Move values from matrix form into object properties
+            updatedState.x = z_next[0, 0];
+            updatedState.y = z_next[2, 0];
+            updatedState.vx = z_next[1, 0];
+            updatedState.vy = z_next[3, 0];
+            updatedState.red = z_next[4, 0];
+            updatedState.green = z_next[5, 0];
+            updatedState.blue = z_next[6, 0];
+
             updatedState.cov_x  = P_next[0, 0];
             updatedState.cov_vx = P_next[1, 1];
             updatedState.cov_y  = P_next[2, 2];
             updatedState.cov_vy = P_next[3, 3];
-
-            updatedState.coordinates.x = z_next[0, 0];
-            updatedState.coordinates.y = z_next[2, 0];
-            updatedState.vx = z_next[1, 0];
-            updatedState.vy = z_next[3, 0];
+            updatedState.cov_red = P_next[4, 4];
+            updatedState.cov_green = P_next[5, 5];
+            updatedState.cov_blue = P_next[6, 6];
 
             return updatedState;
         }
 
-        public StateEstimate PropagateState(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, Coordinates measurement)
+        public StateEstimate PropagateState(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, Measurements measurements)
         {
             StateEstimate updatedState = new StateEstimate();
             //updatedState.coordinates.x = this.coordinates.x + timestep * this.vx;
@@ -751,22 +786,30 @@ namespace TreeLib
             updatedState.turn = this.turn;
             updatedState.path_length = this.path_length + Math.Sqrt(Math.Pow((timestep * this.vx), 2) + Math.Pow((timestep * this.vy), 2));
 
-            DenseMatrix z_est = new DenseMatrix(4, 1); //4-Row state vector: x, vx, y, vy
-            z_est[0, 0] = this.coordinates.x;
+            DenseMatrix z_est = new DenseMatrix(7, 1); //7-Row state vector: x, vx, y, vy, r, g, b
+            z_est[0, 0] = this.x;
             z_est[1, 0] = this.vx;
-            z_est[2, 0] = this.coordinates.y;
+            z_est[2, 0] = this.y;
             z_est[3, 0] = this.vy;
+            z_est[4, 0] = this.red;
+            z_est[5, 0] = this.green;
+            z_est[6, 0] = this.blue;
 
-            DenseMatrix z_meas = new DenseMatrix(2, 1); //2-Row state vector: x, y
-            z_meas[0, 0] = measurement.x;
-            z_meas[1, 0] = measurement.y;
+            DenseMatrix z_meas = new DenseMatrix(5, 1); //5-Row measurement vector: x,y,r,g,b
+            z_meas[0, 0] = measurements.x;
+            z_meas[1, 0] = measurements.y;
+            z_meas[2, 0] = measurements.red;
+            z_meas[3, 0] = measurements.green;
+            z_meas[4, 0] = measurements.blue;
 
-
-            DenseMatrix P_bar = new DenseMatrix(4, 4);
+            DenseMatrix P_bar = new DenseMatrix(7, 7);
             P_bar[0, 0] = this.cov_x;
             P_bar[1, 1] = this.cov_vx;
             P_bar[2, 2] = this.cov_y;
             P_bar[3, 3] = this.cov_vy;
+            P_bar[4, 4] = this.cov_red;
+            P_bar[5, 5] = this.cov_green;
+            P_bar[6, 6] = this.cov_blue;
 
             //DenseMatrix B = H * P_bar * H;
             DenseMatrix z_next = F * z_est;
@@ -778,18 +821,24 @@ namespace TreeLib
             DenseMatrix S_inv =(DenseMatrix) S.Inverse();
             DenseMatrix K = P_next * H_transpose *S_inv;
             DenseMatrix z_post = z_next + K * y_residual;
-            DenseMatrix P_post = (DenseMatrix.Identity(4) - K * H) * P_next;
+            DenseMatrix P_post = (DenseMatrix.Identity(7) - K * H) * P_next;
 
             //Move values from matrix form into object properties
             updatedState.cov_x = P_post[0, 0];
             updatedState.cov_vx = P_post[1, 1];
             updatedState.cov_y = P_post[2, 2];
             updatedState.cov_vy = P_post[3, 3];
+            updatedState.cov_red = P_post[4, 4];
+            updatedState.cov_green = P_post[5, 5];
+            updatedState.cov_blue = P_post[6, 6];
 
-            updatedState.coordinates.x = z_post[0, 0];
-            updatedState.coordinates.y = z_post[2, 0];
+            updatedState.x = z_post[0, 0];
             updatedState.vx = z_post[1, 0];
+            updatedState.y = z_post[2, 0];
             updatedState.vy = z_post[3, 0];
+            updatedState.red = z_post[4, 0];
+            updatedState.green = z_post[5, 0];
+            updatedState.blue = z_post[6, 0];
 
             return updatedState;
         }
@@ -802,10 +851,13 @@ namespace TreeLib
 
     }
 
-    public struct Coordinates
+    public struct Measurements
     {
         public double x;
         public double y;
+        public double red;
+        public double green;
+        public double blue;
     }
 
     enum Turn { Left, Right, Straight, Unknown};
@@ -819,6 +871,13 @@ namespace TreeLib
         public const double cov_vx_init = 300;
         public const double cov_vy_init = 300;
 
+        public const double r_init = 0;
+        public const double g_init = 0;
+        public const double b_init = 0;
+        public const double covr_init = 0;
+        public const double covg_init = 0;
+        public const double covb_init = 0;
+
         public List<StateEstimate> state_history;
 
         public Vehicle(StateEstimate initial_state)
@@ -827,6 +886,7 @@ namespace TreeLib
             initial_state.cov_vy = cov_vy_init;
             initial_state.cov_x = covx_init;
             initial_state.cov_y = covy_init;
+            
             initial_state.turn = (int)Turn.Unknown;
             state_history = new List<StateEstimate>();
             state_history.Add(initial_state);

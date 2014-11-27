@@ -11,7 +11,7 @@ using TreeLib;
 namespace VTC
 {
     /// <summary>
-    /// A Vista represents the statistics and analysis of the videa stream.
+    /// A Vista represents the statistics and analysis of the video stream.
     /// It is intended to be extended by classes for specific use cases such
     /// as intersections, parking lots, etc.
     /// "a mental view of a succession of remembered or anticipated events"
@@ -140,11 +140,11 @@ namespace VTC
 
                 UpdateBackground(newFrame);
 
-                Coordinates[] coordinates = FindBlobCenters(newFrame, count);
+                var measurements = FindBlobCenters(newFrame, count);
 
                 if (null != MHT)
                 {
-                    MHT.Update(coordinates);
+                    MHT.Update(measurements);
 
                     // First update base class stats
                     UpdateVistaStats(MHT.DeletedVehicles);
@@ -191,10 +191,20 @@ namespace VTC
             return count;
         }
 
-        private Coordinates[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
+        private Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
+        {
+            var mask = new Image<Gray, Byte>(frame.Size);
+            var center = new PointF((float)x, (float)y);
+            var circle = new CircleF(center, (float)radius);
+            mask.Draw(circle, new Gray(255), 0);
+
+            return frame.GetAverage(mask);
+        }
+
+        private Measurements[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
         {
             Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone();
-            Coordinates[] coordinates = new Coordinates[count];
+            Measurements[] coordinates = new Measurements[count];
             for (int detection_count = 0; detection_count < count; detection_count++)
             {
                 double[] minValues;
@@ -204,9 +214,17 @@ namespace VTC
                 tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
                 int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
                 tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), car_radius), new Gray(0), 0);
+                
+
+                var x = maxLocation[0];
+                var y = maxLocation[1];
+                //var colour = GetBlobColour(frame, x, y, car_radius);
+                var colour = GetBlobColour(frame, x, y, 3.0);
+                var coords = new Measurements() { x = x, y = y, red = colour.Red, green = colour.Green, blue = colour.Blue };
+                coordinates[detection_count] = coords;
+
+                //Do this last so that it doesn't interfere with color sampling
                 frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                coordinates[detection_count].x = maxLocation[0];
-                coordinates[detection_count].y = maxLocation[1];
             }
             return coordinates;
         }
@@ -239,8 +257,8 @@ namespace VTC
 
             vehicles.ForEach(delegate(Vehicle vehicle)
             {
-                float x = (float)vehicle.state_history.Last().coordinates.x;
-                float y = (float)vehicle.state_history.Last().coordinates.y;
+                float x = (float)vehicle.state_history.Last().x;
+                float y = (float)vehicle.state_history.Last().y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
 
@@ -254,7 +272,9 @@ namespace VTC
 
                 if (render_clean)
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
+                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.state_history.Last().blue, vehicle.state_history.Last().green, vehicle.state_history.Last().red), 2);
+                    frame.Draw(new CircleF(new PointF(x, y), 2), new Bgr(0.0, 255.0, 0.0), 1);
+                    //frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(0.0, 255.0, 0.0), 2);
                     //frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), new Bgr(0.0, 0.0, 255.0), 1); //Render velocity vector
                 }
                 else

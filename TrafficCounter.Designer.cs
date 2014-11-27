@@ -37,8 +37,6 @@ namespace VTC
             this.label1 = new System.Windows.Forms.Label();
             this.debugTextBox = new System.Windows.Forms.TextBox();
             this.tbVistaStats = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.configPathBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.intersectionIDTextBox = new System.Windows.Forms.TextBox();
             this.SaveParametersBtn = new System.Windows.Forms.Button();
@@ -119,8 +117,6 @@ namespace VTC
             // 
             this.splitContainer3.Panel2.Controls.Add(this.debugTextBox);
             this.splitContainer3.Panel2.Controls.Add(this.tbVistaStats);
-            this.splitContainer3.Panel2.Controls.Add(this.label7);
-            this.splitContainer3.Panel2.Controls.Add(this.configPathBox);
             this.splitContainer3.Panel2.Controls.Add(this.label4);
             this.splitContainer3.Panel2.Controls.Add(this.intersectionIDTextBox);
             this.splitContainer3.Panel2.Controls.Add(this.SaveParametersBtn);
@@ -186,23 +182,6 @@ namespace VTC
             this.tbVistaStats.ReadOnly = true;
             this.tbVistaStats.Size = new System.Drawing.Size(240, 96);
             this.tbVistaStats.TabIndex = 27;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(352, 297);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(109, 13);
-            this.label7.TabIndex = 30;
-            this.label7.Text = "Configuration file path";
-            // 
-            // configPathBox
-            // 
-            this.configPathBox.Location = new System.Drawing.Point(9, 294);
-            this.configPathBox.Multiline = true;
-            this.configPathBox.Name = "configPathBox";
-            this.configPathBox.Size = new System.Drawing.Size(338, 41);
-            this.configPathBox.TabIndex = 29;
             // 
             // label4
             // 
@@ -502,9 +481,7 @@ namespace VTC
       private System.Windows.Forms.Button SaveParametersBtn;
       private System.Windows.Forms.Label label4;
       private System.Windows.Forms.TextBox intersectionIDTextBox;
-      private System.Windows.Forms.Label label7;
       private System.Windows.Forms.TextBox tbVistaStats;
-	  private System.Windows.Forms.TextBox configPathBox;
       private System.Windows.Forms.TextBox debugTextBox;
    }
 }

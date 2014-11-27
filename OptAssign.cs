@@ -64,7 +64,7 @@ namespace VTC
                 {
                     List<MurtyNode> partition = partition_assignment(this_assignment);
                     MurtyNode best_node = findBestNode(temp_costs, partition);
-                    costs = adjusted_cost(temp_costs, best_node);
+                    temp_costs = adjusted_cost(temp_costs, best_node);
                 }
             }
 

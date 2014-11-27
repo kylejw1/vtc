@@ -194,7 +194,6 @@ namespace VTC
       private void LoadParameters()
       {
           Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-          configPathBox.Text = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).FilePath;
 
           avgAreaTextbox.Text = config.AppSettings.Settings["PerCar"].Value;
           avgNoiseTextbox.Text = config.AppSettings.Settings["PerCarMin"].Value;
@@ -281,7 +280,7 @@ namespace VTC
         }
       }
 
-      private static void CoordinatesContains(Coordinates[] coordinates, double problem_x, double problem_y)
+      private static void CoordinatesContains(Measurements[] coordinates, double problem_x, double problem_y)
       {
           for (int i = 0; i < coordinates.Length; i++)
           {
@@ -299,8 +298,8 @@ namespace VTC
               Dictionary<string, string> post_values = new Dictionary<string, string>();
               for (int vehicle_count = 0; vehicle_count < state_estimates.Length; vehicle_count++)
               {
-                  String x = state_estimates[vehicle_count].coordinates.x.ToString();
-                  String y = state_estimates[vehicle_count].coordinates.y.ToString();
+                  String x = state_estimates[vehicle_count].x.ToString();
+                  String y = state_estimates[vehicle_count].y.ToString();
                   String vx = state_estimates[vehicle_count].vx.ToString();
                   String vy = state_estimates[vehicle_count].vy.ToString();
                   String zero = "0";

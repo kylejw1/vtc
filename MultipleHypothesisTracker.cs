@@ -77,18 +77,17 @@ namespace VTC
         /// <summary>
         /// Update targets from all child hypotheses with a new set of coordinates
         /// </summary>
-        /// <param name="coords">Coordinates of all detections present in the latest readings.  This 
+        /// <param name="detections">Information about each detected item present in the latest readings.  This 
         /// list is assumed to be complete.</param>
-        public void Update(Coordinates[] coords)
+        public void Update(Measurements[] detections)
         {
-            int numDetections = coords.Length;
+            int numDetections = detections.Length;
 
             //Maintain hypothesis tree
             if (HypothesisTree.children.Count > 0)
             {
                 if (HypothesisTree.TreeDepth() > MaxHypothesisTreeDepth)
                 {
-                    //TODO: Why do we prune to one remaining?  Shouldn't this reflect the (max depth - 1)?
                     HypothesisTree.Prune(1);
                     HypothesisTree = HypothesisTree.GetChild(0);
                 }
@@ -104,7 +103,7 @@ namespace VTC
                
                 if (numDetections > 0)
                 {
-                    GenerateChildNodes(coords, childNode);
+                    GenerateChildNodes(detections, childNode);
                 }
                 else
                 {
@@ -135,7 +134,7 @@ namespace VTC
         /// <param name="detections">Coordinates of all detections present in the latest measurements.  This 
         /// list is assumed to be complete.</param>
         /// <param name="hypothesisNode">The node to build the new hypotheses from</param>
-        private void GenerateChildNodes(Coordinates[] detections, Node<StateHypothesis> hypothesisNode)
+        private void GenerateChildNodes(Measurements[] detections, Node<StateHypothesis> hypothesisNode)
         {
             //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
 
@@ -179,7 +178,7 @@ namespace VTC
         /// <param name="hypothesisParent">Hypothesis node to add child hypotheses to</param>
         /// <param name="numExistingTargets">Number of currently detected targets</param>
         /// <param name="hypothesis_expanded">Hypothesis matrix</param>
-        private void GenerateChildHypotheses(Coordinates[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesis_expanded)
+        private void GenerateChildHypotheses(Measurements[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesis_expanded)
         {
             //Calculate K-best assignment using Murty's algorithm
             double[,] costs = hypothesis_expanded.ToArray();
@@ -193,7 +192,6 @@ namespace VTC
             //Generate child hypotheses from k-best assignments
             for (int i = 0; i < k_best.Count; i++)
             {
-                //Console.WriteLine("Generating hypothesis {0}", i);
                 int[] assignment = k_best[i];
                 StateHypothesis child_hypothesis = new StateHypothesis(MissThreshold);
                 hypothesisParent.AddChild(child_hypothesis);
@@ -221,14 +219,22 @@ namespace VTC
                     if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets < MaxTargets) //Add new vehicle
                     {
                         //Creating new vehicle
-                        child_hypothesis.AddVehicle(Convert.ToInt16(coords[j].x), Convert.ToInt16(coords[j].y), 0, 0);
+                        child_hypothesis.AddVehicle(
+                            Convert.ToInt16(coords[j].x), 
+                            Convert.ToInt16(coords[j].y), 
+                            0, 
+                            0,
+                            Convert.ToInt16(coords[j].red),
+                            Convert.ToInt16(coords[j].green),
+                            Convert.ToInt16(coords[j].blue));
+
                     }
                     else if (assignment[j] >= numDetections && assignment[j] < numDetections + numExistingTargets) //Update states for vehicles with measurements
                     {
                         //Updating vehicle with measurement
                         StateEstimate last_state = hypothesisParent.nodeData.vehicles[assignment[j] - numDetections].state_history.Last();
-                        StateEstimate measurement_update = last_state.PropagateState(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, coords[j]);
-                        child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - numDetections, measurement_update, true);
+                        StateEstimate estimated_state = last_state.PropagateState(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, coords[j]);
+                        child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - numDetections, estimated_state, true);
                     }
 
                 }
@@ -277,7 +283,7 @@ namespace VTC
         /// <param name="numExistingTargets">Number of currently detected targets</param>
         /// <param name="target_state_estimates">Latest state estimates for each known target</param>
         /// <returns></returns>
-        private DenseMatrix GenerateAmbiguityMatrix(Coordinates[] coordinates, int numExistingTargets, StateEstimate[] target_state_estimates)
+        private DenseMatrix GenerateAmbiguityMatrix(Measurements[] coordinates, int numExistingTargets, StateEstimate[] target_state_estimates)
         {
             // TODO:  Can't we get numExistingTargets from target_state_estimates Length?
 
@@ -291,11 +297,14 @@ namespace VTC
                 //Get this car's estimated next position using Kalman predictor
                 StateEstimate no_measurement_estimate = target_state_estimates[i].PropagateStateNoMeasurement(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.compensation_gain);
 
-                DenseMatrix P_bar = new DenseMatrix(4, 4);
+                DenseMatrix P_bar = new DenseMatrix(7, 7);
                 P_bar[0, 0] = no_measurement_estimate.cov_x;
                 P_bar[1, 1] = no_measurement_estimate.cov_vx;
                 P_bar[2, 2] = no_measurement_estimate.cov_y;
                 P_bar[3, 3] = no_measurement_estimate.cov_vy;
+                P_bar[4, 4] = no_measurement_estimate.cov_red;
+                P_bar[5, 5] = no_measurement_estimate.cov_green;
+                P_bar[6, 6] = no_measurement_estimate.cov_blue;
 
                 DenseMatrix H_trans = (DenseMatrix)HypothesisTree.H.Transpose();
                 DenseMatrix B = HypothesisTree.H * P_bar * H_trans + HypothesisTree.R;
@@ -303,13 +312,19 @@ namespace VTC
 
                 for (int j = 0; j < num_detections; j++)
                 {
-                    DenseMatrix z_meas = new DenseMatrix(2, 1);
+                    DenseMatrix z_meas = new DenseMatrix(5, 1);
                     z_meas[0, 0] = coordinates[j].x;
                     z_meas[1, 0] = coordinates[j].y;
+                    z_meas[2, 0] = coordinates[j].red;
+                    z_meas[3, 0] = coordinates[j].green;
+                    z_meas[4, 0] = coordinates[j].blue;
 
-                    DenseMatrix z_est = new DenseMatrix(2, 1);
-                    z_est[0, 0] = no_measurement_estimate.coordinates.x;
-                    z_est[1, 0] = no_measurement_estimate.coordinates.y;
+                    DenseMatrix z_est = new DenseMatrix(5, 1);
+                    z_est[0, 0] = no_measurement_estimate.x;
+                    z_est[1, 0] = no_measurement_estimate.y;
+                    z_est[2, 0] = no_measurement_estimate.red;
+                    z_est[3, 0] = no_measurement_estimate.green;
+                    z_est[4, 0] = no_measurement_estimate.blue;
 
                     DenseMatrix residual = StateEstimate.residual(z_est, z_meas);
                     DenseMatrix residual_transpose = (DenseMatrix)residual.Transpose();

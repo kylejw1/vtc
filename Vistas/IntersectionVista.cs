@@ -63,8 +63,8 @@ namespace VTC
         {
             foreach (var d in deleted)
             {
-                var startCoord = d.state_history.First().coordinates;
-                var startPoint = new Point((int)startCoord.x, (int)startCoord.y);
+                var startState = d.state_history.First();
+                var startPoint = new Point((int)startState.x, (int)startState.y);
 
                 var startRegion = this.RegionConfiguration.Regions.FirstOrDefault(r => 
                     {
@@ -75,8 +75,8 @@ namespace VTC
 
                 if (null == startRegion.Key) continue;
 
-                var endCoord = d.state_history.Last().coordinates;
-                var endPoint = new Point((int)endCoord.x, (int)endCoord.y);
+                var endState = d.state_history.Last();
+                var endPoint = new Point((int)endState.x, (int)endState.y);
 
                 var endRegion = this.RegionConfiguration.Regions.FirstOrDefault(r =>
                 {
