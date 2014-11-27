@@ -1,34 +1,28 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
-using System.Web;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Net;
-using System.Configuration;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.Distributions;
 using System.Linq;
+using System.Net;
 using System.Threading;
-using System.Diagnostics;
+using System.Web;
+using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
-using Emgu.CV.UI;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using TreeLib;
 using VTC.ServerReporting.ReportItems;
+using VTC.Settings;
 
 namespace VTC
 {
    public partial class TrafficCounter : Form
    {
-      private static MCvFont _font = new MCvFont(Emgu.CV.CvEnum.FONT.CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0);
-      private readonly string _filename; // filename with local video (debug mode).
+      private static MCvFont _font = new MCvFont(FONT.CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0);
+       private readonly AppSettings _settings;
+       private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
       List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
@@ -39,28 +33,17 @@ namespace VTC
       Vista Vista = null;
        
        //private MultipleHypothesisTracker MHT = null;
-      double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
-      double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"]);                           //Process noise matrix multiplier
-      double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"]);                           //Measurement noise matrix multiplier
 
-      //************* Server connection parameters ***************  
-      string server_url = "";
-      string intersection_id = "";
-      private int FRAME_UPLOAD_INTERVAL_MINUTES =Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
-      string ftp_password = ConfigurationManager.AppSettings["FTPpassword"];
-      string ftp_username = ConfigurationManager.AppSettings["FTPusername"];
-      private int state_upload_interval_ms = Convert.ToInt32(ConfigurationManager.AppSettings["state_upload_interval_ms"]);
-       
-      /// <summary>
-      /// Constructor.
-      /// </summary>
-      /// <param name="filename">Local file with video.</param>
-      public TrafficCounter(string filename = null)
+       /// <summary>
+       /// Constructor.
+       /// </summary>
+       /// <param name="settings">Application settings.</param>
+       /// <param name="filename">Local file with video.</param>
+       public TrafficCounter(AppSettings settings, string filename = null)
       {
-          _filename = filename;
+           _settings = settings;
+           _filename = filename;
 
-          intersection_id = ConfigurationManager.AppSettings["IntersectionId"];
-      
           InitializeComponent();
 
           //Initialize the camera selection combobox.
@@ -85,9 +68,9 @@ namespace VTC
                  _cameraCapture = new Capture(0);
              }
 
-             Vista = new IntersectionVista(_cameraCapture.Width, _cameraCapture.Height);
+             Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
 
-             var regionConfig = RegionConfig.Load(ConfigurationManager.AppSettings["RegionConfig"]);
+             var regionConfig = RegionConfig.Load(_settings.RegionConfigPath);
              if (null != regionConfig) Vista.RegionConfiguration = regionConfig;
          }
          catch (Exception e)
@@ -99,12 +82,12 @@ namespace VTC
          Application.Idle += ProcessFrame;
 
           //TODO: Move server credentials to configuration file
-         String IntersectionImagePath = "ftp://"+server_url+"/intersection_" + intersection_id + ".png";
+         String IntersectionImagePath = "ftp://"+ _settings.ServerUrl +"/intersection_" + _settings.IntersectionID + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
-                 FRAME_UPLOAD_INTERVAL_MINUTES,
+                 _settings.FrameUploadIntervalMinutes, 
                  new Uri(@IntersectionImagePath),
-                  new NetworkCredential(ftp_username, ftp_password),
+                  new NetworkCredential(_settings.FtpUserName, _settings.FtpPassword),
                   GetCameraFrameBytes
                  ));
          ServerReporter.INSTANCE.Start();
@@ -147,7 +130,7 @@ namespace VTC
           int _deviceIndex = 0;
 
           //Add every device to the global variable and to the camera combobox
-          foreach (DirectShowLib.DsDevice _camera in _systemCameras)
+          foreach (DsDevice _camera in _systemCameras)
           {
               //Add Device with an index and a name to the List.
               _cameraDevices.Add(new KeyValuePair<int, string>(_deviceIndex, _camera.Name));
@@ -195,13 +178,11 @@ namespace VTC
       {
           Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-          avgAreaTextbox.Text = config.AppSettings.Settings["PerCar"].Value;
-          avgNoiseTextbox.Text = config.AppSettings.Settings["PerCarMin"].Value;
+          avgAreaTextbox.Text = _settings.PerCar.ToString(CultureInfo.InvariantCulture); 
+          avgNoiseTextbox.Text = _settings.PerCarMinimum.ToString(CultureInfo.InvariantCulture);
 
-          intersectionIDTextBox.Text = intersection_id.ToString();
-          pushStateTimer.Interval = state_upload_interval_ms;
-
-          server_url = config.AppSettings.Settings["server_url"].Value;
+          intersectionIDTextBox.Text = _settings.IntersectionID;
+          pushStateTimer.Interval = _settings.StateUploadIntervalMs;
       }
 
       /// <summary>
@@ -209,15 +190,20 @@ namespace VTC
       /// </summary>
       private void SaveParametersBtn_Click(object sender, EventArgs e)
       {
-          Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-          
-          config.AppSettings.Settings["PerCar"].Value = avgAreaTextbox.Text;
-          config.AppSettings.Settings["PerCarMin"].Value = avgNoiseTextbox.Text;
-          config.AppSettings.Settings["IntersectionID"].Value = intersectionIDTextBox.Text;
+          try
+          {
+              _settings.PerCar = double.Parse(avgAreaTextbox.Text, CultureInfo.InvariantCulture);
+              _settings.PerCarMinimum = double.Parse(avgNoiseTextbox.Text, CultureInfo.InvariantCulture);
+              _settings.IntersectionID = intersectionIDTextBox.Text;
 
-          config.Save(ConfigurationSaveMode.Modified);
-
-          ConfigurationManager.RefreshSection("appSettings");
+              _settings.Save();
+          }
+          catch (Exception ex)
+          {
+              var message = "Cannot save configuration settings. Error: " + ex.Message;
+              Log(message);
+              MessageBox.Show(message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+          }
       }
 
        /// <summary>
@@ -226,18 +212,14 @@ namespace VTC
        /// <returns>Byte array containing the current frame in PNG format</returns>
       private Byte[] GetCameraFrameBytes()
       {
-          var bmp = Vista.Color_Background.ToBitmap();
+           using (var bmp = Vista.Color_Background.ToBitmap())
+           using (var stream = new MemoryStream())
+           {
+               bmp.Save(stream, ImageFormat.Png);
+               stream.Close();
 
-          byte[] byteArray;
-          using (MemoryStream stream = new MemoryStream())
-          {
-              bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-              stream.Close();
-
-              byteArray = stream.ToArray();
-          }
-
-          return byteArray;
+               return stream.ToArray();
+           }
       }
 
       void ProcessFrame(object sender, EventArgs e)
@@ -252,8 +234,8 @@ namespace VTC
           // user specifies a value that is too low.
           // Also, do we want an "apply" button?  I feel like if the frame updates while a user has helf-changed the 
           // per_car value, we could get some bad values?
-          Vista.noise_mass = Convert.ToInt32(avgNoiseTextbox.Text);
-          Vista.per_car = Convert.ToInt32(avgAreaTextbox.Text);
+          Vista.NoiseMass = Convert.ToInt32(avgNoiseTextbox.Text);
+          Vista.PerCar = Convert.ToInt32(avgAreaTextbox.Text);
 
           // Send the new image frame to the vista for processing
           Vista.Update(frame);
@@ -313,7 +295,7 @@ namespace VTC
               if(state_estimates.Length == 0)
                   post_values.Add("state_sample[states_attributes][]", "");
 
-              post_values.Add("intersection_id", intersection_id);
+              post_values.Add("intersection_id", _settings.IntersectionID);
 
 
               String post_string = "";
@@ -324,7 +306,7 @@ namespace VTC
               post_string = post_string.TrimEnd('&');
 
               //Upload state to server
-              String post_url = "http://"+server_url+"/state_samples";
+              String post_url = "http://" + _settings.ServerUrl + "/state_samples";
 
               HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
               objRequest.KeepAlive = true;
@@ -371,10 +353,10 @@ namespace VTC
       private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
           RegionEditor r = new RegionEditor(Vista.Color_Background, Vista.RegionConfiguration);
-          if (r.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+          if (r.ShowDialog() == DialogResult.OK)
           {
               Vista.RegionConfiguration = r.RegionConfig;
-              Vista.RegionConfiguration.Save(ConfigurationManager.AppSettings["RegionConfig"]);
+              Vista.RegionConfiguration.Save(_settings.RegionConfigPath);
           }
       }
 

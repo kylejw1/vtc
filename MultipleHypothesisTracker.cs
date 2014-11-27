@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Configuration;
-using TreeLib;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.Distributions;
+using MathNet.Numerics.LinearAlgebra.Double;
+using TreeLib;
+using VTC.Settings;
 
 namespace VTC
 {
@@ -16,31 +14,12 @@ namespace VTC
     /// </summary>
     public class MultipleHypothesisTracker
     {
-        private int MissThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["MissThreshold"]);                 //Number of misses to consider an object gone
-        private int MaxHypothesisTreeDepth = Convert.ToInt32(ConfigurationManager.AppSettings["MaxHypTreeDepth"]);      //Maximum allowed hypothesis tree depth
-        private int MaxTargets = Convert.ToInt32(ConfigurationManager.AppSettings["MaxTargets"]);                       //Maximum number of concurrently tracked targets
-        private int k_hypotheses = Convert.ToInt32(ConfigurationManager.AppSettings["KHypotheses"]);                    //Branching factor for hypothesis tree
-        private int _validationRegionDeviation = Convert.ToInt32(ConfigurationManager.AppSettings["ValRegDeviation"]);  //Mahalanobis distance multiplier used in measurement gating
-
-        private double LambdaX = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaX"]);     //Termination likelihood
-        private double LambdaF = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaF"]);     //Density of Poisson-distributed false positives
-        private double LambdaN = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaN"]);     //Density of Poission-distributed new vehicles
-        private double Pd = Convert.ToDouble(ConfigurationManager.AppSettings["Pd"]);               //Probability of object detection
-        private double Px = Convert.ToDouble(ConfigurationManager.AppSettings["Px"]);               //Probability of track termination
-
+        private readonly IMultipleHypothesisSettings _settings;
         private HypothesisTree HypothesisTree = null;
 
         public int ValidationRegionDeviation
         {
-            get
-            {
-                return _validationRegionDeviation;
-            }
-
-            private set
-            {
-                _validationRegionDeviation = value;
-            }
+            get { return _settings.ValidationRegionDeviation; }
         }
 
         public List<Vehicle> CurrentVehicles
@@ -68,9 +47,11 @@ namespace VTC
         /// <summary>
         /// Default ctor
         /// </summary>
-        public MultipleHypothesisTracker()
+        public MultipleHypothesisTracker(IMultipleHypothesisSettings settings)
         {
-            StateHypothesis initialHypothesis = new StateHypothesis(MissThreshold);
+            _settings = settings;
+
+            StateHypothesis initialHypothesis = new StateHypothesis(_settings.MissThreshold);
             HypothesisTree = new HypothesisTree(initialHypothesis);
         }
 
@@ -86,7 +67,7 @@ namespace VTC
             //Maintain hypothesis tree
             if (HypothesisTree.children.Count > 0)
             {
-                if (HypothesisTree.TreeDepth() > MaxHypothesisTreeDepth)
+                if (HypothesisTree.TreeDepth() > _settings.MaxHypothesisTreeDepth)
                 {
                     HypothesisTree.Prune(1);
                     HypothesisTree = HypothesisTree.GetChild(0);
@@ -108,12 +89,12 @@ namespace VTC
                 else
                 {
                     int numExistingTargets = childNode.nodeData.vehicles.Count;
-                    StateHypothesis child_hypothesis = new StateHypothesis(MissThreshold);
+                    StateHypothesis child_hypothesis = new StateHypothesis(_settings.MissThreshold);
                     childNode.AddChild(child_hypothesis);
                     HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[0].nodeData);
                     child_hypothesis_tree.parent = childNode;
 
-                    child_hypothesis.probability = Math.Pow((1 - Pd), numExistingTargets);
+                    child_hypothesis.probability = Math.Pow((1 - _settings.Pd), numExistingTargets);
                     //Update states for vehicles without measurements
                     for (int j = 0; j < numExistingTargets; j++)
                     {
@@ -143,11 +124,11 @@ namespace VTC
 
             //Got detections
             DenseMatrix false_assignment_matrix = new DenseMatrix(numDetections, numDetections, Double.MinValue);
-            double[] false_assignment_diagonal = Enumerable.Repeat(Math.Log10(LambdaF), numDetections).ToArray();
+            double[] false_assignment_diagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaF), numDetections).ToArray();
             false_assignment_matrix.SetDiagonal(false_assignment_diagonal); //Represents a false positive
 
             DenseMatrix new_target_matrix = new DenseMatrix(numDetections, numDetections, Double.MinValue);
-            double[] new_target_diagonal = Enumerable.Repeat(Math.Log10(LambdaN), numDetections).ToArray();
+            double[] new_target_diagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaN), numDetections).ToArray();
             new_target_matrix.SetDiagonal(new_target_diagonal); //Represents a new object to track
 
             StateEstimate[] target_state_estimates = hypothesisNode.nodeData.GetStateEstimates();
@@ -187,13 +168,13 @@ namespace VTC
                 for (int j = 0; j < costs.GetLength(1); j++)
                     costs[i, j] = -costs[i, j];
 
-            List<int[]> k_best = OptAssign.FindKBestAssignments(costs, k_hypotheses);
+            List<int[]> k_best = OptAssign.FindKBestAssignments(costs, _settings.KHypotheses);
 
             //Generate child hypotheses from k-best assignments
             for (int i = 0; i < k_best.Count; i++)
             {
                 int[] assignment = k_best[i];
-                StateHypothesis child_hypothesis = new StateHypothesis(MissThreshold);
+                StateHypothesis child_hypothesis = new StateHypothesis(_settings.MissThreshold);
                 hypothesisParent.AddChild(child_hypothesis);
                 HypothesisTree child_hypothesis_tree = new HypothesisTree(hypothesisParent.children[i].nodeData);
                 child_hypothesis_tree.parent = hypothesisParent;
@@ -216,7 +197,7 @@ namespace VTC
                 {
 
                     //Account for new vehicles
-                    if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets < MaxTargets) //Add new vehicle
+                    if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets < _settings.MaxTargets) //Add new vehicle
                     {
                         //Creating new vehicle
                         child_hypothesis.AddVehicle(
@@ -290,7 +271,7 @@ namespace VTC
             DenseMatrix ambiguity_matrix;
             int num_detections = coordinates.Length;
             ambiguity_matrix = new DenseMatrix(num_detections, numExistingTargets + 2);
-            Normal norm = new MathNet.Numerics.Distributions.Normal();
+            Normal norm = new Normal();
 
             for (int i = 0; i < numExistingTargets; i++)
             {
@@ -335,7 +316,7 @@ namespace VTC
                         ambiguity_matrix[j, i + 1] = Double.MinValue;
                     else
                     {
-                        ambiguity_matrix[j, i + 1] = Math.Log10(Pd * norm.Density(mahalanobis_distance) / (1 - Pd));
+                        ambiguity_matrix[j, i + 1] = Math.Log10(_settings.Pd * norm.Density(mahalanobis_distance) / (1 - _settings.Pd));
                     }
                 }
             }

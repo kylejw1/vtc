@@ -4,6 +4,7 @@
 
 using System;
 using System.Windows.Forms;
+using VTC.Settings;
 
 namespace VTC
 {
@@ -21,7 +22,7 @@ namespace VTC
          string filename = null;
          if (args.Length == 1) filename = args[0];
 
-         Application.Run(new TrafficCounter(filename));
+         Application.Run(new TrafficCounter(new AppSettings(), filename));
       }
    }
 }

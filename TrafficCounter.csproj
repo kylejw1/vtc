@@ -122,6 +122,9 @@
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
     <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
+    <Compile Include="Settings\AppSettings.cs" />
+    <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
+    <Compile Include="Settings\ISettings.cs" />
     <Compile Include="Vistas\IntersectionVista.cs" />
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="RegionConfig\Polygon.cs" />
