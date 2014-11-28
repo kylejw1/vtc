@@ -67,6 +67,8 @@ namespace VTC
              else
              {
                  _cameraCapture = new Capture(0);
+                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
+                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
              }
 
              Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
@@ -91,7 +93,7 @@ namespace VTC
                   new NetworkCredential(_settings.FtpUserName, _settings.FtpPassword),
                   GetCameraFrameBytes
                  ));
-         ServerReporter.INSTANCE.Start();
+
       }
 
        /// <summary>
@@ -184,6 +186,10 @@ namespace VTC
 
           intersectionIDTextBox.Text = _settings.IntersectionID;
           pushStateTimer.Interval = _settings.StateUploadIntervalMs;
+          serverUrlTextBox.Text = _settings.ServerUrl;
+
+          frameHeightBox.Text = _settings.FrameHeight.ToString();
+          frameWidthBox.Text = _settings.FrameWidth.ToString();
       }
 
       /// <summary>
@@ -196,6 +202,10 @@ namespace VTC
               _settings.PerCar = double.Parse(avgAreaTextbox.Text, CultureInfo.InvariantCulture);
               _settings.PerCarMinimum = double.Parse(avgNoiseTextbox.Text, CultureInfo.InvariantCulture);
               _settings.IntersectionID = intersectionIDTextBox.Text;
+              _settings.ServerUrl = serverUrlTextBox.Text;
+
+              _settings.FrameHeight = double.Parse(frameHeightBox.Text);
+              _settings.FrameWidth = double.Parse(frameWidthBox.Text);
 
               _settings.Save();
           }
@@ -248,8 +258,6 @@ namespace VTC
 
           // Update statistics
           trackCountBox.Text = Vista.CurrentVehicles.Count().ToString();
-          movementMassBox.Text = Vista.RawMass.ToString();
-          detectionCountBox.Text = Vista.LastDetectionCount.ToString();
 
           tbVistaStats.Text = Vista.GetStatString();
       }

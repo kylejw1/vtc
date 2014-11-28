@@ -50,10 +50,6 @@ namespace VTC
             this.avgNoiseTextbox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.avgAreaTextbox = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.movementMassBox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.detectionCountBox = new System.Windows.Forms.TextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -62,6 +58,12 @@ namespace VTC
             this.panel3 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
+            this.serverUrlTextBox = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.frameWidthBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.frameHeightBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -97,8 +99,8 @@ namespace VTC
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1051, 684);
-            this.splitContainer1.SplitterDistance = 517;
+            this.splitContainer1.Size = new System.Drawing.Size(1073, 684);
+            this.splitContainer1.SplitterDistance = 527;
             this.splitContainer1.TabIndex = 0;
             // 
             // splitContainer3
@@ -115,6 +117,12 @@ namespace VTC
             // 
             // splitContainer3.Panel2
             // 
+            this.splitContainer3.Panel2.Controls.Add(this.frameHeightBox);
+            this.splitContainer3.Panel2.Controls.Add(this.label6);
+            this.splitContainer3.Panel2.Controls.Add(this.label5);
+            this.splitContainer3.Panel2.Controls.Add(this.frameWidthBox);
+            this.splitContainer3.Panel2.Controls.Add(this.label7);
+            this.splitContainer3.Panel2.Controls.Add(this.serverUrlTextBox);
             this.splitContainer3.Panel2.Controls.Add(this.debugTextBox);
             this.splitContainer3.Panel2.Controls.Add(this.tbVistaStats);
             this.splitContainer3.Panel2.Controls.Add(this.label4);
@@ -130,11 +138,7 @@ namespace VTC
             this.splitContainer3.Panel2.Controls.Add(this.avgNoiseTextbox);
             this.splitContainer3.Panel2.Controls.Add(this.label8);
             this.splitContainer3.Panel2.Controls.Add(this.avgAreaTextbox);
-            this.splitContainer3.Panel2.Controls.Add(this.label6);
-            this.splitContainer3.Panel2.Controls.Add(this.movementMassBox);
-            this.splitContainer3.Panel2.Controls.Add(this.label5);
-            this.splitContainer3.Panel2.Controls.Add(this.detectionCountBox);
-            this.splitContainer3.Size = new System.Drawing.Size(517, 684);
+            this.splitContainer3.Size = new System.Drawing.Size(527, 684);
             this.splitContainer3.SplitterDistance = 342;
             this.splitContainer3.TabIndex = 0;
             // 
@@ -143,7 +147,7 @@ namespace VTC
             this.imageBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBox1.Location = new System.Drawing.Point(0, 20);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(517, 322);
+            this.imageBox1.Size = new System.Drawing.Size(527, 322);
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             this.imageBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imageBox1_MouseDown);
@@ -154,7 +158,7 @@ namespace VTC
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(517, 20);
+            this.panel1.Size = new System.Drawing.Size(527, 20);
             this.panel1.TabIndex = 0;
             // 
             // label1
@@ -171,7 +175,7 @@ namespace VTC
             this.debugTextBox.Location = new System.Drawing.Point(9, 122);
             this.debugTextBox.Multiline = true;
             this.debugTextBox.Name = "debugTextBox";
-            this.debugTextBox.Size = new System.Drawing.Size(240, 168);
+            this.debugTextBox.Size = new System.Drawing.Size(240, 112);
             this.debugTextBox.TabIndex = 31;
             // 
             // tbVistaStats
@@ -186,7 +190,7 @@ namespace VTC
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(352, 273);
+            this.label4.Location = new System.Drawing.Point(354, 209);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(76, 13);
             this.label4.TabIndex = 28;
@@ -194,14 +198,14 @@ namespace VTC
             // 
             // intersectionIDTextBox
             // 
-            this.intersectionIDTextBox.Location = new System.Drawing.Point(255, 270);
+            this.intersectionIDTextBox.Location = new System.Drawing.Point(256, 206);
             this.intersectionIDTextBox.Name = "intersectionIDTextBox";
             this.intersectionIDTextBox.Size = new System.Drawing.Size(92, 20);
             this.intersectionIDTextBox.TabIndex = 27;
             // 
             // SaveParametersBtn
             // 
-            this.SaveParametersBtn.Location = new System.Drawing.Point(255, 250);
+            this.SaveParametersBtn.Location = new System.Drawing.Point(256, 291);
             this.SaveParametersBtn.Name = "SaveParametersBtn";
             this.SaveParametersBtn.Size = new System.Drawing.Size(196, 23);
             this.SaveParametersBtn.TabIndex = 26;
@@ -212,7 +216,7 @@ namespace VTC
             // CameraComboBox
             // 
             this.CameraComboBox.FormattingEnabled = true;
-            this.CameraComboBox.Location = new System.Drawing.Point(255, 223);
+            this.CameraComboBox.Location = new System.Drawing.Point(256, 9);
             this.CameraComboBox.Name = "CameraComboBox";
             this.CameraComboBox.Size = new System.Drawing.Size(196, 21);
             this.CameraComboBox.TabIndex = 25;
@@ -220,7 +224,7 @@ namespace VTC
             // 
             // btnConfigureRegions
             // 
-            this.btnConfigureRegions.Location = new System.Drawing.Point(255, 7);
+            this.btnConfigureRegions.Location = new System.Drawing.Point(256, 91);
             this.btnConfigureRegions.Name = "btnConfigureRegions";
             this.btnConfigureRegions.Size = new System.Drawing.Size(196, 23);
             this.btnConfigureRegions.TabIndex = 24;
@@ -231,7 +235,7 @@ namespace VTC
             // showPolygonsCheckbox
             // 
             this.showPolygonsCheckbox.AutoSize = true;
-            this.showPolygonsCheckbox.Location = new System.Drawing.Point(255, 36);
+            this.showPolygonsCheckbox.Location = new System.Drawing.Point(257, 68);
             this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
             this.showPolygonsCheckbox.Size = new System.Drawing.Size(98, 17);
             this.showPolygonsCheckbox.TabIndex = 23;
@@ -241,7 +245,7 @@ namespace VTC
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(352, 177);
+            this.label10.Location = new System.Drawing.Point(354, 183);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(82, 13);
             this.label10.TabIndex = 22;
@@ -249,16 +253,15 @@ namespace VTC
             // 
             // trackCountBox
             // 
-            this.trackCountBox.Location = new System.Drawing.Point(255, 174);
+            this.trackCountBox.Location = new System.Drawing.Point(257, 180);
             this.trackCountBox.Name = "trackCountBox";
             this.trackCountBox.Size = new System.Drawing.Size(91, 20);
             this.trackCountBox.TabIndex = 21;
-            this.trackCountBox.Text = "0";
             // 
             // pushStateCheckbox
             // 
             this.pushStateCheckbox.AutoSize = true;
-            this.pushStateCheckbox.Location = new System.Drawing.Point(255, 200);
+            this.pushStateCheckbox.Location = new System.Drawing.Point(257, 258);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
             this.pushStateCheckbox.Size = new System.Drawing.Size(117, 17);
             this.pushStateCheckbox.TabIndex = 20;
@@ -269,7 +272,7 @@ namespace VTC
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(352, 99);
+            this.label9.Location = new System.Drawing.Point(353, 157);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(99, 13);
             this.label9.TabIndex = 19;
@@ -277,16 +280,15 @@ namespace VTC
             // 
             // avgNoiseTextbox
             // 
-            this.avgNoiseTextbox.Location = new System.Drawing.Point(255, 96);
+            this.avgNoiseTextbox.Location = new System.Drawing.Point(256, 154);
             this.avgNoiseTextbox.Name = "avgNoiseTextbox";
             this.avgNoiseTextbox.Size = new System.Drawing.Size(91, 20);
             this.avgNoiseTextbox.TabIndex = 18;
-            this.avgNoiseTextbox.Text = "0";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(352, 72);
+            this.label8.Location = new System.Drawing.Point(353, 130);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(103, 13);
             this.label8.TabIndex = 17;
@@ -294,43 +296,10 @@ namespace VTC
             // 
             // avgAreaTextbox
             // 
-            this.avgAreaTextbox.Location = new System.Drawing.Point(255, 69);
+            this.avgAreaTextbox.Location = new System.Drawing.Point(256, 127);
             this.avgAreaTextbox.Name = "avgAreaTextbox";
             this.avgAreaTextbox.Size = new System.Drawing.Size(92, 20);
             this.avgAreaTextbox.TabIndex = 16;
-            this.avgAreaTextbox.Text = "20000";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(352, 151);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(84, 13);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "Movement mass";
-            // 
-            // movementMassBox
-            // 
-            this.movementMassBox.Location = new System.Drawing.Point(255, 148);
-            this.movementMassBox.Name = "movementMassBox";
-            this.movementMassBox.Size = new System.Drawing.Size(91, 20);
-            this.movementMassBox.TabIndex = 12;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(353, 125);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(83, 13);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "Detection count";
-            // 
-            // detectionCountBox
-            // 
-            this.detectionCountBox.Location = new System.Drawing.Point(255, 122);
-            this.detectionCountBox.Name = "detectionCountBox";
-            this.detectionCountBox.Size = new System.Drawing.Size(92, 20);
-            this.detectionCountBox.TabIndex = 10;
             // 
             // splitContainer2
             // 
@@ -348,7 +317,7 @@ namespace VTC
             // 
             this.splitContainer2.Panel2.Controls.Add(this.imageBox3);
             this.splitContainer2.Panel2.Controls.Add(this.panel3);
-            this.splitContainer2.Size = new System.Drawing.Size(530, 684);
+            this.splitContainer2.Size = new System.Drawing.Size(542, 684);
             this.splitContainer2.SplitterDistance = 342;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -357,7 +326,7 @@ namespace VTC
             this.imageBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBox2.Location = new System.Drawing.Point(0, 20);
             this.imageBox2.Name = "imageBox2";
-            this.imageBox2.Size = new System.Drawing.Size(530, 322);
+            this.imageBox2.Size = new System.Drawing.Size(542, 322);
             this.imageBox2.TabIndex = 10;
             this.imageBox2.TabStop = false;
             // 
@@ -367,7 +336,7 @@ namespace VTC
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(530, 20);
+            this.panel2.Size = new System.Drawing.Size(542, 20);
             this.panel2.TabIndex = 9;
             // 
             // label2
@@ -384,7 +353,7 @@ namespace VTC
             this.imageBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBox3.Location = new System.Drawing.Point(0, 20);
             this.imageBox3.Name = "imageBox3";
-            this.imageBox3.Size = new System.Drawing.Size(530, 318);
+            this.imageBox3.Size = new System.Drawing.Size(542, 318);
             this.imageBox3.TabIndex = 6;
             this.imageBox3.TabStop = false;
             // 
@@ -394,7 +363,7 @@ namespace VTC
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(530, 20);
+            this.panel3.Size = new System.Drawing.Size(542, 20);
             this.panel3.TabIndex = 5;
             // 
             // label3
@@ -412,11 +381,59 @@ namespace VTC
             this.pushStateTimer.Interval = 10000;
             this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
             // 
+            // serverUrlTextBox
+            // 
+            this.serverUrlTextBox.Location = new System.Drawing.Point(257, 232);
+            this.serverUrlTextBox.Name = "serverUrlTextBox";
+            this.serverUrlTextBox.Size = new System.Drawing.Size(195, 20);
+            this.serverUrlTextBox.TabIndex = 32;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(452, 235);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(63, 13);
+            this.label7.TabIndex = 33;
+            this.label7.Text = "Server URL";
+            // 
+            // frameWidthBox
+            // 
+            this.frameWidthBox.Location = new System.Drawing.Point(257, 36);
+            this.frameWidthBox.Name = "frameWidthBox";
+            this.frameWidthBox.Size = new System.Drawing.Size(37, 20);
+            this.frameWidthBox.TabIndex = 34;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(298, 39);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(55, 13);
+            this.label5.TabIndex = 36;
+            this.label5.Text = "Width (px)";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(402, 39);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(58, 13);
+            this.label6.TabIndex = 37;
+            this.label6.Text = "Height (px)";
+            // 
+            // frameHeightBox
+            // 
+            this.frameHeightBox.Location = new System.Drawing.Point(359, 36);
+            this.frameHeightBox.Name = "frameHeightBox";
+            this.frameHeightBox.Size = new System.Drawing.Size(37, 20);
+            this.frameHeightBox.TabIndex = 38;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1054, 687);
+            this.ClientSize = new System.Drawing.Size(1076, 687);
             this.Controls.Add(this.splitContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TrafficCounter";
@@ -457,10 +474,6 @@ namespace VTC
       private System.Windows.Forms.Label label1;
       private System.Windows.Forms.SplitContainer splitContainer2;
       private System.Windows.Forms.SplitContainer splitContainer3;
-      private System.Windows.Forms.Label label5;
-      private System.Windows.Forms.TextBox detectionCountBox;
-      private System.Windows.Forms.Label label6;
-      private System.Windows.Forms.TextBox movementMassBox;
       private Emgu.CV.UI.ImageBox imageBox3;
       private Emgu.CV.UI.ImageBox imageBox2;
       private System.Windows.Forms.Panel panel2;
@@ -483,5 +496,11 @@ namespace VTC
       private System.Windows.Forms.TextBox intersectionIDTextBox;
       private System.Windows.Forms.TextBox tbVistaStats;
       private System.Windows.Forms.TextBox debugTextBox;
+      private System.Windows.Forms.Label label7;
+      private System.Windows.Forms.TextBox serverUrlTextBox;
+      private System.Windows.Forms.TextBox frameHeightBox;
+      private System.Windows.Forms.Label label6;
+      private System.Windows.Forms.Label label5;
+      private System.Windows.Forms.TextBox frameWidthBox;
    }
 }

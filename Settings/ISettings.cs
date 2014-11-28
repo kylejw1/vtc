@@ -18,6 +18,12 @@
         /// </summary>
         string RegionConfigPath { get; }
 
+        #region Video stream parameters
+        double FrameWidth { get; }
+        double FrameHeight { get; }
+
+        #endregion
+
         #region Background subtraction parameters
 
         /// <summary>

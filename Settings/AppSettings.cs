@@ -14,6 +14,8 @@ namespace VTC.Settings
         private const string PerCarKey = "PerCar";
         private const string PerCarMinKey = "PerCarMin";
         private const string IntersectionIdKey = "IntersectionID";
+        private const string FrameWidthKey = "FrameWidth";
+        private const string FrameHeightKey = "FrameHeight";
 
         #endregion
 
@@ -24,8 +26,11 @@ namespace VTC.Settings
         public short FrameUploadIntervalMinutes { get; private set; }
         public int StateUploadIntervalMs { get; private set; }
 
+        public double FrameWidth { get; set; }
+        public double FrameHeight { get; set; }
+
         public string IntersectionID { get; set; }
-        public string ServerUrl { get; private set; }
+        public string ServerUrl { get; set; }
 
         public double Alpha { get; private set; }
 
@@ -67,6 +72,9 @@ namespace VTC.Settings
             FtpPassword = ConfigurationManager.AppSettings["FTPpassword"];
             FrameUploadIntervalMinutes = Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
             StateUploadIntervalMs = Convert.ToInt32(ConfigurationManager.AppSettings["state_upload_interval_ms"]);
+
+            FrameWidth = Convert.ToDouble(ConfigurationManager.AppSettings["FrameWidth"]);
+            FrameHeight = Convert.ToDouble(ConfigurationManager.AppSettings["FrameHeight"]);
 
             Alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"]);
             ColorThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"]);
@@ -110,6 +118,9 @@ namespace VTC.Settings
             _config.AppSettings.Settings[PerCarKey].Value = PerCar.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[PerCarMinKey].Value = PerCarMinimum.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[IntersectionIdKey].Value = IntersectionID;
+            _config.AppSettings.Settings[FrameWidthKey].Value = FrameWidth.ToString();
+            _config.AppSettings.Settings[FrameHeightKey].Value = FrameHeight.ToString();
+            
 
             _config.Save(ConfigurationSaveMode.Modified);
 
