@@ -271,8 +271,8 @@ namespace VTC
 
                 var lastState = vehicle.state_history.Last();
 
-                float x = (float)lastState.coordinates.x;
-                float y = (float)lastState.coordinates.y;
+                float x = (float)lastState.x;
+                float y = (float)lastState.y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
 
@@ -287,7 +287,7 @@ namespace VTC
                 if (render_clean)
                 {
                     frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.state_history.Last().blue, vehicle.state_history.Last().green, vehicle.state_history.Last().red), 2);
-                    frame.Draw(new CircleF(new PointF(x, y), 2), _stateColorGreen, 2);
+                    frame.Draw(new CircleF(new PointF(x, y), 2), _stateColorGreen, 1);
                 }
                 else
                 {
