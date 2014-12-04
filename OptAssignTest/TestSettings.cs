@@ -108,11 +108,6 @@ namespace OptAssignTest
             get { return 0.0; }
         }
 
-        public double PerCar
-        {
-            get { return 20000; }
-        }
-
         public int MaxObjectCount
         {
             get { return 20; }
@@ -125,8 +120,10 @@ namespace OptAssignTest
 
         public int CarRadius
         {
-            get { return 12; }
+            get { return _carRadius; }
+            set { _carRadius = value; }
         }
+        private int _carRadius = 12;
 
         public double FrameWidth
         {
