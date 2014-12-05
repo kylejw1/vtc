@@ -1,3 +1,5 @@
+using System.Windows.Forms;
+
 namespace VTC
 {
    partial class TrafficCounter
@@ -49,7 +51,7 @@ namespace VTC
             this.label9 = new System.Windows.Forms.Label();
             this.avgNoiseTextbox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.avgAreaTextbox = new System.Windows.Forms.TextBox();
+            this.carRadiusTextbox = new System.Windows.Forms.TextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -137,7 +139,7 @@ namespace VTC
             this.splitContainer3.Panel2.Controls.Add(this.label9);
             this.splitContainer3.Panel2.Controls.Add(this.avgNoiseTextbox);
             this.splitContainer3.Panel2.Controls.Add(this.label8);
-            this.splitContainer3.Panel2.Controls.Add(this.avgAreaTextbox);
+            this.splitContainer3.Panel2.Controls.Add(this.carRadiusTextbox);
             this.splitContainer3.Size = new System.Drawing.Size(527, 684);
             this.splitContainer3.SplitterDistance = 342;
             this.splitContainer3.TabIndex = 0;
@@ -216,6 +218,7 @@ namespace VTC
             // CameraComboBox
             // 
             this.CameraComboBox.FormattingEnabled = true;
+            this.CameraComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             this.CameraComboBox.Location = new System.Drawing.Point(256, 9);
             this.CameraComboBox.Name = "CameraComboBox";
             this.CameraComboBox.Size = new System.Drawing.Size(196, 21);
@@ -292,14 +295,14 @@ namespace VTC
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(103, 13);
             this.label8.TabIndex = 17;
-            this.label8.Text = "Average object area";
+            this.label8.Text = "Average vehicle radius";
             // 
             // avgAreaTextbox
             // 
-            this.avgAreaTextbox.Location = new System.Drawing.Point(256, 127);
-            this.avgAreaTextbox.Name = "avgAreaTextbox";
-            this.avgAreaTextbox.Size = new System.Drawing.Size(92, 20);
-            this.avgAreaTextbox.TabIndex = 16;
+            this.carRadiusTextbox.Location = new System.Drawing.Point(256, 127);
+            this.carRadiusTextbox.Name = "carRadiusTextbox";
+            this.carRadiusTextbox.Size = new System.Drawing.Size(92, 20);
+            this.carRadiusTextbox.TabIndex = 16;
             // 
             // splitContainer2
             // 
@@ -480,7 +483,7 @@ namespace VTC
       private System.Windows.Forms.Label label9;
       private System.Windows.Forms.TextBox avgNoiseTextbox;
       private System.Windows.Forms.Label label8;
-      private System.Windows.Forms.TextBox avgAreaTextbox;
+      private System.Windows.Forms.TextBox carRadiusTextbox;
       private System.Windows.Forms.CheckBox pushStateCheckbox;
       private System.Windows.Forms.Label label10;
       private System.Windows.Forms.TextBox trackCountBox;

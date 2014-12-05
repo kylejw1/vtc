@@ -47,7 +47,34 @@ namespace VTC
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
 
-        public double PerCar { get; set; }
+        public double CarRadius
+        {
+            get { return _carRadius; }
+            set
+            {
+                _carRadius = value;
+
+                // update PerCar
+
+                    // The sum of moving area is calculated by adding all pixel values across the image 
+                    // in the movement/foreground image after multiplication by the intersection ROI
+                    // Total value for a white pixel = 3x255 = 765
+
+                PerCar = Math.PI * value * value * (3 * 255);
+            }
+        }
+        private double _carRadius;
+
+        private double PerCar
+        {
+            get { return _perCar; }
+            set
+            {
+                _perCar = Math.Max(value, Settings.PerCarMinimum);
+            }
+        }
+        private double _perCar;
+
         public double NoiseMass { get; set; }
 
         //************* Event detection parameters ***************
@@ -117,10 +144,7 @@ namespace VTC
             _thresholdColor = new Bgr(Settings.ColorThreshold, Settings.ColorThreshold, Settings.ColorThreshold);
             MHT = new MultipleHypothesisTracker(settings);
 
-            PerCar = Settings.PerCar;
-            if (PerCar <= Settings.PerCarMinimum)
-                PerCar = Settings.PerCarMinimum;
-
+            CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
         }
 
