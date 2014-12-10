@@ -25,9 +25,66 @@ namespace VTC
        private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
-      List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
       bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
                                             //using a prerecorded video.
+
+      private List<CameraDevice> _cameraDevices = new List<CameraDevice>(); //List of all video input devices. Index, file location, name
+      private CameraDevice _selectedCamera = null;
+      private CameraDevice SelectedCamera
+      {
+          get
+          {
+              return _selectedCamera;
+          }
+          set
+          {
+              if (value == _selectedCamera) return;
+
+              _selectedCamera = value;
+
+              if (null != _cameraCapture)
+              {
+                  _cameraCapture.Dispose();
+              }
+
+              _cameraCapture = _selectedCamera.GetCapture();
+          }
+      }
+       //TODO: Move to new file if we want to keep this.  Might make sense to make an interface if we see the number of cameradevice settings is likely to increase.
+      // Interface would be extended by different stream classes, and the local camera class.  Could perhaps make a fake camera class as well for testing?
+      public class CameraDevice
+      {
+          private int? CameraIndex = null;
+          private string ConnectionString = null;
+          public string Name { get; private set; }
+
+          public CameraDevice(int index, string name)
+          {
+              CameraIndex = index;
+              Name = name;
+          }
+
+          public CameraDevice(string connectionString, string name)
+          {
+              ConnectionString = connectionString;
+              Name = name;  
+          }
+
+          public Capture GetCapture()
+          {
+              if (CameraIndex.HasValue)
+              {
+                  return new Capture(CameraIndex.Value);
+              }
+
+              if (!string.IsNullOrWhiteSpace(ConnectionString))
+              {
+                  return new Capture(ConnectionString);
+              }
+
+              return null;
+          }
+      }
 
       //************* Multiple hypothesis tracking parameters ***************  
       Vista Vista = null;
@@ -65,7 +122,7 @@ namespace VTC
              }
              else
              {
-                 _cameraCapture = new Capture(0);
+                 SelectedCamera = _cameraDevices.First();
                  _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
                  _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
              }
@@ -135,13 +192,28 @@ namespace VTC
           foreach (DsDevice _camera in _systemCameras)
           {
               //Add Device with an index and a name to the List.
-              _cameraDevices.Add(new KeyValuePair<int, string>(_deviceIndex, _camera.Name));
+              _cameraDevices.Add(new CameraDevice(_deviceIndex, _camera.Name));
 
               //Add a combobox item.
               CameraComboBox.Items.Add(_camera.Name);
 
               //Increment the index.
               _deviceIndex++;
+          }
+
+          // TODO: Temporary mess until we sort out IP camera config.  Don't commit
+          if (File.Exists("ipCameras.txt"))
+          {
+              var ipCameraStrings = File.ReadAllLines("ipCameras.txt");
+
+              foreach (var str in ipCameraStrings)
+              {
+                  var split = str.Split(',');
+                  if (split.Count() != 2) continue;
+
+                  _cameraDevices.Add(new CameraDevice(split[1], split[0]));
+                  CameraComboBox.Items.Add(split[0]);
+              }
           }
 
           //Disable eventhandler for the changing combobox index.
@@ -165,11 +237,10 @@ namespace VTC
           //Continue if it´s allowed to select a camera during the use of an prerecorded video.
           if (_changeInFileMode == true)
           {
-              //Change the capture device.
-              _cameraCapture = new Capture(CameraComboBox.SelectedIndex);
-
               //TODO: Reset processing variables.
-              //...
+
+              //Change the capture device.
+              SelectedCamera = _cameraDevices[CameraComboBox.SelectedIndex];
           }
       }
       
