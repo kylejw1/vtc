@@ -47,11 +47,6 @@
         double NoiseMass { get; }
 
         /// <summary>
-        /// White pixels per car in image.
-        /// </summary>
-        double PerCar { get; }
-
-        /// <summary>
         /// Maximum number of blobs to detect.
         /// </summary>
         int MaxObjectCount { get; }

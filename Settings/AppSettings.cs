@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Globalization;
 
@@ -11,11 +11,11 @@ namespace VTC.Settings
     {
         #region Constants
 
-        private const string PerCarKey = "PerCar";
         private const string PerCarMinKey = "PerCarMin";
         private const string IntersectionIdKey = "IntersectionID";
         private const string FrameWidthKey = "FrameWidth";
         private const string FrameHeightKey = "FrameHeight";
+        private const string CarRadiusKey = "CarRadius";
 
         #endregion
 
@@ -37,10 +37,9 @@ namespace VTC.Settings
         public int ColorThreshold { get; private set; }
 
         public double NoiseMass { get; private set; }
-        public double PerCar { get; set; }
         public int MaxObjectCount { get; private set; }
         public double PerCarMinimum { get; set; }
-        public int CarRadius { get; private set; }
+        public int CarRadius { get; set; }
 
         public int MissThreshold { get; private set; }
         public int MaxHypothesisTreeDepth { get; private set; }
@@ -73,17 +72,16 @@ namespace VTC.Settings
             FrameUploadIntervalMinutes = Convert.ToInt16(ConfigurationManager.AppSettings["FRAME_UPLOAD_INTERVAL_MINUTES"]);
             StateUploadIntervalMs = Convert.ToInt32(ConfigurationManager.AppSettings["state_upload_interval_ms"]);
 
-            FrameWidth = Convert.ToDouble(ConfigurationManager.AppSettings["FrameWidth"]);
-            FrameHeight = Convert.ToDouble(ConfigurationManager.AppSettings["FrameHeight"]);
+            FrameWidth = Convert.ToDouble(ConfigurationManager.AppSettings["FrameWidth"], CultureInfo.InvariantCulture);
+            FrameHeight = Convert.ToDouble(ConfigurationManager.AppSettings["FrameHeight"], CultureInfo.InvariantCulture);
 
-            Alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"]);
-            ColorThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"]);
+            Alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"], CultureInfo.InvariantCulture);
+            ColorThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"], CultureInfo.InvariantCulture);
 
-            CarRadius = Convert.ToInt32(ConfigurationManager.AppSettings["CarRadius"]);
-            PerCarMinimum = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarMinKey]);
+            CarRadius = Convert.ToInt32(ConfigurationManager.AppSettings[CarRadiusKey]);
+            PerCarMinimum = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarMinKey], CultureInfo.InvariantCulture);
             MaxObjectCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);
-            PerCar = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarKey]);
-            NoiseMass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"]);
+            NoiseMass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"], CultureInfo.InvariantCulture);
 
             MissThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["MissThreshold"]);
             MaxHypothesisTreeDepth = Convert.ToInt32(ConfigurationManager.AppSettings["MaxHypTreeDepth"]);
@@ -91,11 +89,11 @@ namespace VTC.Settings
             KHypotheses = Convert.ToInt32(ConfigurationManager.AppSettings["KHypotheses"]);
             ValidationRegionDeviation = Convert.ToInt32(ConfigurationManager.AppSettings["ValRegDeviation"]);
 
-            LambdaX = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaX"]);
-            LambdaF = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaF"]);
-            LambdaN = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaN"]);
-            Pd = Convert.ToDouble(ConfigurationManager.AppSettings["Pd"]);
-            Px = Convert.ToDouble(ConfigurationManager.AppSettings["Px"]);
+            LambdaX = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaX"], CultureInfo.InvariantCulture);
+            LambdaF = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaF"], CultureInfo.InvariantCulture);
+            LambdaN = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaN"], CultureInfo.InvariantCulture);
+            Pd = Convert.ToDouble(ConfigurationManager.AppSettings["Pd"], CultureInfo.InvariantCulture);
+            Px = Convert.ToDouble(ConfigurationManager.AppSettings["Px"], CultureInfo.InvariantCulture);
 
             ServerUrl = ConfigurationManager.AppSettings["server_url"];
             IntersectionID = ConfigurationManager.AppSettings[IntersectionIdKey];
@@ -106,8 +104,8 @@ namespace VTC.Settings
 
             // some unused settings from TrafficCounter. Keeping it just in case.
             double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
-            double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"]);                           //Process noise matrix multiplier
-            double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"]);                           //Measurement noise matrix multiplier
+            double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"], CultureInfo.InvariantCulture);                           //Process noise matrix multiplier
+            double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"], CultureInfo.InvariantCulture);                           //Measurement noise matrix multiplier
         }
 
         /// <summary>
@@ -115,11 +113,11 @@ namespace VTC.Settings
         /// </summary>
         public void Save() // only several parameters can be saved
         {
-            _config.AppSettings.Settings[PerCarKey].Value = PerCar.ToString(CultureInfo.InvariantCulture);
+            _config.AppSettings.Settings[CarRadiusKey].Value = CarRadius.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[PerCarMinKey].Value = PerCarMinimum.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[IntersectionIdKey].Value = IntersectionID;
-            _config.AppSettings.Settings[FrameWidthKey].Value = FrameWidth.ToString();
-            _config.AppSettings.Settings[FrameHeightKey].Value = FrameHeight.ToString();
+            _config.AppSettings.Settings[FrameWidthKey].Value = FrameWidth.ToString(CultureInfo.InvariantCulture);
+            _config.AppSettings.Settings[FrameHeightKey].Value = FrameHeight.ToString(CultureInfo.InvariantCulture);
             
 
             _config.Save(ConfigurationSaveMode.Modified);

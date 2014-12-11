@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -179,9 +178,7 @@ namespace VTC
       /// </summary>
       private void LoadParameters()
       {
-          Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-          avgAreaTextbox.Text = _settings.PerCar.ToString(CultureInfo.InvariantCulture); 
+          carRadiusTextbox.Text = _settings.CarRadius.ToString(CultureInfo.InvariantCulture); 
           avgNoiseTextbox.Text = _settings.PerCarMinimum.ToString(CultureInfo.InvariantCulture);
 
           intersectionIDTextBox.Text = _settings.IntersectionID;
@@ -199,7 +196,7 @@ namespace VTC
       {
           try
           {
-              _settings.PerCar = double.Parse(avgAreaTextbox.Text, CultureInfo.InvariantCulture);
+              _settings.CarRadius = int.Parse(carRadiusTextbox.Text, CultureInfo.InvariantCulture);
               _settings.PerCarMinimum = double.Parse(avgNoiseTextbox.Text, CultureInfo.InvariantCulture);
               _settings.IntersectionID = intersectionIDTextBox.Text;
               _settings.ServerUrl = serverUrlTextBox.Text;
@@ -246,7 +243,7 @@ namespace VTC
           // Also, do we want an "apply" button?  I feel like if the frame updates while a user has helf-changed the 
           // per_car value, we could get some bad values?
           Vista.NoiseMass = Convert.ToInt32(avgNoiseTextbox.Text);
-          Vista.PerCar = Convert.ToInt32(avgAreaTextbox.Text);
+          Vista.CarRadius = Convert.ToInt32(carRadiusTextbox.Text);
 
           // Send the new image frame to the vista for processing
           Vista.Update(frame);
@@ -257,7 +254,7 @@ namespace VTC
           imageBox3.Image = Vista.Movement_Mask;
 
           // Update statistics
-          trackCountBox.Text = Vista.CurrentVehicles.Count().ToString();
+          trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
 
           tbVistaStats.Text = Vista.GetStatString();
       }
