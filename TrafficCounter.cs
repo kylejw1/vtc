@@ -168,9 +168,19 @@ namespace VTC
               //Change the capture device.
               _cameraCapture = new Capture(CameraComboBox.SelectedIndex);
 
-              //TODO: Reset processing variables.
-              //...
+              //Refresh background.
+              Image<Bgr, Byte> Frame = _cameraCapture.QueryFrame();
+              RefreshBackground(Frame);
           }
+      }
+
+      /// <summary>
+      /// Method for refreshing the background.
+      /// </summary>
+      private void RefreshBackground(Image<Bgr, Byte> Frame) 
+      {
+          //Refresh background.
+          Vista.InitializeBackground(Frame);
       }
       
        /// <summary>

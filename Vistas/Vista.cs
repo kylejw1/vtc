@@ -201,6 +201,15 @@ namespace VTC
             }
         }
 
+        public void InitializeBackground(Image<Bgr, Byte> frame)
+        {
+            using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
+            {
+                Color_Background.RunningAvg(BackgroundUpdate, 1.0);
+            }
+        }
+
+
         private int CountObjects()
         {
             Color_Difference = Color_Background.AbsDiff(Frame.Convert<Bgr, float>());
