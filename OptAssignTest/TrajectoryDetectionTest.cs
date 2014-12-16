@@ -1,14 +1,12 @@
-using System;
 using System.Drawing;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VTC;
 using VTC.Settings;
 
 namespace OptAssignTest
 {
     [TestClass]
-    public class TrajectoryDetectionTest
+    public class TrajectoryDetectionTest : TestBase
     {
         [TestMethod]
         public void EmptyTrajectory_ShouldNotDetectVehicles()
@@ -44,9 +42,6 @@ namespace OptAssignTest
                 }
             }
         }
-
-
-        
         
         [TestMethod]
         public void TwoDiagonalsTrajectories_ShouldDetectTwoVehicles()
@@ -68,43 +63,6 @@ namespace OptAssignTest
                     Assert.AreEqual(2, vista.CurrentVehicles.Count);
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates initialized intersection vista to be used for tests.
-        /// </summary>
-        /// <returns></returns>
-        private static IntersectionVista CreateVista(ISettings settings)
-        {
-            // create mask for the whole image
-            var polygon = new Polygon();
-            polygon.AddRange(new[]
-                            {
-                                new Point(0, 0), 
-                                new Point(0, (int) settings.FrameHeight),
-                                new Point((int) settings.FrameWidth, (int) settings.FrameHeight), 
-                                new Point((int) settings.FrameWidth, 0),
-                                new Point(0, 0)
-                            });
-
-            var regionConfig = new RegionConfig
-                                {
-                                    RoiMask = polygon
-                                };
-
-            return new IntersectionVista(settings, (int) settings.FrameWidth, (int) settings.FrameHeight)
-                    {
-                        RegionConfiguration = regionConfig
-                    };
-        }
-
-        /// <summary>
-        /// Assuming that vehicles is circle, create settings for it.
-        /// </summary>
-        /// <param name="vehicleRadius">Radius of "vehicle"</param>
-        private static ISettings CreateSettings(int vehicleRadius)
-        {
-            return new TestSettings { CarRadius = vehicleRadius };
         }
     }
 } ;
