@@ -59,7 +59,7 @@ namespace OptAssignTest
         }
 
         [TestMethod]
-        [Description("Vehicle should be recognized as the same after loss and reappearance within threshold.")]
+        [Description("Vehicle should be recognized as the same after loss and reappearence within threshold.")]
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
             const uint frameWhenDetectionLost = 150;
@@ -98,13 +98,13 @@ namespace OptAssignTest
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected");
 
                         Assert.IsTrue(vehicles[0].state_history.Count > frameWithReappearence, "It should be the same car as before.");
-                        Assert.IsTrue(vehicles[0].state_history.Last().missed_detections == 0, "Car visibility reappearance should be detected.");
+                        Assert.IsTrue(vehicles[0].state_history.Last().missed_detections == 0, "Car visibility reappearence should be detected.");
                     }
                 });
         }
 
         [TestMethod]
-        [Description("Vehicle should be recognized as the same after loss and reappearance within threshold.")]
+        [Description("Vehicle should be recognized as a new one after loss and reappearence after threshold.")]
         public void ReappearenceAfterThreshold_ShouldBeDetected()
         {
             const uint frameWhenDetectionLost = 150;
