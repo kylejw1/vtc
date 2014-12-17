@@ -71,8 +71,12 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Car.cs" />
     <Compile Include="OptAssignTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Script.cs" />
+    <Compile Include="ScriptedTests.cs" />
+    <Compile Include="TestBase.cs" />
     <Compile Include="TestSettings.cs" />
     <Compile Include="TrajectoryDetectionTest.cs" />
     <Compile Include="CircleVehicles.cs" />

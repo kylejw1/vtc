@@ -31,10 +31,9 @@ namespace TreeLib
 
         public T nodeData; 
 
-        public Node(T value)
+        public Node(T value) : this()
         {
             nodeData = value;
-            children = new List<Node<T>>();
         }
 
         public Node()
@@ -58,7 +57,7 @@ namespace TreeLib
         {
             Node<T> newchild = new Node<T>(value);
             newchild.parent = this;
-            if (newchild != null && children != null)
+            if (children != null)
                 this.children.Add(newchild);
         }
 
@@ -381,7 +380,7 @@ namespace TreeLib
         {
             HypothesisTree newchild = new HypothesisTree(value);
             newchild.parent = this;
-            if (newchild != null && children != null)
+            if (children != null)
                 this.children.Add(newchild);
         }
 
