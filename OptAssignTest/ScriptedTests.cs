@@ -21,16 +21,17 @@ namespace OptAssignTest
         [Description("Car should be tracked after visibility loss until threshold happens.")]
         public void VisibilityLoss_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 150;
+            const uint frameWhenDetectionLost = 100;
             const int vehicleRadius = 3;
 
             var settings = CreateSettings(vehicleRadius);
             var midX = (int)settings.FrameWidth / 2;
+            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
 
             var script = new Script();
             script
                 .CreateCar()
-                .AddPath(0, 400, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
                 .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
 
             RunScript(settings, script, (vista, frame) =>
@@ -62,17 +63,18 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as the same after loss and reappearence within threshold.")]
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 150;
+            const uint frameWhenDetectionLost = 100;
             const int vehicleRadius = 3;
 
             var settings = CreateSettings(vehicleRadius);
             var midX = (int) settings.FrameWidth/2;
-            var frameWithReappearence = (uint) (frameWhenDetectionLost + settings.MissThreshold - 10);
+            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 10);
 
             var script = new Script();
             script
                 .CreateCar()
-                .AddPath(0, 400, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
             RunScript(settings, script, (vista, frame) =>
@@ -107,17 +109,18 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as a new one after loss and reappearence after threshold.")]
         public void ReappearenceAfterThreshold_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 150;
+            const uint frameWhenDetectionLost = 100;
             const int vehicleRadius = 3;
 
             var settings = CreateSettings(vehicleRadius);
             var midX = (int) settings.FrameWidth/2;
-            var frameWithReappearence = (uint) (frameWhenDetectionLost + settings.MissThreshold + 10);
+            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold + 10);
 
             var script = new Script();
             script
                 .CreateCar()
-                .AddPath(0, 400, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
             RunScript(settings, script, (vista, frame) =>
@@ -148,6 +151,49 @@ namespace OptAssignTest
                         //Assert.IsTrue(vehicles[0].state_history.Last().missed_detections == 0, "No missed detection expected.");
                     }
                 });
+        }
+
+        [TestMethod]
+        [Description("Vehicle might (slightly?) change color, and it should not affect recognition")]
+        public void ChangedCarColor_ShouldNotAffectTracking()
+        {
+            const int vehicleRadius = 3;
+
+            var settings = CreateSettings(vehicleRadius);
+            var midX = (int)settings.FrameWidth / 2;
+            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
+
+            var script = new Script();
+            script
+                .CreateCar()
+                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .CarColor( // car changes color
+                    delegate(uint frame)
+                    {
+                        switch (frame % 5)
+                        {
+                            case 0:
+                            case 4:
+                                return new Bgr(0xff, 0xff, 0xff);
+                            case 1:
+                            case 3:
+                                return new Bgr(0xee, 0xee, 0xee);
+                            case 2:
+                                return new Bgr(0xdd, 0xdd, 0xdd);
+                            default:
+                                throw new Exception("what?");
+                        }
+                    }); 
+
+            RunScript(settings, script, (vista, frame) =>
+            {
+                var vehicles = vista.CurrentVehicles;
+
+                if (frame > DetectionThreshold)
+                {
+                    Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected.");
+                }
+            });
         }
 
         /// <summary>
