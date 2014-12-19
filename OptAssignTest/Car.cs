@@ -7,8 +7,9 @@ using Emgu.CV.Structure;
 
 namespace OptAssignTest
 {
-    class Car
+    public class Car
     {
+
         #region Inner declarations
 
         // TODO: think - might be moved out for complex trajectories
@@ -57,6 +58,24 @@ namespace OptAssignTest
             get { return _maxFrame; }
         }
         private uint _maxFrame = UInt32.MinValue;
+
+        /// <summary>
+        /// Car size.
+        /// </summary>
+        public uint CarRadius
+        {
+            get { return _carRadius; }
+        }
+        private readonly uint _carRadius;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="carRadius">Car size.</param>
+        public Car(uint carRadius) 
+        {
+            _carRadius = carRadius;
+        }
 
         /// <summary>
         /// Set car as always visible.
@@ -131,7 +150,7 @@ namespace OptAssignTest
             {
                 // draw car at the point
                 var point = section.GetPoint(frame);
-                scene.Draw(new CircleF(new PointF(point.X, point.Y), 3), _carColor(frame), 0);
+                scene.Draw(new CircleF(new PointF(point.X, point.Y), CarRadius), _carColor(frame), 0); // TODO: someday move out actual drawing out of here
 
                 break;
             }

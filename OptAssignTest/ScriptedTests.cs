@@ -1,37 +1,23 @@
-﻿using System;
-using System.Drawing;
-using System.Linq;
-using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VTC;
-using VTC.Settings;
 
 namespace OptAssignTest
 {
     [TestClass]
-    public class ScriptedTests : TestBase
+    public class VisibilityLossTests : ScriptedTestBase
     {
-        /// <summary>
-        /// Frames to skip before validation.
-        /// </summary>
-        private const int DetectionThreshold = 10;
-
         [TestMethod]
         [Description("Car should be tracked after visibility loss until threshold happens.")]
         public void VisibilityLoss_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 100;
-            const int vehicleRadius = 3;
+            var settings = CreateSettings(VehicleRadius);
+            uint frameWhenDetectionLost = (uint) (settings.FrameHeight / 2);
 
-            var settings = CreateSettings(vehicleRadius);
-            var midX = (int)settings.FrameWidth / 2;
-            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
 
             var script = new Script();
             script
-                .CreateCar()
-                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(settings) 
                 .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
 
             RunScript(settings, script, (vista, frame) =>
@@ -63,18 +49,15 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as the same after loss and reappearence within threshold.")]
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 100;
-            const int vehicleRadius = 3;
+            var settings = CreateSettings(VehicleRadius);
+            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
 
-            var settings = CreateSettings(vehicleRadius);
-            var midX = (int) settings.FrameWidth/2;
-            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
             var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 10);
 
             var script = new Script();
             script
-                .CreateCar()
-                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(settings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
             RunScript(settings, script, (vista, frame) =>
@@ -109,18 +92,15 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as a new one after loss and reappearence after threshold.")]
         public void ReappearenceAfterThreshold_ShouldBeDetected()
         {
-            const uint frameWhenDetectionLost = 100;
-            const int vehicleRadius = 3;
+            var settings = CreateSettings(VehicleRadius);
+            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
 
-            var settings = CreateSettings(vehicleRadius);
-            var midX = (int) settings.FrameWidth/2;
-            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
             var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold + 10);
 
             var script = new Script();
             script
-                .CreateCar()
-                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(settings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
             RunScript(settings, script, (vista, frame) =>
@@ -153,69 +133,5 @@ namespace OptAssignTest
                 });
         }
 
-        [TestMethod]
-        [Description("Vehicle might (slightly?) change color, and it should not affect recognition")]
-        public void ChangedCarColor_ShouldNotAffectTracking()
-        {
-            const int vehicleRadius = 3;
-
-            var settings = CreateSettings(vehicleRadius);
-            var midX = (int)settings.FrameWidth / 2;
-            var pathLength = (uint)settings.FrameHeight - vehicleRadius;
-
-            var script = new Script();
-            script
-                .CreateCar()
-                .AddPath(0, pathLength, frame => new Point(midX, (int)frame + vehicleRadius)) // vertical path
-                .CarColor( // car changes color
-                    delegate(uint frame)
-                    {
-                        switch (frame % 5)
-                        {
-                            case 0:
-                            case 4:
-                                return new Bgr(0xff, 0xff, 0xff);
-                            case 1:
-                            case 3:
-                                return new Bgr(0xee, 0xee, 0xee);
-                            case 2:
-                                return new Bgr(0xdd, 0xdd, 0xdd);
-                            default:
-                                throw new Exception("what?");
-                        }
-                    }); 
-
-            RunScript(settings, script, (vista, frame) =>
-            {
-                var vehicles = vista.CurrentVehicles;
-
-                if (frame > DetectionThreshold)
-                {
-                    Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected.");
-                }
-            });
-        }
-
-        /// <summary>
-        /// Execute script against the test action.
-        /// </summary>
-        private static void RunScript(ISettings settings, Script script, Action<Vista, uint> testAction)
-        {
-            var vista = CreateVista(settings);
-
-            var background = new Image<Bgr, byte>((int) settings.FrameWidth, (int) settings.FrameHeight, new Bgr(Color.Black));
-            vista.Update(background);
-
-            var lastFrame = script.MaxFrame;
-            for (uint frame = 0; frame < lastFrame; frame++)
-            {
-                var image = background.Clone();
-
-                script.Draw(frame, image);
-                vista.Update(image);
-
-                testAction(vista, frame);
-            }
-        }
     }
 }
