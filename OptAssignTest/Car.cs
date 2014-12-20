@@ -7,8 +7,9 @@ using Emgu.CV.Structure;
 
 namespace OptAssignTest
 {
-    class Car
+    public class Car
     {
+
         #region Inner declarations
 
         // TODO: think - might be moved out for complex trajectories
@@ -40,9 +41,12 @@ namespace OptAssignTest
 
         #endregion
 
-        private static readonly Bgr _carColor = new Bgr(Color.White);
+        private static readonly Bgr _whiteColor = new Bgr(Color.White);
+
+        private static readonly Func<uint, Bgr> AlwaysWhiteFunc = _ => _whiteColor;
         private static readonly Func<uint, bool> AlwaysVisibleFunc = _ => true;
 
+        private static Func<uint, Bgr> _carColor = AlwaysWhiteFunc; // car is white by default
         private Func<uint, bool> _visibilityFunc = AlwaysVisibleFunc; // car is always visible by default
         private readonly List<PathSection> _sections = new List<PathSection>();
 
@@ -56,6 +60,24 @@ namespace OptAssignTest
         private uint _maxFrame = UInt32.MinValue;
 
         /// <summary>
+        /// Car size.
+        /// </summary>
+        public uint CarRadius
+        {
+            get { return _carRadius; }
+        }
+        private readonly uint _carRadius;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="carRadius">Car size.</param>
+        public Car(uint carRadius) 
+        {
+            _carRadius = carRadius;
+        }
+
+        /// <summary>
         /// Set car as always visible.
         /// </summary>
         public Car AlwaysVisible()
@@ -67,13 +89,38 @@ namespace OptAssignTest
         /// Set custom visibility for the car.
         /// </summary>
         /// <param name="visibilityFunc">
-        /// Function which returns opacity for the car for the given frame. 
-        /// 1 is full opacity, 0 is full transparency.
+        /// Function which returns visibility for the car for the given frame. 
         /// </param>
         public Car Visibility(Func<uint, bool> visibilityFunc)
         {
             _visibilityFunc = visibilityFunc;
             return this;
+        }
+
+        /// <summary>
+        /// Set custom car coloring for the car.
+        /// </summary>
+        /// <param name="colorFunc">Function which returns color of the car for the given frame.</param>
+        public Car CarColor(Func<uint, Bgr> colorFunc)
+        {
+            _carColor = colorFunc;
+            return this;
+        }
+
+        /// <summary>
+        /// Set custom car coloring for the car.
+        /// </summary>
+        public Car CarColor(Color color)
+        {
+            return CarColor(new Bgr(color));
+        }
+
+        /// <summary>
+        /// Set custom car coloring for the car.
+        /// </summary>
+        public Car CarColor(Bgr color)
+        {
+            return CarColor(_ => color);
         }
 
         public Car AddPath(uint @from, uint to, Func<uint, Point> pathGenerator)
@@ -103,7 +150,7 @@ namespace OptAssignTest
             {
                 // draw car at the point
                 var point = section.GetPoint(frame);
-                scene.Draw(new CircleF(new PointF(point.X, point.Y), 3), _carColor, 0);
+                scene.Draw(new CircleF(new PointF(point.X, point.Y), CarRadius), _carColor(frame), 0); // TODO: someday move out actual drawing out of here
 
                 break;
             }

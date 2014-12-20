@@ -9,7 +9,7 @@ namespace OptAssignTest
     /// <summary>
     /// Traffic script.
     /// </summary>
-    class Script
+    public class Script
     {
         /// <summary>
         /// Car collection.
@@ -32,9 +32,9 @@ namespace OptAssignTest
         /// Create new car in the collection.
         /// </summary>
         /// <returns></returns>
-        public Car CreateCar()
+        public Car CreateCar(uint carRadius)
         {
-            var car = new Car();
+            var car = new Car(carRadius);
             _cars.Add(car);
             return car;
         }

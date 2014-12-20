@@ -72,10 +72,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Car.cs" />
+    <Compile Include="CarUtilities.cs" />
+    <Compile Include="ColorChangeTests.cs" />
     <Compile Include="OptAssignTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Script.cs" />
-    <Compile Include="ScriptedTests.cs" />
+    <Compile Include="ScriptedTestBase.cs" />
+    <Compile Include="VisibilityLossTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestSettings.cs" />
     <Compile Include="TrajectoryDetectionTest.cs" />
