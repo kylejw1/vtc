@@ -12,5 +12,11 @@ namespace OptAssignTest
 
             return car.AddPath(0, pathLength, frame => new Point(midX, (int)(frame + car.CarRadius)));
         }
+
+
+        public static uint VerticalPathLength(this ISettings settings) // TODO: should be merged to path generator.
+        {
+            return (uint) settings.FrameHeight;
+        }
     }
 }

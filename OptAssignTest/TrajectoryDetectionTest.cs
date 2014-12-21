@@ -25,8 +25,7 @@ namespace OptAssignTest
         [TestMethod]
         public void SingleDiagonalTrajectory_ShouldDetectSingleVehicle()
         {
-            const int vehicleRadius = 3; // in pixels
-            ISettings settings = CreateSettings(vehicleRadius);
+            ISettings settings = CreateSettings(VehicleRadius);
             var vista = CreateVista(settings);
 
             var diagonal = Enumerable.Range(5, 195).Select(x => new[] { new Point(x, x) });
@@ -46,11 +45,10 @@ namespace OptAssignTest
         [TestMethod]
         public void TwoDiagonalsTrajectories_ShouldDetectTwoVehicles()
         {
-            const int vehicleRadius = 3; // in pixels
-            ISettings settings = CreateSettings(vehicleRadius);
+            ISettings settings = CreateSettings(VehicleRadius);
             var vista = CreateVista(settings);
 
-            var diagonals = Enumerable.Range(5 + vehicleRadius, 195).Select(x => new[] { new Point(x, x + 5), new Point(x, x - 5) });
+            var diagonals = Enumerable.Range(5 + VehicleRadius, 195).Select(x => new[] { new Point(x, x + 5), new Point(x, x - 5) });
 
             int count = 0;
             var generator = new CircleVehicles((int) settings.FrameWidth, (int) settings.FrameHeight, diagonals);

@@ -18,11 +18,6 @@ namespace OptAssignTest
         protected const int DetectionThreshold = 10;
 
         /// <summary>
-        /// Default vehicle size.
-        /// </summary>
-        protected const int VehicleRadius = 3;
-
-        /// <summary>
         /// Execute script against the test action.
         /// </summary>
         protected static void RunScript(ISettings settings, Script script, Action<Vista, uint> testAction)

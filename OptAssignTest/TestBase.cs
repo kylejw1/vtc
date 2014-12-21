@@ -7,6 +7,11 @@ namespace OptAssignTest
     public class TestBase
     {
         /// <summary>
+        /// Default vehicle size.
+        /// </summary>
+        protected const int VehicleRadius = 3; // in pixels
+
+        /// <summary>
         /// Creates initialized intersection vista to be used for tests.
         /// </summary>
         /// <returns></returns>
