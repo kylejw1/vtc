@@ -28,9 +28,9 @@ namespace VTC
       bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
                                             //using a prerecorded video.
 
-      private List<CameraDevice> _cameraDevices = new List<CameraDevice>(); //List of all video input devices. Index, file location, name
-      private CameraDevice _selectedCamera = null;
-      private CameraDevice SelectedCamera
+      private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
+      private CaptureSource _selectedCamera = null;
+      private CaptureSource SelectedCamera
       {
           get
           {
@@ -48,41 +48,11 @@ namespace VTC
               }
 
               _cameraCapture = _selectedCamera.GetCapture();
-          }
-      }
-       //TODO: Move to new file if we want to keep this.  Might make sense to make an interface if we see the number of cameradevice settings is likely to increase.
-      // Interface would be extended by different stream classes, and the local camera class.  Could perhaps make a fake camera class as well for testing?
-      public class CameraDevice
-      {
-          private int? CameraIndex = null;
-          private string ConnectionString = null;
-          public string Name { get; private set; }
 
-          public CameraDevice(int index, string name)
-          {
-              CameraIndex = index;
-              Name = name;
-          }
+              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
+              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
 
-          public CameraDevice(string connectionString, string name)
-          {
-              ConnectionString = connectionString;
-              Name = name;  
-          }
-
-          public Capture GetCapture()
-          {
-              if (CameraIndex.HasValue)
-              {
-                  return new Capture(CameraIndex.Value);
-              }
-
-              if (!string.IsNullOrWhiteSpace(ConnectionString))
-              {
-                  return new Capture(ConnectionString);
-              }
-
-              return null;
+              Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
           }
       }
 
@@ -116,21 +86,7 @@ namespace VTC
       {
          try
          {
-             if (UseLocalVideo(_filename))
-             {
-                 _cameraCapture = new Capture(_filename);
-             }
-             else
-             {
-                 SelectedCamera = _cameraDevices.First();
-                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
-                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
-             }
-
-             Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
-
-             var regionConfig = RegionConfig.Load(_settings.RegionConfigPath);
-             if (null != regionConfig) Vista.RegionConfiguration = regionConfig;
+            SelectedCamera = _cameras.First();
          }
          catch (Exception e)
          {
@@ -177,11 +133,23 @@ namespace VTC
            return false;
        }
 
+       private void AddCamera(CaptureSource camera)
+       {
+           _cameras.Add(camera);
+           CameraComboBox.Items.Add(camera.ToString());
+       }
+
       /// <summary>
       /// Method for initializing the camera selection combobox.
       /// </summary>
       void InitializeCameraSelection()
       {
+          // Add video file as source, if provided
+          if (UseLocalVideo(_filename))
+          {
+              AddCamera(new VideoFileCapture("File: " + Path.GetFileName(_filename), _filename));
+          }
+
           //List all video input devices.
           DsDevice[] _systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
 
@@ -192,10 +160,7 @@ namespace VTC
           foreach (DsDevice _camera in _systemCameras)
           {
               //Add Device with an index and a name to the List.
-              _cameraDevices.Add(new CameraDevice(_deviceIndex, _camera.Name));
-
-              //Add a combobox item.
-              CameraComboBox.Items.Add(_camera.Name);
+              AddCamera(new SystemCamera(_camera.Name, _deviceIndex));
 
               //Increment the index.
               _deviceIndex++;
@@ -211,8 +176,7 @@ namespace VTC
                   var split = str.Split(',');
                   if (split.Count() != 2) continue;
 
-                  _cameraDevices.Add(new CameraDevice(split[1], split[0]));
-                  CameraComboBox.Items.Add(split[0]);
+                  AddCamera(new IpCamera(split[0], split[1]));
               }
           }
 
@@ -220,7 +184,7 @@ namespace VTC
           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
 
           //Set the index if a device could be found.
-          if (_cameraDevices.Count > 0)
+          if (_cameras.Count > 0)
           {
               CameraComboBox.SelectedIndex = 0;
           }
@@ -237,10 +201,8 @@ namespace VTC
           //Continue if it´s allowed to select a camera during the use of an prerecorded video.
           if (_changeInFileMode == true)
           {
-              //TODO: Reset processing variables.
-
               //Change the capture device.
-              SelectedCamera = _cameraDevices[CameraComboBox.SelectedIndex];
+              SelectedCamera = _cameras[CameraComboBox.SelectedIndex];
           }
       }
 
