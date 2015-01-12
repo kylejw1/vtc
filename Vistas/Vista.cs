@@ -135,7 +135,11 @@ namespace VTC
             Settings = settings;
             Width = width;
             Height = height;
-            RegionConfiguration = new RegionConfig();
+
+            RegionConfiguration = RegionConfig.Load(settings.RegionConfigPath);
+            if (null == RegionConfiguration)
+                RegionConfiguration = new RegionConfig();
+
             EventConfiguration = new EventConfig();
 
             LastDetectionCount = 0;

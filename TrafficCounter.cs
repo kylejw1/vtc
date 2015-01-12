@@ -25,9 +25,36 @@ namespace VTC
        private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
-      List<KeyValuePair<int, string>> _cameraDevices = new List<KeyValuePair<int, string>>();   //List of all video input devices. 
       bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
                                             //using a prerecorded video.
+
+      private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
+      private CaptureSource _selectedCamera = null;
+      private CaptureSource SelectedCamera
+      {
+          get
+          {
+              return _selectedCamera;
+          }
+          set
+          {
+              if (value == _selectedCamera) return;
+
+              _selectedCamera = value;
+
+              if (null != _cameraCapture)
+              {
+                  _cameraCapture.Dispose();
+              }
+
+              _cameraCapture = _selectedCamera.GetCapture();
+
+              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
+              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
+
+              Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
+          }
+      }
 
       //************* Multiple hypothesis tracking parameters ***************  
       Vista Vista = null;
@@ -59,21 +86,7 @@ namespace VTC
       {
          try
          {
-             if (UseLocalVideo(_filename))
-             {
-                 _cameraCapture = new Capture(_filename);
-             }
-             else
-             {
-                 _cameraCapture = new Capture(0);
-                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
-                 _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
-             }
-
-             Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
-
-             var regionConfig = RegionConfig.Load(_settings.RegionConfigPath);
-             if (null != regionConfig) Vista.RegionConfiguration = regionConfig;
+            SelectedCamera = _cameras.First();
          }
          catch (Exception e)
          {
@@ -120,11 +133,23 @@ namespace VTC
            return false;
        }
 
+       private void AddCamera(CaptureSource camera)
+       {
+           _cameras.Add(camera);
+           CameraComboBox.Items.Add(camera.ToString());
+       }
+
       /// <summary>
       /// Method for initializing the camera selection combobox.
       /// </summary>
       void InitializeCameraSelection()
       {
+          // Add video file as source, if provided
+          if (UseLocalVideo(_filename))
+          {
+              AddCamera(new VideoFileCapture("File: " + Path.GetFileName(_filename), _filename));
+          }
+
           //List all video input devices.
           DsDevice[] _systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
 
@@ -135,20 +160,31 @@ namespace VTC
           foreach (DsDevice _camera in _systemCameras)
           {
               //Add Device with an index and a name to the List.
-              _cameraDevices.Add(new KeyValuePair<int, string>(_deviceIndex, _camera.Name));
-
-              //Add a combobox item.
-              CameraComboBox.Items.Add(_camera.Name);
+              AddCamera(new SystemCamera(_camera.Name, _deviceIndex));
 
               //Increment the index.
               _deviceIndex++;
+          }
+
+          // TODO: Temporary mess until we sort out IP camera config.  Don't commit
+          if (File.Exists("ipCameras.txt"))
+          {
+              var ipCameraStrings = File.ReadAllLines("ipCameras.txt");
+
+              foreach (var str in ipCameraStrings)
+              {
+                  var split = str.Split(',');
+                  if (split.Count() != 2) continue;
+
+                  AddCamera(new IpCamera(split[0], split[1]));
+              }
           }
 
           //Disable eventhandler for the changing combobox index.
           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
 
           //Set the index if a device could be found.
-          if (_cameraDevices.Count > 0)
+          if (_cameras.Count > 0)
           {
               CameraComboBox.SelectedIndex = 0;
           }
@@ -166,11 +202,7 @@ namespace VTC
           if (_changeInFileMode == true)
           {
               //Change the capture device.
-              _cameraCapture = new Capture(CameraComboBox.SelectedIndex);
-
-              //Refresh background.
-              Image<Bgr, Byte> Frame = _cameraCapture.QueryFrame();
-              RefreshBackground(Frame);
+              SelectedCamera = _cameras[CameraComboBox.SelectedIndex];
           }
       }
 

@@ -119,8 +119,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CaptureSource\SystemCamera.cs" />
+    <Compile Include="CaptureSource\VideoFileCapture.cs" />
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
+    <Compile Include="CaptureSource\CaptureSource.cs" />
+    <Compile Include="CaptureSource\IpCamera.cs" />
     <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
     <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
@@ -470,6 +474,10 @@
     </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -22,8 +22,14 @@ namespace VTC
             : base(settings, Width, Height)
         {
             for (int i = 1; i <= 4; i++) {
-                this.RegionConfiguration.Regions.Add(ApproachName(i), new Polygon());
-                this.RegionConfiguration.Regions.Add(ExitName(i), new Polygon());
+                var approachName = ApproachName(i);
+                var exitName = ExitName(i);
+
+                if (!this.RegionConfiguration.Regions.ContainsKey(approachName))
+                    this.RegionConfiguration.Regions.Add(approachName, new Polygon());
+
+                if (!this.RegionConfiguration.Regions.ContainsKey(exitName))
+                    this.RegionConfiguration.Regions.Add(exitName, new Polygon());
             }
 
 
