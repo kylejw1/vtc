@@ -90,7 +90,7 @@ namespace OptAssignTest
 
         public string RegionConfigPath
         {
-            get { throw new NotImplementedException(); }
+            get { return "config\regionConfig.xml"; }
         }
 
         public double Alpha
