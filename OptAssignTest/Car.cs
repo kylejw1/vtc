@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
@@ -9,38 +7,6 @@ namespace OptAssignTest
 {
     public class Car
     {
-
-        #region Inner declarations
-
-        // TODO: think - might be moved out for complex trajectories
-
-        private class PathSection
-        {
-            private readonly uint _from;
-            private readonly uint _to;
-            private readonly Func<uint, Point> _pathGenerator;
-
-            public PathSection(uint @from, uint to, Func<uint, Point> pathGenerator)
-            {
-                _from = @from;
-                _to = to;
-                _pathGenerator = pathGenerator;
-            }
-
-            internal bool Contains(uint frame)
-            {
-                return (frame >= _from) && (frame <= _to); // TODO: think - should it be strict for both sides?
-            }
-
-            internal Point GetPoint(uint frame)
-            {
-                if (Contains(frame)) ;
-                return _pathGenerator(frame);
-            }
-        }
-
-        #endregion
-
         private static readonly Bgr _whiteColor = new Bgr(Color.White);
 
         private static readonly Func<uint, Bgr> AlwaysWhiteFunc = _ => _whiteColor;
@@ -48,16 +14,8 @@ namespace OptAssignTest
 
         private static Func<uint, Bgr> _carColor = AlwaysWhiteFunc; // car is white by default
         private Func<uint, bool> _visibilityFunc = AlwaysVisibleFunc; // car is always visible by default
-        private readonly List<PathSection> _sections = new List<PathSection>();
 
-        /// <summary>
-        /// Last frame for the car.
-        /// </summary>
-        public uint MaxFrame
-        {
-            get { return _maxFrame; }
-        }
-        private uint _maxFrame = UInt32.MinValue;
+        private IPathGenerator _path;
 
         /// <summary>
         /// Car size.
@@ -123,21 +81,10 @@ namespace OptAssignTest
             return CarColor(_ => color);
         }
 
-        public Car AddPath(uint @from, uint to, Func<uint, Point> pathGenerator)
+        public Car SetPath(IPathGenerator path)
         {
-            // validate inputs
-            if (pathGenerator == null) throw new ArgumentNullException("pathGenerator");
-            if (@from >= to) throw new ArgumentException("Path definition is wrong");
-
-            if (_sections.Any(pathSection => pathSection.Contains(@from) || pathSection.Contains(to)))
-                throw new ArgumentException("Segment intersects with another segment.");
-
-            // register new path section
-            var section = new PathSection(@from, to, pathGenerator);
-            _sections.Add(section);
-
-            _maxFrame = Math.Max(MaxFrame, to);
-
+            if (path == null) throw new ArgumentNullException("path");
+            _path = path;
             return this;
         }
 
@@ -146,14 +93,16 @@ namespace OptAssignTest
             // must be visible
             if (! _visibilityFunc(frame)) return;
 
-            foreach (var section in _sections.Where(s => s.Contains(frame))) // ER: can be optimized if list is sorted
+            Point? position = _path.GetPosition(frame);
+            if (position.HasValue)
             {
-                // draw car at the point
-                var point = section.GetPoint(frame);
-                scene.Draw(new CircleF(new PointF(point.X, point.Y), CarRadius), _carColor(frame), 0); // TODO: someday move out actual drawing out of here
-
-                break;
+                scene.Draw(new CircleF(new PointF(position.Value.X, position.Value.Y), CarRadius), _carColor(frame), 0); // TODO: someday move out actual drawing out of here
             }
+        }
+
+        public bool IsDone(uint frame)
+        {
+            return _path.IsDone(frame);
         }
     }
 }

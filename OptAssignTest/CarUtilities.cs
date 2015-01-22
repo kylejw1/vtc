@@ -1,32 +1,43 @@
-﻿using System.Drawing;
+﻿using System;
 using VTC.Settings;
 
 namespace OptAssignTest
 {
     public static class CarUtilities
     {
-        // TODO: create path generator abstraction
-
-        public static Car AddVerticalPath(this Car car, ISettings settings)
+        public static Car AddVerticalPath(this Car car, ISettings settings, Direction from = Direction.South)
         {
-            var midX = (int)settings.FrameWidth / 2;
-            var pathLength = (uint)settings.FrameHeight - car.CarRadius;
+            if (! (from == Direction.South || from == Direction.North)) 
+                throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            return car.AddPath(0, pathLength, frame => new Point(midX, (int)(frame + car.CarRadius)));
+            var path = PathCreator.New(settings).StraightFrom(from);
+            return car.SetPath(path);
         }
 
-        public static Car AddHorizontalPath(this Car car, ISettings settings)
+        public static Car AddHorizontalPath(this Car car, ISettings settings, Direction from = Direction.East)
         {
-            var midY = (int)settings.FrameHeight / 2;
-            var pathLength = (uint)settings.FrameWidth - car.CarRadius;
+            if (!(from == Direction.East || from == Direction.West))
+                throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            return car.AddPath(0, pathLength, frame => new Point((int)(frame + car.CarRadius), midY));
+            var path = PathCreator.New(settings).StraightFrom(from);
+            return car.SetPath(path);
+        }
+
+        public static Car StraightPathFrom(this Car car, ISettings settings, Direction from)
+        {
+            var path = PathCreator.New(settings).StraightFrom(from);
+            return car.SetPath(path);
         }
 
 
         public static uint VerticalPathLength(this ISettings settings) // TODO: should be merged to path generator.
         {
             return (uint) settings.FrameHeight;
+        }
+
+        public static uint HorizontalPathLength(this ISettings settings) // TODO: should be merged to path generator.
+        {
+            return (uint) settings.FrameWidth;
         }
     }
 }

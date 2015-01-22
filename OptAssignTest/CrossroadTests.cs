@@ -28,6 +28,7 @@ namespace OptAssignTest
                 if (frame > DetectionThreshold)
                 {
                     Assert.AreEqual(script.Cars.Count, vehicles.Count, "Both cars should be detected.");
+                    // TODO: make sure that each car keeps its direction
                 }
             });
         }

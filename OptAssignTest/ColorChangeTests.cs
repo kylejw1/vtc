@@ -6,13 +6,13 @@ namespace OptAssignTest
     [TestClass]
     public class ColorChangeTests : ScriptedTestBase
     {
-        private static readonly Bgr[] _colors = new Bgr[] {
-            new Bgr(0xff, 0xff, 0xff),
-            new Bgr(0xee, 0xee, 0xee),
-            new Bgr(0xdd, 0xdd, 0xdd),
-            new Bgr(0xee, 0xee, 0xee),
-            new Bgr(0xff, 0xff, 0xff),
-        };
+        private static readonly Bgr[] _colors = {
+                                                    new Bgr(0xff, 0xff, 0xff),
+                                                    new Bgr(0xee, 0xee, 0xee),
+                                                    new Bgr(0xdd, 0xdd, 0xdd),
+                                                    new Bgr(0xee, 0xee, 0xee),
+                                                    new Bgr(0xff, 0xff, 0xff),
+                                                };
 
         [TestMethod]
         [Description("Vehicle might (slightly?) change color, and it should not affect recognition")]
@@ -23,8 +23,8 @@ namespace OptAssignTest
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                .AddVerticalPath(settings)
-                .CarColor(frame => _colors[frame % _colors.Length]);// car slightly changes color *each* frame
+                    .AddVerticalPath(settings)
+                    .CarColor(frame => _colors[frame % _colors.Length]);// car slightly changes color *each* frame
 
             RunScript(settings, script, (vista, frame) =>
             {
@@ -49,8 +49,8 @@ namespace OptAssignTest
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                .AddVerticalPath(settings)
-                .CarColor(frame => _colors[frame / segmentLength]);
+                    .AddVerticalPath(settings)
+                    .CarColor(frame => _colors[frame / segmentLength]);
 
             RunScript(settings, script, (vista, frame) =>
             {

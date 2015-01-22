@@ -21,14 +21,6 @@ namespace OptAssignTest
         private readonly List<Car> _cars = new List<Car>();
 
         /// <summary>
-        /// Last frame for the scene.
-        /// </summary>
-        public uint MaxFrame
-        {
-            get { return _cars.Max(car => car.MaxFrame); }
-        }
-
-        /// <summary>
         /// Create new car in the collection.
         /// </summary>
         /// <returns></returns>
@@ -43,10 +35,21 @@ namespace OptAssignTest
         /// Draw the scene.
         /// </summary>
         /// <param name="frame">Frame number.</param>
-        /// <param name="scene">Scene to draw car to</param>
+        /// <param name="scene">Scene to draw cars to</param>
         public void Draw(uint frame, Image<Bgr, byte> scene)
         {
             _cars.ForEach(car => car.Draw(frame, scene));
+        }
+
+        /// <summary>
+        /// Check if script is completed.
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        public bool IsDone(uint frame)
+        {
+            // check all cars have finished their paths
+            return _cars.All(car => car.IsDone(frame));
         }
     }
 }
