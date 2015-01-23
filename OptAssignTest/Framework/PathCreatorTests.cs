@@ -98,6 +98,35 @@ namespace OptAssignTest.Framework
                                                 });
         }
 
+        [TestMethod]
+        [Description("Check points generated for West->East path.")]
+        public void FromSouthAndTurnToEast()
+        {
+            var settings = CreateSettings(VehicleRadius);
+
+            IPathGenerator generator = PathCreator
+                .New(settings)
+                .EnterAndTurn(Direction.South, Direction.East);
+
+            Point? firstPoint = null, lastPoint = null;
+            for (uint frame = 0; !generator.IsDone(frame); frame++)
+            {
+                Point? position = generator.GetPosition(frame);
+                if (!position.HasValue) continue;
+
+                if (! firstPoint.HasValue)
+                {
+                    firstPoint = position.Value;
+                }
+                lastPoint = position;
+            }
+
+            Assert.AreEqual(settings.HorizontalPathLength() / 2, (uint)firstPoint.Value.X, "Middle X expected.");
+            Assert.AreEqual(VehicleRadius, firstPoint.Value.Y, "Origin Y is expected."); // shifted by vehicle size
+            Assert.AreEqual(settings.HorizontalPathLength(), (uint)lastPoint.Value.X, "Should go to right bound.");
+            Assert.AreEqual(settings.VerticalPathLength() / 2, (uint)lastPoint.Value.Y, "Middle Y expected.");
+        }
+
         private static void VerifyDirection(Direction direction, Action<Point, Point> validation)
         {
             var settings = CreateSettings(VehicleRadius);

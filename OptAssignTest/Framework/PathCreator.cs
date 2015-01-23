@@ -35,6 +35,21 @@ namespace OptAssignTest.Framework
             {
                 return new Point((int) (p.X - v.X), (int) (p.Y - v.Y));
             }
+
+            /// <summary>
+            /// It's known that one of the vector components is zero.
+            /// So length is simply the value of non-zero component.
+            /// </summary>
+            /// <value>Length of the vector.</value>
+            public uint SimpleLength
+            {
+                get { return (uint) (Math.Max(Math.Abs(X), Math.Abs(Y))); }
+            }
+
+            public Vector Inverse()
+            {
+                return new Vector(-X, -Y);
+            }
         }
 
         #endregion
@@ -42,12 +57,21 @@ namespace OptAssignTest.Framework
         private readonly double _height;
         private readonly double _width;
         private readonly uint _carRadius;
+        private readonly double _halfWidth;
+        private readonly double _halfHeight;
+        private readonly Point _center;
+
+        // TODO: add support for speed and acceleration
+        // right now it's 1px movement per frame
 
         private PathCreator(double width, double height, uint carRadius)
         {
             _height = height;
             _width = width;
             _carRadius = carRadius;
+            _halfWidth = _width/2;
+            _halfHeight = _height/2;
+            _center = new Point((int) _halfWidth, (int) _halfHeight);
         }
 
         public static PathCreator New(ISettings settings)
@@ -59,28 +83,57 @@ namespace OptAssignTest.Framework
         /// <summary>
         /// Generate path for horizontal or vertical movement through whole scene via center point.
         /// </summary>
-        /// <param name="direction">Movement direction.</param>
-        public IPathGenerator StraightFrom(Direction direction)
+        /// <param name="fromDirection">'from' direction.</param>
+        public IPathGenerator StraightFrom(Direction fromDirection)
         {
-            double halfWidth = _width/2;
-            double halfHeight = _height/2;
-
-            // all paths goes through the center
-            Point center = new Point((int) halfWidth, (int) halfHeight);
-
             // calculate start point
-            Vector dirFrom = VectorFrom(direction);
-            var scaledDir = dirFrom.Scaled(halfWidth, halfHeight);
-            Point fromPoint = center - scaledDir;
+            Vector dirFrom = VectorFrom(fromDirection);
+            var scaledDir = dirFrom.Scaled(_halfWidth, _halfHeight);
+            Point fromPoint = _center - scaledDir;
 
             // find length of visible path
-            uint distance = (uint)(2 * Math.Max(Math.Abs(scaledDir.X), Math.Abs(scaledDir.Y)));
+            uint distance = 2 * scaledDir.SimpleLength;
 
             SectionPath path = new SectionPath();
-            path.AddSegment(_carRadius, distance - 1, frame => fromPoint + dirFrom.Scaled(frame, frame));  // TODO: add support for speed and acceleration
+            path.AddSegment(/*0 + */_carRadius, distance - 1, frame => fromPoint + dirFrom.Scaled(frame, frame));  
             return path;
         }
 
+        public IPathGenerator EnterAndTurn(Direction from, Direction turn)
+        {
+            // special handling for straight movement
+            if (from == turn) return StraightFrom(from);
+
+            // calculate start point
+            Vector dirFrom = VectorFrom(from);
+            var scaledFrom = dirFrom.Scaled(_halfWidth, _halfHeight);
+            Point fromPoint = _center - scaledFrom;
+
+            // find length of first path section
+            uint firstHalf = scaledFrom.SimpleLength;
+
+
+            // calculate path section after turn
+            Vector dirAfterTurn = VectorTo(turn);
+            var scaledAfterTurn = dirAfterTurn.Scaled(_halfWidth, _halfHeight);
+            uint secondHalf = scaledAfterTurn.SimpleLength;
+
+            // generate path
+            SectionPath path = new SectionPath();
+            path.AddSegment(/*0 + */_carRadius, firstHalf - 1, frame => fromPoint + dirFrom.Scaled(frame, frame));
+            path.AddSegment(firstHalf, firstHalf + secondHalf, frame => _center + dirAfterTurn.Scaled(frame - firstHalf, frame - firstHalf));
+
+            return path;
+        }
+
+        private static Vector VectorTo(Direction direction)
+        {
+            return VectorFrom(direction).Inverse();
+        }
+
+        /// <summary>
+        /// Get 'from' unit vector for the given direction.
+        /// </summary>
         private static Vector VectorFrom(Direction direction) 
         {
             switch (direction)
