@@ -4,7 +4,7 @@ using VTC.Settings;
 
 namespace OptAssignTest.Framework
 {
-    class PathCreator
+    class Path
     {
         #region Inner structs
 
@@ -64,7 +64,7 @@ namespace OptAssignTest.Framework
         // TODO: add support for speed and acceleration
         // right now it's 1px movement per frame
 
-        private PathCreator(double width, double height, uint carRadius)
+        private Path(double width, double height, uint carRadius)
         {
             _height = height;
             _width = width;
@@ -74,10 +74,10 @@ namespace OptAssignTest.Framework
             _center = new Point((int) _halfWidth, (int) _halfHeight);
         }
 
-        public static PathCreator New(ISettings settings)
+        public static Path New(ISettings settings)
         {
             if (settings == null) throw new ArgumentNullException("settings");
-            return new PathCreator(settings.FrameWidth, settings.FrameHeight, (uint) settings.CarRadius);
+            return new Path(settings.FrameWidth, settings.FrameHeight, (uint) settings.CarRadius);
         }
 
         /// <summary>
@@ -126,11 +126,6 @@ namespace OptAssignTest.Framework
             return path;
         }
 
-        private static Vector VectorTo(Direction direction)
-        {
-            return VectorFrom(direction).Inverse();
-        }
-
         /// <summary>
         /// Get 'from' unit vector for the given direction.
         /// </summary>
@@ -149,6 +144,14 @@ namespace OptAssignTest.Framework
                 default:
                     throw new ArgumentOutOfRangeException("direction");
             }
+        }
+
+        /// <summary>
+        /// Get 'to' unit vector for the given direction.
+        /// </summary>
+        private static Vector VectorTo(Direction direction)
+        {
+            return VectorFrom(direction).Inverse();
         }
     }
 }

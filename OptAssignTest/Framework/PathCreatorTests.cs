@@ -17,7 +17,7 @@ namespace OptAssignTest.Framework
             var settings = CreateSettings(VehicleRadius);
 
             // create generator with vertical path
-            IPathGenerator generator = PathCreator
+            IPathGenerator generator = Path
                                         .New(settings)
                                         .StraightFrom(Direction.South);
 
@@ -104,7 +104,7 @@ namespace OptAssignTest.Framework
         {
             var settings = CreateSettings(VehicleRadius);
 
-            IPathGenerator generator = PathCreator
+            IPathGenerator generator = Path
                 .New(settings)
                 .EnterAndTurn(Direction.South, Direction.East);
 
@@ -131,7 +131,7 @@ namespace OptAssignTest.Framework
         {
             var settings = CreateSettings(VehicleRadius);
 
-            IPathGenerator generator = PathCreator
+            IPathGenerator generator = Path
                 .New(settings)
                 .StraightFrom(direction);
 

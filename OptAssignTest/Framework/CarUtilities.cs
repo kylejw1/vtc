@@ -10,7 +10,7 @@ namespace OptAssignTest.Framework
             if (! (from == Direction.South || from == Direction.North)) 
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            var path = PathCreator.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from);
             return car.SetPath(path);
         }
 
@@ -19,13 +19,13 @@ namespace OptAssignTest.Framework
             if (!(from == Direction.East || from == Direction.West))
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            var path = PathCreator.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from);
             return car.SetPath(path);
         }
 
         public static Car StraightPathFrom(this Car car, ISettings settings, Direction from)
         {
-            var path = PathCreator.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from);
             return car.SetPath(path);
         }
 
