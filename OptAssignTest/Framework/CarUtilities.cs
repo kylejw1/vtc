@@ -1,7 +1,7 @@
 ﻿using System;
 using VTC.Settings;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     public static class CarUtilities
     {

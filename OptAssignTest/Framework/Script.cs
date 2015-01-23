@@ -4,7 +4,7 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     /// <summary>
     /// Traffic script.

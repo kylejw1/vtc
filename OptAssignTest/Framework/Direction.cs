@@ -1,4 +1,4 @@
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     public enum Direction
     {

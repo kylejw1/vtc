@@ -1,5 +1,6 @@
 ﻿using Emgu.CV.Structure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OptAssignTest.Framework;
 
 namespace OptAssignTest
 {

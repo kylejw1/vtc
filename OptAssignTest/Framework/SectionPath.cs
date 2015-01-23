@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     class SectionPath : IPathGenerator
     {

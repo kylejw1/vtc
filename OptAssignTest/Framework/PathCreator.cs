@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using VTC.Settings;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     class PathCreator
     {

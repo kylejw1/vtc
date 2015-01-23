@@ -2,7 +2,7 @@
 using System.Drawing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     /// <summary>
     /// Self tests for test helpers.

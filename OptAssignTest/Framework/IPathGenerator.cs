@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     public interface IPathGenerator
     {
