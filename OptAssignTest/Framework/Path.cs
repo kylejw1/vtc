@@ -4,16 +4,17 @@ using VTC.Settings;
 
 namespace OptAssignTest.Framework
 {
-    class Path
+    internal class Path
     {
         #region Inner structs
 
         // ER: can be replaced with some standard implementation
 
-        private struct Vector
+        internal struct Vector
         {
             public readonly double X;
             public readonly double Y;
+            public static readonly Vector Zero = new Vector(0, 0);
 
             public Vector(double x, double y)
             {
@@ -84,7 +85,8 @@ namespace OptAssignTest.Framework
         /// Generate path for horizontal or vertical movement through whole scene via center point.
         /// </summary>
         /// <param name="fromDirection">'from' direction.</param>
-        public IPathGenerator StraightFrom(Direction fromDirection)
+        /// <param name="offset">Offset from the default path.</param>
+        public IPathGenerator StraightFrom(Direction fromDirection, Vector? offset = null)
         {
             // calculate start point
             Vector dirFrom = VectorFrom(fromDirection);
@@ -95,11 +97,11 @@ namespace OptAssignTest.Framework
             uint distance = 2 * scaledDir.SimpleLength;
 
             SectionPath path = new SectionPath();
-            path.AddSegment(/*0 + */_carRadius, distance - 1, frame => fromPoint + dirFrom.Scaled(frame, frame));  
+            path.AddSegment(/*0 + */_carRadius, distance - 1, frame => fromPoint + dirFrom.Scaled(frame, frame), offset);  
             return path;
         }
 
-        public IPathGenerator EnterAndTurn(Direction from, Direction turn)
+        public IPathGenerator EnterAndTurn(Direction from, Direction turn, Vector? offset = null)
         {
             // special handling for straight movement
             if (from == turn) return StraightFrom(from);
@@ -120,8 +122,8 @@ namespace OptAssignTest.Framework
 
             // generate path
             SectionPath path = new SectionPath();
-            path.AddSegment(/*0 + */_carRadius, firstHalf - 1, frame => fromPoint + dirFrom.Scaled(frame, frame));
-            path.AddSegment(firstHalf, firstHalf + secondHalf, frame => _center + dirAfterTurn.Scaled(frame - firstHalf, frame - firstHalf));
+            path.AddSegment(/*0 + */_carRadius, firstHalf - 1, frame => fromPoint + dirFrom.Scaled(frame, frame), offset);
+            path.AddSegment(firstHalf, firstHalf + secondHalf, frame => _center + dirAfterTurn.Scaled(frame - firstHalf, frame - firstHalf), offset);
 
             return path;
         }

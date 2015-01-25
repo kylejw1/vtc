@@ -23,6 +23,15 @@ namespace OptAssignTest.Framework
             return car.SetPath(path);
         }
 
+        public static Car AddTurn(this Car car, ISettings settings, Direction from, Direction turn)
+        {
+            var path = Path
+                        .New(settings)
+                        .EnterAndTurn(from, turn);
+
+            return car.SetPath(path);
+        }
+
         public static Car StraightPathFrom(this Car car, ISettings settings, Direction from)
         {
             var path = Path.New(settings).StraightFrom(from);

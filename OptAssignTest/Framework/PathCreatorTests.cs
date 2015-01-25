@@ -158,6 +158,33 @@ namespace OptAssignTest.Framework
             Assert.IsTrue(script.IsDone(0), "Should be done for beginning.");
         }
 
+        [TestMethod]
+        [Description("Offset should be taken in account.")]
+        public void PathOffsetTest() 
+        {
+            const int horizontalOffset = 10;
+
+            var settings = CreateSettings(VehicleRadius);
+
+            IPathGenerator generator = Path
+                .New(settings)
+                .StraightFrom(Direction.South, new Path.Vector(horizontalOffset, 0));
+
+            IPathGenerator generator2 = Path
+                .New(settings)
+                .StraightFrom(Direction.South);
+
+            for (uint frame = 0; !generator.IsDone(frame) && !generator2.IsDone(frame); frame++)
+            {
+                Point? position = generator.GetPosition(frame);
+                Point? position2 = generator2.GetPosition(frame);
+                if (!position.HasValue || !position2.HasValue) continue;
+
+                Assert.AreEqual(horizontalOffset, position.Value.X - position2.Value.X);
+                Assert.AreEqual(position.Value.Y, position2.Value.Y);
+            }
+        }
+
         private static void SingleVerticalPathTest(Direction direction)
         {
             var settings = CreateSettings(VehicleRadius);

@@ -17,11 +17,14 @@ namespace OptAssignTest.Framework
             private readonly uint _to;
             private readonly Func<uint, Point> _pathGenerator;
 
-            public PathSection(uint @from, uint to, Func<uint, Point> pathGenerator)
+            private readonly Path.Vector _offset; 
+
+            public PathSection(uint @from, uint to, Func<uint, Point> pathGenerator, Path.Vector? offset = null)
             {
                 _from = @from;
                 _to = to;
                 _pathGenerator = pathGenerator;
+                _offset = offset.GetValueOrDefault(Path.Vector.Zero); // no offset by default
             }
 
             internal bool Contains(uint frame)
@@ -31,7 +34,7 @@ namespace OptAssignTest.Framework
 
             internal Point GetPoint(uint frame)
             {
-                return _pathGenerator(frame);
+                return _pathGenerator(frame) + _offset;
             }
 
             internal bool IsFinished(uint frame)
@@ -59,7 +62,7 @@ namespace OptAssignTest.Framework
             return _sections.All(section => section.IsFinished(frame));
         }
 
-        public SectionPath AddSegment(uint @from, uint to, Func<uint, Point> pathGenerator)
+        public SectionPath AddSegment(uint @from, uint to, Func<uint, Point> pathGenerator, Path.Vector? offset = null)
         {
             // validate inputs
             if (pathGenerator == null) throw new ArgumentNullException("pathGenerator");
@@ -69,7 +72,7 @@ namespace OptAssignTest.Framework
                 throw new ArgumentException("Segment intersects with another segment.");
 
             // register new path section
-            var section = new PathSection(@from, to, pathGenerator);
+            var section = new PathSection(@from, to, pathGenerator, offset);
             _sections.Add(section);
 
             return this;
