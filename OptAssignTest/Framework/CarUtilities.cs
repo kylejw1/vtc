@@ -5,7 +5,7 @@ namespace OptAssignTest.Framework
 {
     public static class CarUtilities
     {
-        public static Car AddVerticalPath(this Car car, ISettings settings, Direction from = Direction.South)
+        public static Car AddVerticalPath(this Car car, ISettings settings, Direction from)
         {
             if (! (from == Direction.South || from == Direction.North)) 
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");
@@ -14,7 +14,7 @@ namespace OptAssignTest.Framework
             return car.SetPath(path);
         }
 
-        public static Car AddHorizontalPath(this Car car, ISettings settings, Direction from = Direction.East)
+        public static Car AddHorizontalPath(this Car car, ISettings settings, Direction from)
         {
             if (!(from == Direction.East || from == Direction.West))
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");

@@ -11,14 +11,12 @@ namespace OptAssignTest
         [Description("Left turn should be detected correctly.")]
         public void LeftTurn()
         {
-            var settings = CreateSettings(VehicleRadius);
-
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                    .AddTurn(settings, Direction.South, Direction.West);
+                    .AddTurn(DefaultSettings, Direction.South, Direction.West);
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -30,7 +28,7 @@ namespace OptAssignTest
         }
 
         [TestMethod]
-        [Description("")]
+        [Description("One car goes straight thru intersection, another turns right.")]
         public void RightAndStraight()
         {
             throw new NotImplementedException();

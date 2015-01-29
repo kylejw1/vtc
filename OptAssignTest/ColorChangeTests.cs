@@ -19,15 +19,13 @@ namespace OptAssignTest
         [Description("Vehicle might (slightly?) change color, and it should not affect recognition")]
         public void OftenChangedCarColor_ShouldNotAffectTracking()
         {
-            var settings = CreateSettings(VehicleRadius);
-
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                    .AddVerticalPath(settings)
+                    .AddVerticalPath(DefaultSettings)
                     .CarColor(frame => _colors[frame % _colors.Length]);// car slightly changes color *each* frame
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -42,18 +40,16 @@ namespace OptAssignTest
         [Description("Vehicle changes color along the path, and it should not affect recognition")]
         public void SlowlyChangedCarColor_ShouldNotAffectTracking()
         {
-            var settings = CreateSettings(VehicleRadius);
-
             // car changes color on each segment
-            var segmentLength = settings.VerticalPathLength() / _colors.Length;
+            var segmentLength = DefaultSettings.VerticalPathLength() / _colors.Length;
 
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                    .AddVerticalPath(settings)
+                    .AddVerticalPath(DefaultSettings)
                     .CarColor(frame => _colors[frame / segmentLength]);
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
