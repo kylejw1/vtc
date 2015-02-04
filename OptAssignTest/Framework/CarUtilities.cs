@@ -5,36 +5,36 @@ namespace OptAssignTest.Framework
 {
     public static class CarUtilities
     {
-        public static Car AddVerticalPath(this Car car, ISettings settings, Direction from)
+        public static Car AddVerticalPath(this Car car, ISettings settings, Direction @from = Direction.South, Path.Vector? offset = null)
         {
             if (! (from == Direction.South || from == Direction.North)) 
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            var path = Path.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from, offset);
             return car.SetPath(path);
         }
 
-        public static Car AddHorizontalPath(this Car car, ISettings settings, Direction from)
+        public static Car AddHorizontalPath(this Car car, ISettings settings, Direction from = Direction.East, Path.Vector? offset = null)
         {
             if (!(from == Direction.East || from == Direction.West))
                 throw new ArgumentOutOfRangeException("from", "Wrong direction");
 
-            var path = Path.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from, offset);
             return car.SetPath(path);
         }
 
-        public static Car AddTurn(this Car car, ISettings settings, Direction from, Direction turn)
+        public static Car AddTurn(this Car car, ISettings settings, Direction from, Direction turn, Path.Vector? offset = null)
         {
             var path = Path
                         .New(settings)
-                        .EnterAndTurn(from, turn);
+                        .EnterAndTurn(from, turn, offset);
 
             return car.SetPath(path);
         }
 
-        public static Car StraightPathFrom(this Car car, ISettings settings, Direction from)
+        public static Car StraightPathFrom(this Car car, ISettings settings, Direction from, Path.Vector? offset = null)
         {
-            var path = Path.New(settings).StraightFrom(from);
+            var path = Path.New(settings).StraightFrom(from, offset);
             return car.SetPath(path);
         }
 

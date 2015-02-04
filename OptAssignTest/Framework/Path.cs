@@ -4,13 +4,13 @@ using VTC.Settings;
 
 namespace OptAssignTest.Framework
 {
-    internal class Path
+    public class Path
     {
         #region Inner structs
 
         // ER: can be replaced with some standard implementation
 
-        internal struct Vector
+        public struct Vector
         {
             public readonly double X;
             public readonly double Y;
