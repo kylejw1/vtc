@@ -12,7 +12,7 @@ namespace OptAssignTest.Framework
         private static readonly Func<uint, Bgr> AlwaysWhiteFunc = _ => _whiteColor;
         private static readonly Func<uint, bool> AlwaysVisibleFunc = _ => true;
 
-        private static Func<uint, Bgr> _carColor = AlwaysWhiteFunc; // car is white by default
+        private Func<uint, Bgr> _carColor = AlwaysWhiteFunc; // car is white by default
         private Func<uint, bool> _visibilityFunc = AlwaysVisibleFunc; // car is always visible by default
 
         private IPathGenerator _path;
