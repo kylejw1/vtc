@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using OptAssignTest.Framework;
 using VTC;
 using VTC.Settings;
 
@@ -29,8 +30,7 @@ namespace OptAssignTest
             vista.Update(background);
 
             // run the script
-            var lastFrame = script.MaxFrame;
-            for (uint frame = 0; frame < lastFrame; frame++)
+            for (uint frame = 0; ! script.IsDone(frame); frame++)
             {
                 var image = background.Clone();
 

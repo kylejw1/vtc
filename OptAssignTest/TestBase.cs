@@ -12,6 +12,15 @@ namespace OptAssignTest
         protected const int VehicleRadius = 3; // in pixels
 
         /// <summary>
+        /// Default settings.
+        /// </summary>
+        protected static ISettings DefaultSettings
+        {
+            get { return _defaultSettings; }
+        }
+        private static readonly ISettings _defaultSettings = CreateSettings(VehicleRadius);
+
+        /// <summary>
         /// Creates initialized intersection vista to be used for tests.
         /// </summary>
         /// <returns></returns>

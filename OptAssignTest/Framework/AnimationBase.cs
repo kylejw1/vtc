@@ -4,7 +4,7 @@ using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     public abstract class AnimationBase
     {

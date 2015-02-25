@@ -3,7 +3,7 @@ using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace OptAssignTest
+namespace OptAssignTest.Framework
 {
     /// <summary>
     /// Generate "video" frames of circles moving by trajectories.

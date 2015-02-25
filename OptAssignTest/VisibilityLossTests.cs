@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OptAssignTest.Framework;
 
 namespace OptAssignTest
 {
@@ -10,17 +11,15 @@ namespace OptAssignTest
         [Description("Car should be tracked after visibility loss until threshold happens.")]
         public void VisibilityLoss_ShouldBeDetected()
         {
-            var settings = CreateSettings(VehicleRadius);
-            uint frameWhenDetectionLost = (uint) (settings.FrameHeight / 2);
-
+            uint frameWhenDetectionLost = (uint) (DefaultSettings.FrameHeight / 2);
 
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                .AddVerticalPath(settings) 
+                .AddVerticalPath(DefaultSettings) 
                 .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
                 {
                     // the car should be detected at that point
                     if (frame == DetectionThreshold)
@@ -38,7 +37,7 @@ namespace OptAssignTest
                     }
 
                     // car should not be tracked anymore
-                    if (frame == frameWhenDetectionLost + settings.MissThreshold + DetectionThreshold)
+                    if (frame == frameWhenDetectionLost + DefaultSettings.MissThreshold + DetectionThreshold)
                     {
                         Assert.AreEqual(0, vista.CurrentVehicles.Count, "No cars should be detected after certain number of misses");
                     }
@@ -49,18 +48,17 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as the same after loss and reappearence within threshold.")]
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
-            var settings = CreateSettings(VehicleRadius);
-            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
+            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
 
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 10);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold - 10);
 
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                .AddVerticalPath(settings)
+                .AddVerticalPath(DefaultSettings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
                 {
                     var vehicles = vista.CurrentVehicles;
 
@@ -92,18 +90,17 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as a new one after loss and reappearence after threshold.")]
         public void ReappearenceAfterThreshold_ShouldBeDetected()
         {
-            var settings = CreateSettings(VehicleRadius);
-            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
+            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
 
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold + 10);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold + 10);
 
             var script = new Script();
             script
                 .CreateCar(VehicleRadius)
-                .AddVerticalPath(settings)
+                .AddVerticalPath(DefaultSettings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
 
-            RunScript(settings, script, (vista, frame) =>
+            RunScript(DefaultSettings, script, (vista, frame) =>
                 {
                     var vehicles = vista.CurrentVehicles;
 
