@@ -187,3 +187,6 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Thirdparty libraries
+Thirdparty/

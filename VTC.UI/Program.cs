@@ -22,7 +22,9 @@ namespace VTC
          string filename = null;
          if (args.Length == 1) filename = args[0];
 
-         Application.Run(new TrafficCounter(new AppSettings(), filename));
+          var mainForm = new TrafficCounter(new AppSettings(), filename);
+
+          Application.Run(mainForm);
       }
    }
 }
