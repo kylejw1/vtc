@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Runtime.InteropServices;
-//using Excel = Microsoft.Office.Interop.Excel;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+
+//using Excel = Microsoft.Office.Interop.Excel;
 
 //TreeLib
 //A tree class with inherited class HypothesisTree for use in Multiple Hypothesis Tracking algorithm. 
@@ -19,7 +15,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 //Updated October 27 2011 - debugging
 //Updated Dec 6 2011 - added initial angle, path length, is_pedestrian states to StateHypothesis struct
 //----------------------------------------------------------------------
-namespace TreeLib
+namespace VTC.Kernel
 {
 
     public enum MeasurementSource { false_positive, existing_vehicle, new_vehicle }; 

@@ -12,7 +12,8 @@ using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
-using TreeLib;
+using VTC.Kernel;
+using VTC.Kernel.Vistas;
 using VTC.ServerReporting.ReportItems;
 using VTC.Settings;
 

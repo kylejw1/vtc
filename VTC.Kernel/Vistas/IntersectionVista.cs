@@ -6,10 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
-using TreeLib;
-using VTC.Settings;
+using VTC.Kernel.EventConfig;
+using VTC.Kernel.Extensions;
+using VTC.Kernel.RegionConfig;
+using VTC.Kernel.Settings;
 
-namespace VTC
+namespace VTC.Kernel.Vistas
 {
     public class IntersectionVista : Vista
     {
@@ -112,6 +114,8 @@ namespace VTC
         {
             try
             {
+                // ER: TODO: most likely, it should not be in kernel
+
                 Dictionary<string, string> post_values = new Dictionary<string, string>();
                 post_values.Add("event_report[intersection_id]", Settings.IntersectionID);
                 post_values.Add("event_report[event_type]", "Turn");

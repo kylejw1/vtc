@@ -1,13 +1,8 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 
-namespace VTC
+namespace VTC.Kernel.RegionConfig
 { 
     [DataContract]
     public class RegionConfig

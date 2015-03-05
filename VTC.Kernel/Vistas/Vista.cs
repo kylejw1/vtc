@@ -4,10 +4,10 @@ using System.Drawing;
 using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using TreeLib;
-using VTC.Settings;
+using VTC.Kernel.EventConfig;
+using VTC.Kernel.Settings;
 
-namespace VTC
+namespace VTC.Kernel.Vistas
 {
     /// <summary>
     /// A Vista represents the statistics and analysis of the video stream.
@@ -88,8 +88,8 @@ namespace VTC
 
         private int TotalDeleted = 0;
 
-        private RegionConfig _regionConfiguration = null;
-        public RegionConfig RegionConfiguration
+        private RegionConfig.RegionConfig _regionConfiguration = null;
+        public RegionConfig.RegionConfig RegionConfiguration
         {
             get
             {
@@ -107,9 +107,9 @@ namespace VTC
             }
         }
 
-        private EventConfig _eventConfiguration = null;
+        private EventConfig.EventConfig _eventConfiguration = null;
 
-        public EventConfig EventConfiguration
+        public EventConfig.EventConfig EventConfiguration
         {
             get
             {
@@ -136,11 +136,11 @@ namespace VTC
             Width = width;
             Height = height;
 
-            RegionConfiguration = RegionConfig.Load(settings.RegionConfigPath);
+            RegionConfiguration = RegionConfig.RegionConfig.Load(settings.RegionConfigPath);
             if (null == RegionConfiguration)
-                RegionConfiguration = new RegionConfig();
+                RegionConfiguration = new RegionConfig.RegionConfig();
 
-            EventConfiguration = new EventConfig();
+            EventConfiguration = new EventConfig.EventConfig();
 
             LastDetectionCount = 0;
             RawMass = 0;

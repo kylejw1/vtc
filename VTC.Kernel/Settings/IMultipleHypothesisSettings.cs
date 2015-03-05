@@ -1,4 +1,4 @@
-namespace VTC.Settings
+namespace VTC.Kernel.Settings
 {
     public interface IMultipleHypothesisSettings
     {

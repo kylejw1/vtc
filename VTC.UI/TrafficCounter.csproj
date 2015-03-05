@@ -122,28 +122,16 @@
   <ItemGroup>
     <Compile Include="CaptureSource\SystemCamera.cs" />
     <Compile Include="CaptureSource\VideoFileCapture.cs" />
-    <Compile Include="EventConfig\EventConfig.cs" />
-    <Compile Include="HungarianAlgorithm.cs" />
     <Compile Include="CaptureSource\CaptureSource.cs" />
     <Compile Include="CaptureSource\IpCamera.cs" />
     <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
     <Compile Include="Settings\AppSettings.cs" />
-    <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
-    <Compile Include="Settings\ISettings.cs" />
-    <Compile Include="Vistas\IntersectionVista.cs" />
-    <Compile Include="MultipleHypothesisTracker.cs" />
-    <Compile Include="RegionConfig\Polygon.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="RegionConfig\PolygonBuilderControl.Designer.cs">
       <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="RegionConfig\RegionConfig.cs" />
-    <Compile Include="Extensions\LineSegment2DExtensions.cs" />
-    <Compile Include="NodeClass.cs" />
-    <Compile Include="OptAssign.cs" />
-    <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegionConfig\RegionEditor.cs">
@@ -161,7 +149,6 @@
     <Compile Include="TrafficCounter.Designer.cs">
       <DependentUpon>TrafficCounter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Vistas\Vista.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
@@ -224,6 +211,12 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VTC.Kernel\VTC.Kernel.csproj">
+      <Project>{d8a795d9-f343-4db5-a993-eb35d1a4c182}</Project>
+      <Name>VTC.Kernel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

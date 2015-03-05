@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra.Double;
-using TreeLib;
-using VTC.Settings;
+using VTC.Kernel.Settings;
 
-namespace VTC
+namespace VTC.Kernel
 {
     /// <summary>
     /// Track hypotheses for multiple targets based on Reid's Multiple Hypothesis

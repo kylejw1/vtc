@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using VTC.Kernel.RegionConfig;
 
-namespace VTC
+namespace VTC.Kernel.Extensions
 {
     public static class PointExtensions
     {

@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using VTC.Kernel.Extensions;
+using VTC.Kernel.RegionConfig;
 
 namespace VTC
 {

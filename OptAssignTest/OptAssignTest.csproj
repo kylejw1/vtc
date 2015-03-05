@@ -95,9 +95,10 @@
     <Compile Include="Framework\AnimationBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VTC.UI\TrafficCounter.csproj">
-      <Project>{6a2c2cf3-4f2c-43b5-b34c-a4a24b60b093}</Project>
-      <Name>TrafficCounter</Name>
+    <ProjectReference Include="..\VTC.Kernel\VTC.Kernel.csproj">
+      <Project>{d8a795d9-f343-4db5-a993-eb35d1a4c182}</Project>
+      <Name>VTC.Kernel</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
