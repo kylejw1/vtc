@@ -73,6 +73,9 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Framework\Car.cs" />
     <Compile Include="Framework\CarUtilities.cs" />
     <Compile Include="ColorChangeTests.cs" />

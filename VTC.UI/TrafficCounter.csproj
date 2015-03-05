@@ -120,6 +120,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="CaptureSource\SystemCamera.cs" />
     <Compile Include="CaptureSource\VideoFileCapture.cs" />
     <Compile Include="CaptureSource\CaptureSource.cs" />
