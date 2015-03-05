@@ -10,16 +10,21 @@ Realtime video-based object tracking software. Written in C# using Emgu CV. Requ
 
 #Development environment setup
 
-Make sure you have NuGet extension (applicable for VS2010).
+Get sources to some dir (say - `c:\projects\vtc`). Further referenced as `REPODIR`.
 
 ##EmguCV
-* Copy EmguCV x64 and x86 directories (emgucv-windows-universal-cuda 2.9.0.1922\bin\x64, x86) to the Visual Studio solution directory for VTC.
- * *or do symlink to the folders mentioned above*
-* Update references to Emgu.CV, Emgu.CV.UI and Emgu.Util
+*to be improved*
+
+It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\` dir).
+* Solution projects are using the path, so no need to fix it.
+* Run **setup.bat** (as Administrator) to create links to huge x86/x64 dirs of EmguCV library.
+** (not sure) maybe it's necessary to build solution before the step above, so `bin` folder got created.
 
 ##DirectShow
+??? can we simply put the dll to repository? Is it legal???
+
 * Download and extract DirectShowLib v2.1 (http://sourceforge.net/projects/directshownet/files/DirectShowNET/)
-* Update reference to DirectShowLib-2005
+* Copy `DirectShowLib-2005.dll` to `REPODIR\Thirdparty\DirectShowLibNET\`
 
 ##Manifest
 * It's necessary to remove manifest to run project on dev machine.
