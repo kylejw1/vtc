@@ -1,6 +1,7 @@
 using System.Drawing;
-using VTC;
-using VTC.Settings;
+using VTC.Kernel.RegionConfig;
+using VTC.Kernel.Settings;
+using VTC.Kernel.Vistas;
 
 namespace OptAssignTest
 {

@@ -1,6 +1,6 @@
 using System;
 using System.Drawing;
-using VTC.Settings;
+using VTC.Kernel.Settings;
 
 namespace OptAssignTest.Framework
 {

@@ -187,3 +187,8 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Thirdparty libraries
+Thirdparty/DirectShowLibNET/*.dll
+
+pingme.txt

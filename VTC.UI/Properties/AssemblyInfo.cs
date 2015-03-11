@@ -1,13 +1,12 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OptAssignTest")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyTitle("TrafficCounter")]
+[assembly: AssemblyDescription("Video-based turn counting application")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("df741676-6557-45c3-b35e-fe59f38ccb9f")]
+[assembly: Guid("1473aee8-a64a-45ac-8765-de2fae48901b")]
 

@@ -2,7 +2,7 @@ using System.Drawing;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptAssignTest.Framework;
-using VTC.Settings;
+using VTC.Kernel.Settings;
 
 namespace OptAssignTest
 {
