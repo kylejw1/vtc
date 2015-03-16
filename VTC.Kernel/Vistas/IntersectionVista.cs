@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Web;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Extensions;
@@ -112,6 +114,7 @@ namespace VTC.Kernel.Vistas
 
         private bool postTurnReport(string content)
         {
+            bool success = false;
             try
             {
                 // ER: TODO: most likely, it should not be in kernel
@@ -134,26 +137,41 @@ namespace VTC.Kernel.Vistas
                 HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
                 objRequest.KeepAlive = true;
                 objRequest.Pipelined = true;
-                objRequest.Timeout = 2000;
+                objRequest.Timeout = 10000;
                 objRequest.Method = "POST";
                 objRequest.ContentLength = post_string.Length;
                 objRequest.ContentType = "application/x-www-form-urlencoded";
 
                 //// post data is sent as a stream
                 StreamWriter myWriter = null;
-                myWriter = new StreamWriter(objRequest.GetRequestStream());
-                myWriter.Write(post_string);
-                myWriter.Close();
-                objRequest.GetResponse();
 
+                Thread t2 = new Thread(delegate()
+                {
+                    try
+                    {
+                        myWriter = new StreamWriter(objRequest.GetRequestStream());
+                        myWriter.Write(post_string);
+                        myWriter.Close();
+                        objRequest.GetResponse();
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                        //throw (ex);      
+                    }
+                    finally
+                    {
+                        Debug.WriteLine("Post turn report success: " + success);
+                    }
+                });
+                t2.Start();
             }
             catch (Exception ex)
             {
 #if(DEBUG)
-                {
-                    Console.WriteLine(ex.Message);
-                    //throw (ex);
-                }
+                Debug.WriteLine(ex.Message);
+                //throw (ex);      
 #else
             {
                 Trace.WriteLine(ex.Message);

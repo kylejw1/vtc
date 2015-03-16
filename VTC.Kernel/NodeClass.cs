@@ -308,8 +308,9 @@ namespace VTC.Kernel
 
         public double compensation_gain = 30; //Gain applied to process noise when a measurement is missed
 
-        public double q = 10.0; // Process noise matrix multiplier
-        public double r_position = 10.0; // Position easurement noise matrix multiplier
+        //TODO: Pull these values from settings file instead of hard-coding
+        public double q = 20.0; // Process noise matrix multiplier
+        public double r_position = 5.0; // Position measurement noise matrix multiplier
         // TODO: What value for r_colour?
         public double r_colour = 50.0; // Colour measurement noise matrix multiplier
 

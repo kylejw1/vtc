@@ -31,6 +31,7 @@ namespace VTC.ServerReporting.ReportItems
             wc.UploadDataCompleted += wc_UploadDataCompleted;
 
             wc.UploadDataAsync(DestinationFilePath, data);
+
         }
 
         void wc_UploadDataCompleted(object sender, UploadDataCompletedEventArgs e)

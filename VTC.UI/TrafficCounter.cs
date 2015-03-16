@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
@@ -294,12 +295,14 @@ namespace VTC
           // Update image boxes
           imageBox1.Image = Vista.GetCurrentStateImage();
           imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-          imageBox3.Image = Vista.Movement_Mask;
+          resampleBackgroundButton.Image = Vista.Movement_Mask;
 
           // Update statistics
           trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
 
           tbVistaStats.Text = Vista.GetStatString();
+
+          //System.Threading.Thread.Sleep(33);
       }
 
       void PushStateProcess(object sender, EventArgs e)
@@ -322,6 +325,7 @@ namespace VTC
 
       private void pushState()
       {
+          bool success = false;
           try
           {
 
@@ -371,7 +375,8 @@ namespace VTC
               myWriter.Write(post_string);
               myWriter.Close();
               objRequest.GetResponse();
-              
+              success = true;
+
           }
           catch (Exception ex)
           {
@@ -388,6 +393,10 @@ namespace VTC
                 Trace.WriteLine(ex.TargetSite);
             }
             #endif
+          }
+          finally
+          {
+              Debug.WriteLine("Post state success: " + success);
           }
       }
 
@@ -424,6 +433,13 @@ namespace VTC
           {
               ServerReporter.INSTANCE.Stop();
           }
+      }
+
+      private void resampleBackgroundButton_Click(object sender, EventArgs e)
+      {
+          Image<Bgr, Byte> frame = _cameraCapture.QueryFrame();
+          if(frame != null)
+            RefreshBackground(frame);
       }
    }
 }

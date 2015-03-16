@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using Emgu.CV;
+using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
@@ -180,7 +182,8 @@ namespace VTC.Kernel.Vistas
 
                 UpdateBackground(newFrame);
 
-                var measurements = FindBlobCenters(newFrame, count);
+                //var measurements = FindBlobCenters(newFrame, count);
+                var measurements = FindClosedBlobCenters(newFrame);
                 MHT.Update(measurements);
 
                 // First update base class stats
@@ -223,6 +226,10 @@ namespace VTC.Kernel.Vistas
             {
                 Masked_Difference._ThresholdBinary(_thresholdColor, _whiteColor);
                 Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
+                Movement_Mask._Erode(1);
+                Movement_Mask._Dilate(1);
+                Movement_Mask._Erode(1);
+                Movement_Mask._Dilate(1);
                 Movement_Mask._SmoothGaussian(5, 5, 1, 1);
                 using (Image<Bgr, double> int_img = Masked_Difference.Integral())
                 {
@@ -276,6 +283,48 @@ namespace VTC.Kernel.Vistas
                     //Do this last so that it doesn't interfere with color sampling
 					frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
                 }
+            }
+            return coordinates;
+        }
+
+        private Measurements[] FindClosedBlobCenters(Image<Bgr, Byte> frame)
+        {
+            Measurements[] coordinates;
+
+            using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
+            {
+                Emgu.CV.Cvb.CvBlobs resultingImgBlobs = new Emgu.CV.Cvb.CvBlobs();
+                Emgu.CV.Cvb.CvBlobDetector bDetect = new Emgu.CV.Cvb.CvBlobDetector();
+                bDetect.Detect(tempMovement_Mask, resultingImgBlobs);
+                int numWebcamBlobsFound = resultingImgBlobs.Count;
+                if (numWebcamBlobsFound > Settings.MaxObjectCount)
+                    numWebcamBlobsFound = Settings.MaxObjectCount;
+
+                BlobAreaComparer areaComparer = new BlobAreaComparer();
+                SortedList<CvBlob, int> blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
+                foreach (Emgu.CV.Cvb.CvBlob targetBlob in resultingImgBlobs.Values)
+                    blobsWithArea.Add(targetBlob, targetBlob.Area);
+
+                coordinates = new Measurements[numWebcamBlobsFound];
+                for(int i=0; i<numWebcamBlobsFound; i++)
+                {
+                    CvBlob targetBlob = blobsWithArea.ElementAt(i).Key;
+                    double x = targetBlob.Centroid.X;
+                    double y = targetBlob.Centroid.Y;
+                    var colour = GetBlobColour(frame, x, y, 3.0);
+                    var coords = new Measurements()
+                    {
+                        x = x,
+                        y = y,
+                        red = colour.Red,
+                        green = colour.Green,
+                        blue = colour.Blue
+                    };
+                    coordinates[i] = coords;
+                    //Do this last so that it doesn't interfere with color sampling
+                    frame.Draw(new CircleF(new PointF((float) x, (float) y), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                }
+                
             }
             return coordinates;
         }
@@ -339,3 +388,12 @@ namespace VTC.Kernel.Vistas
         }
     }
 }
+
+class BlobAreaComparer : IComparer<CvBlob>
+{
+     public int Compare(CvBlob x, CvBlob y)
+     {
+         return (x.Area < y.Area) ? 1 : -1;
+     }
+}
+        

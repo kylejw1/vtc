@@ -52,6 +52,7 @@ namespace VTC.Kernel
 
             StateHypothesis initialHypothesis = new StateHypothesis(_settings.MissThreshold);
             HypothesisTree = new HypothesisTree(initialHypothesis);
+            
         }
 
         /// <summary>
