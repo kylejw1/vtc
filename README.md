@@ -13,18 +13,10 @@ Realtime video-based object tracking software. Written in C# using Emgu CV. Requ
 Get sources to some dir (say - `c:\projects\vtc`). Further referenced as `REPODIR`.
 
 ##EmguCV
-*to be improved*
-
 It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\` dir).
 * Solution projects are using the path, so no need to fix it.
 * Run **setup.bat** (as Administrator) to create links to huge x86/x64 dirs of EmguCV library.
 ** (not sure) maybe it's necessary to build solution before the step above, so `bin` folder got created.
-
-##DirectShow
-??? can we simply put the dll to repository? Is it legal???
-
-* Download and extract DirectShowLib v2.1 (http://sourceforge.net/projects/directshownet/files/DirectShowNET/)
-* Copy `DirectShowLib-2005.dll` to `REPODIR\Thirdparty\DirectShowLibNET\`
 
 ##Manifest
 * It's necessary to remove manifest to run project on dev machine.
@@ -33,6 +25,10 @@ It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV i
 
 ##Using existing video for debugging
 Pass pathname of local video as command line argument.
+
+#Debug output
+Debug output is written to C:\TrafficCounter\VTClog.txt (see app.config)
+
 
 ##First run
 > You need to go through the "Configure Regions" dialog the first time you use the application, or whenever it's recompiled, or whenever the intersection is switched.

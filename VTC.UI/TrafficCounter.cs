@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -29,6 +30,8 @@ namespace VTC
 
       bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
                                             //using a prerecorded video.
+
+       private DateTime applicationStartTime;
 
       private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
       private CaptureSource _selectedCamera = null;
@@ -81,6 +84,7 @@ namespace VTC
           //Initialize parameters.
           LoadParameters();
 
+           applicationStartTime = DateTime.Now;
           Run();
       }
 
@@ -303,6 +307,8 @@ namespace VTC
           tbVistaStats.Text = Vista.GetStatString();
 
           //System.Threading.Thread.Sleep(33);
+          TimeSpan activeTime = (DateTime.Now - applicationStartTime);
+          timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
       }
 
       void PushStateProcess(object sender, EventArgs e)

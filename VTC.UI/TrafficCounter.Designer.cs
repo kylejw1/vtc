@@ -37,6 +37,7 @@ namespace VTC
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.frameHeightBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -66,7 +67,8 @@ namespace VTC
             this.panel3 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
-            this.button1 = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
+            this.timeActiveTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -120,6 +122,8 @@ namespace VTC
             // 
             // splitContainer3.Panel2
             // 
+            this.splitContainer3.Panel2.Controls.Add(this.timeActiveTextBox);
+            this.splitContainer3.Panel2.Controls.Add(this.label11);
             this.splitContainer3.Panel2.Controls.Add(this.button1);
             this.splitContainer3.Panel2.Controls.Add(this.frameHeightBox);
             this.splitContainer3.Panel2.Controls.Add(this.label6);
@@ -173,6 +177,16 @@ namespace VTC
             this.label1.Size = new System.Drawing.Size(46, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Camera ";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(256, 320);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(196, 23);
+            this.button1.TabIndex = 39;
+            this.button1.Text = "Resample background";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.resampleBackgroundButton_Click);
             // 
             // frameHeightBox
             // 
@@ -435,15 +449,22 @@ namespace VTC
             this.pushStateTimer.Interval = 10000;
             this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
             // 
-            // button1
+            // label11
             // 
-            this.button1.Location = new System.Drawing.Point(256, 320);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(196, 23);
-            this.button1.TabIndex = 39;
-            this.button1.Text = "Resample background";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.resampleBackgroundButton_Click);
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(112, 326);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(62, 13);
+            this.label11.TabIndex = 40;
+            this.label11.Text = "Time active";
+            // 
+            // timeActiveTextBox
+            // 
+            this.timeActiveTextBox.Location = new System.Drawing.Point(6, 323);
+            this.timeActiveTextBox.Name = "timeActiveTextBox";
+            this.timeActiveTextBox.ReadOnly = true;
+            this.timeActiveTextBox.Size = new System.Drawing.Size(100, 20);
+            this.timeActiveTextBox.TabIndex = 41;
             // 
             // TrafficCounter
             // 
@@ -519,5 +540,7 @@ namespace VTC
       private System.Windows.Forms.Label label5;
       private System.Windows.Forms.TextBox frameWidthBox;
       private Button button1;
+      private TextBox timeActiveTextBox;
+      private Label label11;
    }
 }
