@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -23,24 +22,16 @@ namespace VTC
 {
    public partial class TrafficCounter : Form
    {
-      private static MCvFont _font = new MCvFont(FONT.CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0);
        private readonly AppSettings _settings;
        private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
-      bool _changeInFileMode = true;        //Boolean variable indicating, if the user can choose a webcam, while he was
-                                            //using a prerecorded video.
-
-       private DateTime applicationStartTime;
+      private DateTime _applicationStartTime;
 
       private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
       private CaptureSource _selectedCamera = null;
       private CaptureSource SelectedCamera
       {
-          get
-          {
-              return _selectedCamera;
-          }
           set
           {
               if (value == _selectedCamera) return;
@@ -84,7 +75,7 @@ namespace VTC
           //Initialize parameters.
           LoadParameters();
 
-           applicationStartTime = DateTime.Now;
+           _applicationStartTime = DateTime.Now;
           Run();
       }
 
@@ -102,12 +93,11 @@ namespace VTC
          
          Application.Idle += ProcessFrame;
 
-          //TODO: Move server credentials to configuration file
-         String IntersectionImagePath = "ftp://"+ _settings.ServerUrl +"/intersection_" + _settings.IntersectionID + ".png";
+         String intersectionImagePath = "ftp://"+ _settings.ServerUrl +"/intersection_" + _settings.IntersectionID + ".png";
          ServerReporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  _settings.FrameUploadIntervalMinutes, 
-                 new Uri(@IntersectionImagePath),
+                 new Uri(intersectionImagePath),
                   new NetworkCredential(_settings.FtpUserName, _settings.FtpPassword),
                   GetCameraFrameBytes
                  ));
@@ -157,22 +147,21 @@ namespace VTC
           }
 
           //List all video input devices.
-          DsDevice[] _systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+          DsDevice[] systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
 
           //Variable to indicate the device´s index.
-          int _deviceIndex = 0;
+          int deviceIndex = 0;
 
           //Add every device to the global variable and to the camera combobox
-          foreach (DsDevice _camera in _systemCameras)
+          foreach (DsDevice camera in systemCameras)
           {
               //Add Device with an index and a name to the List.
-              AddCamera(new SystemCamera(_camera.Name, _deviceIndex));
+              AddCamera(new SystemCamera(camera.Name, deviceIndex));
 
               //Increment the index.
-              _deviceIndex++;
+              deviceIndex++;
           }
 
-          // TODO: Temporary mess until we sort out IP camera config.  Don't commit
           if (File.Exists("ipCameras.txt"))
           {
               var ipCameraStrings = File.ReadAllLines("ipCameras.txt");
@@ -204,21 +193,17 @@ namespace VTC
       /// </summary>
       private void CameraComboBox_SelectedIndexChanged(object sender, EventArgs e)
       {
-          //Continue if it´s allowed to select a camera during the use of an prerecorded video.
-          if (_changeInFileMode == true)
-          {
-              //Change the capture device.
-              SelectedCamera = _cameras[CameraComboBox.SelectedIndex];
-          }
+        //Change the capture device.
+        SelectedCamera = _cameras[CameraComboBox.SelectedIndex];   
       }
 
       /// <summary>
       /// Method for refreshing the background.
       /// </summary>
-      private void RefreshBackground(Image<Bgr, Byte> Frame) 
+      private void RefreshBackground(Image<Bgr, Byte> frame) 
       {
           //Refresh background.
-          Vista.InitializeBackground(Frame);
+          Vista.InitializeBackground(frame);
       }
       
        /// <summary>
@@ -226,15 +211,12 @@ namespace VTC
       /// </summary>
       private void LoadParameters()
       {
-          carRadiusTextbox.Text = _settings.CarRadius.ToString(CultureInfo.InvariantCulture); 
-          avgNoiseTextbox.Text = _settings.PerCarMinimum.ToString(CultureInfo.InvariantCulture);
-
           intersectionIDTextBox.Text = _settings.IntersectionID;
           pushStateTimer.Interval = _settings.StateUploadIntervalMs;
           serverUrlTextBox.Text = _settings.ServerUrl;
 
-          frameHeightBox.Text = _settings.FrameHeight.ToString();
-          frameWidthBox.Text = _settings.FrameWidth.ToString();
+          frameHeightBox.Text = _settings.FrameHeight.ToString(CultureInfo.InvariantCulture);
+          frameWidthBox.Text = _settings.FrameWidth.ToString(CultureInfo.InvariantCulture);
       }
 
       /// <summary>
@@ -244,8 +226,6 @@ namespace VTC
       {
           try
           {
-              _settings.CarRadius = int.Parse(carRadiusTextbox.Text, CultureInfo.InvariantCulture);
-              _settings.PerCarMinimum = double.Parse(avgNoiseTextbox.Text, CultureInfo.InvariantCulture);
               _settings.IntersectionID = intersectionIDTextBox.Text;
               _settings.ServerUrl = serverUrlTextBox.Text;
 
@@ -258,7 +238,7 @@ namespace VTC
           {
               var message = "Cannot save configuration settings. Error: " + ex.Message;
               Log(message);
-              MessageBox.Show(message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+              MessageBox.Show(message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
           }
       }
 
@@ -285,14 +265,6 @@ namespace VTC
           if (frame == null)
               return;
 
-          // Send options text box data to the Vista
-          // TODO:  'Vista' class has a per_car_minimum that should be set in the text box if the 
-          // user specifies a value that is too low.
-          // Also, do we want an "apply" button?  I feel like if the frame updates while a user has helf-changed the 
-          // per_car value, we could get some bad values?
-          Vista.NoiseMass = Convert.ToInt32(avgNoiseTextbox.Text);
-          Vista.CarRadius = Convert.ToInt32(carRadiusTextbox.Text);
-
           // Send the new image frame to the vista for processing
           Vista.Update(frame);
 
@@ -307,7 +279,7 @@ namespace VTC
           tbVistaStats.Text = Vista.GetStatString();
 
           //System.Threading.Thread.Sleep(33);
-          TimeSpan activeTime = (DateTime.Now - applicationStartTime);
+          TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
           timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
       }
 
@@ -315,70 +287,61 @@ namespace VTC
       {
         if (pushStateCheckbox.Checked)
         {
-            Thread pushThread = new Thread(pushState);
+            Thread pushThread = new Thread(PushState);
             pushThread.Start();
         }
       }
 
-      private static void CoordinatesContains(Measurements[] coordinates, double problem_x, double problem_y)
-      {
-          for (int i = 0; i < coordinates.Length; i++)
-          {
-              if (coordinates[i].x == problem_x && coordinates[i].y == problem_y)
-                  Console.WriteLine("Multiple detections here");
-          }
-      }
-
-      private void pushState()
+      private void PushState()
       {
           bool success = false;
           try
           {
 
-              StateEstimate[] state_estimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
-              Dictionary<string, string> post_values = new Dictionary<string, string>();
-              for (int vehicle_count = 0; vehicle_count < state_estimates.Length; vehicle_count++)
+              StateEstimate[] stateEstimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
+              Dictionary<string, string> postValues = new Dictionary<string, string>();
+              for (int vehicleCount = 0; vehicleCount < stateEstimates.Length; vehicleCount++)
               {
-                  String x = state_estimates[vehicle_count].x.ToString();
-                  String y = state_estimates[vehicle_count].y.ToString();
-                  String vx = state_estimates[vehicle_count].vx.ToString();
-                  String vy = state_estimates[vehicle_count].vy.ToString();
-                  String zero = "0";
-                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][x]", x);
-                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vx]", vx);
-                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][y]", y);
-                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][vy]", vy);
-                  post_values.Add("state_sample[states_attributes][" + vehicle_count.ToString() + "][_destroy]", zero);
+                  String x = stateEstimates[vehicleCount].x.ToString(CultureInfo.InvariantCulture);
+                  String y = stateEstimates[vehicleCount].y.ToString(CultureInfo.InvariantCulture);
+                  String vx = stateEstimates[vehicleCount].vx.ToString(CultureInfo.InvariantCulture);
+                  String vy = stateEstimates[vehicleCount].vy.ToString(CultureInfo.InvariantCulture);
+                  const string zero = "0";
+                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][x]", x);
+                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vx]", vx);
+                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][y]", y);
+                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vy]", vy);
+                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][_destroy]", zero);
               }
               
-              if(state_estimates.Length == 0)
-                  post_values.Add("state_sample[states_attributes][]", "");
+              if(stateEstimates.Length == 0)
+                  postValues.Add("state_sample[states_attributes][]", "");
 
-              post_values.Add("intersection_id", _settings.IntersectionID);
+              postValues.Add("intersection_id", _settings.IntersectionID);
 
 
-              String post_string = "";
-              foreach (KeyValuePair<string, string> post_value in post_values)
+              String postString = "";
+              foreach (KeyValuePair<string, string> postValue in postValues)
               {
-                  post_string += post_value.Key + "=" + HttpUtility.UrlEncode(post_value.Value) + "&";
+                  postString += postValue.Key + "=" + HttpUtility.UrlEncode(postValue.Value) + "&";
               }
-              post_string = post_string.TrimEnd('&');
+              postString = postString.TrimEnd('&');
 
               //Upload state to server
-              String post_url = "http://" + _settings.ServerUrl + "/state_samples";
+              String postUrl = "http://" + _settings.ServerUrl + "/state_samples";
 
-              HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(post_url);
+              HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(postUrl);
               objRequest.KeepAlive = true;
               objRequest.Pipelined = true;
               objRequest.Timeout = 2000;
               objRequest.Method = "POST";
-              objRequest.ContentLength = post_string.Length;
+              objRequest.ContentLength = postString.Length;
               objRequest.ContentType = "application/x-www-form-urlencoded";
 
               //// post data is sent as a stream
               StreamWriter myWriter = null;
               myWriter = new StreamWriter(objRequest.GetRequestStream());
-              myWriter.Write(post_string);
+              myWriter.Write(postString);
               myWriter.Close();
               objRequest.GetResponse();
               success = true;
@@ -408,10 +371,6 @@ namespace VTC
 
       private void imageBox1_MouseDown(object sender, MouseEventArgs e)
       {
-          int offsetX = (int)(e.Location.X / imageBox1.ZoomScale);
-          int offsetY = (int)(e.Location.Y / imageBox1.ZoomScale);
-          int horizontalScrollBarValue = imageBox1.HorizontalScrollBar.Visible ? (int)imageBox1.HorizontalScrollBar.Value : 0;
-          int verticalScrollBarValue = imageBox1.VerticalScrollBar.Visible ? (int)imageBox1.VerticalScrollBar.Value : 0;
       }
 
       private void btnConfigureRegions_Click(object sender, EventArgs e)
