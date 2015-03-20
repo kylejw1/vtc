@@ -260,27 +260,28 @@ namespace VTC
 
       void ProcessFrame(object sender, EventArgs e)
       {
-          Image<Bgr, Byte> frame = _cameraCapture.QueryFrame();
+          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          {
+              if (frame == null)
+                  return;
 
-          if (frame == null)
-              return;
+              // Send the new image frame to the vista for processing
+              Vista.Update(frame);
 
-          // Send the new image frame to the vista for processing
-          Vista.Update(frame);
+              // Update image boxes
+              imageBox1.Image = Vista.GetCurrentStateImage();
+              imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
+              resampleBackgroundButton.Image = Vista.Movement_Mask;
 
-          // Update image boxes
-          imageBox1.Image = Vista.GetCurrentStateImage();
-          imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-          resampleBackgroundButton.Image = Vista.Movement_Mask;
+              // Update statistics
+              trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
 
-          // Update statistics
-          trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
+              tbVistaStats.Text = Vista.GetStatString();
 
-          tbVistaStats.Text = Vista.GetStatString();
-
-          //System.Threading.Thread.Sleep(33);
-          TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
-          timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+              //System.Threading.Thread.Sleep(33);
+              TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
+              timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+          }
       }
 
       void PushStateProcess(object sender, EventArgs e)
@@ -297,55 +298,11 @@ namespace VTC
           bool success = false;
           try
           {
-
               StateEstimate[] stateEstimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
-              Dictionary<string, string> postValues = new Dictionary<string, string>();
-              for (int vehicleCount = 0; vehicleCount < stateEstimates.Length; vehicleCount++)
-              {
-                  String x = stateEstimates[vehicleCount].x.ToString(CultureInfo.InvariantCulture);
-                  String y = stateEstimates[vehicleCount].y.ToString(CultureInfo.InvariantCulture);
-                  String vx = stateEstimates[vehicleCount].vx.ToString(CultureInfo.InvariantCulture);
-                  String vy = stateEstimates[vehicleCount].vy.ToString(CultureInfo.InvariantCulture);
-                  const string zero = "0";
-                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][x]", x);
-                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vx]", vx);
-                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][y]", y);
-                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vy]", vy);
-                  postValues.Add("state_sample[states_attributes][" + vehicleCount + "][_destroy]", zero);
-              }
-              
-              if(stateEstimates.Length == 0)
-                  postValues.Add("state_sample[states_attributes][]", "");
-
-              postValues.Add("intersection_id", _settings.IntersectionID);
-
-
-              String postString = "";
-              foreach (KeyValuePair<string, string> postValue in postValues)
-              {
-                  postString += postValue.Key + "=" + HttpUtility.UrlEncode(postValue.Value) + "&";
-              }
-              postString = postString.TrimEnd('&');
-
-              //Upload state to server
-              String postUrl = "http://" + _settings.ServerUrl + "/state_samples";
-
-              HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(postUrl);
-              objRequest.KeepAlive = true;
-              objRequest.Pipelined = true;
-              objRequest.Timeout = 2000;
-              objRequest.Method = "POST";
-              objRequest.ContentLength = postString.Length;
-              objRequest.ContentType = "application/x-www-form-urlencoded";
-
-              //// post data is sent as a stream
-              StreamWriter myWriter = null;
-              myWriter = new StreamWriter(objRequest.GetRequestStream());
-              myWriter.Write(postString);
-              myWriter.Close();
-              objRequest.GetResponse();
+              string postString;
+              string postUrl = ServerReporting.ReportItems.HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
+              ServerReporting.ReportItems.HttpPostReportItem.SendStatePOST(postUrl, postString);
               success = true;
-
           }
           catch (Exception ex)
           {
@@ -365,11 +322,13 @@ namespace VTC
           }
           finally
           {
-              Debug.WriteLine("Post state success: " + success);
+              Debug.WriteLine("Post state success: " + success + " " + DateTime.Now);
           }
       }
 
-      private void imageBox1_MouseDown(object sender, MouseEventArgs e)
+       
+
+       private void imageBox1_MouseDown(object sender, MouseEventArgs e)
       {
       }
 

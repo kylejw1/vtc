@@ -162,7 +162,7 @@ namespace VTC.Kernel.Vistas
                     }
                     finally
                     {
-                        Debug.WriteLine("Post turn report success: " + success);
+                        Debug.WriteLine("Post turn report success: " + success + " " + DateTime.Now);
                     }
                 });
                 t2.Start();
