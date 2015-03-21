@@ -16,6 +16,8 @@ namespace VTC.ServerReporting.ReportItems
         public static void SendStatePOST(string postUrl, string postString)
         {
 
+            
+
                 HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(postUrl);
                 objRequest.KeepAlive = true;
                 objRequest.Pipelined = true;
@@ -23,6 +25,7 @@ namespace VTC.ServerReporting.ReportItems
                 objRequest.Method = "POST";
                 objRequest.ContentLength = postString.Length;
                 objRequest.ContentType = "application/x-www-form-urlencoded";
+                objRequest.Proxy = null;
 
                 //Trying different things to prevent so many timeouts:
                 objRequest.KeepAlive = false;
@@ -34,8 +37,10 @@ namespace VTC.ServerReporting.ReportItems
                     myWriter.Write(postString);
                     myWriter.Close();
                 }
-                objRequest.GetResponse();
+                objRequest.GetResponse().Close();
                 objRequest.Abort();
+
+                
             
         }
 

@@ -262,8 +262,16 @@ namespace VTC
       {
           using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
           {
-              if (frame == null)
-                  return;
+              
+              //Workaround - dispose and restart capture if camera starts returning null. 
+              //TODO: Investigate - why is this necessary?
+              if (frame == null) 
+              {
+                _cameraCapture.Dispose();
+                _cameraCapture = _selectedCamera.GetCapture();
+                Debug.WriteLine("Restarting camera: " + DateTime.Now);
+                return;
+              }
 
               // Send the new image frame to the vista for processing
               Vista.Update(frame);
@@ -281,6 +289,7 @@ namespace VTC
               //System.Threading.Thread.Sleep(33);
               TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
               timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+
           }
       }
 
