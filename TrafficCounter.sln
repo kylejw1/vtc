@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficCounter", "VTC.UI\Tr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTC.Kernel", "VTC.Kernel\VTC.Kernel.csproj", "{D8A795D9-F343-4DB5-A993-EB35D1A4C182}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTC.Reporting", "VTC.Reporting\VTC.Reporting.csproj", "{0CE41230-5E22-4B13-8520-AE201EED01BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{D8A795D9-F343-4DB5-A993-EB35D1A4C182}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8A795D9-F343-4DB5-A993-EB35D1A4C182}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8A795D9-F343-4DB5-A993-EB35D1A4C182}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CE41230-5E22-4B13-8520-AE201EED01BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE41230-5E22-4B13-8520-AE201EED01BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CE41230-5E22-4B13-8520-AE201EED01BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE41230-5E22-4B13-8520-AE201EED01BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
