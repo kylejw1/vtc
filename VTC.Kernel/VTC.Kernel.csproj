@@ -61,6 +61,7 @@
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="Extensions\LineSegment2DExtensions.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
+    <Compile Include="Fast2dNearestNeighbor.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="NodeClass.cs" />

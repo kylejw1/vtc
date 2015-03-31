@@ -64,10 +64,18 @@ namespace VTC
        /// <param name="filename">Local file with video.</param>
        public TrafficCounter(AppSettings settings, string filename = null)
       {
+          InitializeComponent();
+
+          var t = new System.Windows.Forms.Timer();
+          t.Tick += t_Tick;
+          t.Interval = 5000;
+          t.Start();
+          
+
            _settings = settings;
            _filename = filename;
 
-          InitializeComponent();
+          
 
           //Initialize the camera selection combobox.
           InitializeCameraSelection();
@@ -76,8 +84,41 @@ namespace VTC
           LoadParameters();
 
            _applicationStartTime = DateTime.Now;
-          Run();
+          //Run();
       }
+
+       Random r = new Random();
+       void t_Tick(object sender, EventArgs e)
+       {
+          
+
+
+           var points = new List<System.Drawing.Point>();
+           while (points.Count < 100)
+           {
+               points.Add(new System.Drawing.Point(r.Next(640), r.Next(480)));
+           }
+
+           var kyle = new System.Drawing.Point(r.Next(640), r.Next(480));
+
+           var nearest = Kernel.Fast2dNearestNeighbor.FindNearestNeighbor(kyle, points,
+              640,
+              480);
+
+           var img = new Image<Bgr, Byte>(640, 480);
+           var white = new Bgr(System.Drawing.Color.White);
+           var red = new Bgr(System.Drawing.Color.Red);
+           var blue = new Bgr(System.Drawing.Color.Blue);
+           foreach (var pt in points)
+           {
+               var pts = new CircleF(new System.Drawing.PointF(pt.X, pt.Y), 3);
+               img.Draw(pts, white, 2);
+           }
+           img.Draw(new CircleF(new System.Drawing.PointF(kyle.X, kyle.Y), 3), blue, 2);
+           img.Draw(new CircleF(new System.Drawing.PointF(nearest.X, nearest.Y), 3), red, 2);
+
+           imageBox1.Image = img;
+       }
 
       void Run()
       {

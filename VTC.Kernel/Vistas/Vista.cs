@@ -49,6 +49,9 @@ namespace VTC.Kernel.Vistas
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
 
+        //TODO: Decide later where this should go (could be here)
+        //private 
+
         public double CarRadius
         {
             get { return _carRadius; }
