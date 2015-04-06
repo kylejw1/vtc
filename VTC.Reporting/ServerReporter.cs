@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using VTC.ServerReporting;
-using System.Diagnostics;
 
-namespace VTC
+namespace VTC.Reporting
 {
-    internal class ServerReporter
+    public class ServerReporter
     {
         private Timer ReportTimer;
         private List<ReportItem> ReportItems;

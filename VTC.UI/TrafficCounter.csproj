@@ -149,9 +149,6 @@
     <Compile Include="RegionConfig\RegionEditor.Designer.cs">
       <DependentUpon>RegionEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="ServerReporting\ReportItem.cs" />
-    <Compile Include="ServerReporting\ReportItems\FtpSendFileReportItem.cs" />
-    <Compile Include="ServerReporting\ServerReporter.cs" />
     <Compile Include="TrafficCounter.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -231,6 +228,10 @@
     <ProjectReference Include="..\VTC.Kernel\VTC.Kernel.csproj">
       <Project>{d8a795d9-f343-4db5-a993-eb35d1a4c182}</Project>
       <Name>VTC.Kernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VTC.Reporting\VTC.Reporting.csproj">
+      <Project>{0CE41230-5E22-4B13-8520-AE201EED01BB}</Project>
+      <Name>VTC.Reporting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

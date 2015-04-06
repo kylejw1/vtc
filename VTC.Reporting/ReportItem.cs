@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
-namespace VTC.ServerReporting
+namespace VTC.Reporting
 {
     /// <summary>
     /// Overlap Report Handling signals what to do when a long-running report 
