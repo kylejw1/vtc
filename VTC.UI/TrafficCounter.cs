@@ -12,7 +12,9 @@ using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using VTC.CaptureSource;
 using VTC.Kernel;
+using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
@@ -27,13 +29,13 @@ namespace VTC
 
       private readonly DateTime _applicationStartTime;
 
-      private readonly List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
-      private CaptureSource _selectedCamera;
+      private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
+      private ICaptureSource _selectedCamera;
 
        /// <summary>
        /// Active camera.
        /// </summary>
-      private CaptureSource SelectedCamera
+      private ICaptureSource SelectedCamera
       {
           get { return _selectedCamera; }
           set
@@ -139,10 +141,10 @@ namespace VTC
            return false;
        }
 
-       private void AddCamera(CaptureSource camera)
+       private void AddCamera(CaptureSource.CaptureSource camera)
        {
            _cameras.Add(camera);
-           CameraComboBox.Items.Add(camera.ToString());
+           CameraComboBox.Items.Add(camera.Name);
        }
 
        /// <summary>

@@ -1,14 +1,15 @@
-﻿using Emgu.CV;
-using System;
+﻿using System;
+using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using VTC.Kernel.Settings;
+using VTC.Kernel.Video;
 
-namespace VTC
+namespace VTC.CaptureSource
 {
-    public abstract class CaptureSource
+    public abstract class CaptureSource : ICaptureSource
     {
-        private readonly string Name;
+        private readonly string _name;
         private Capture _cameraCapture;
 
         public int Width
@@ -29,6 +30,11 @@ namespace VTC
             }
         }
 
+        public string Name
+        {
+            get { return _name; }
+        }
+
 
         protected abstract Capture GetCapture();
 
@@ -38,7 +44,7 @@ namespace VTC
         /// <param name="name">Capture source name.</param>
         protected CaptureSource(string name)
         {
-            Name = name;
+            _name = name;
         }
 
         /// <summary>

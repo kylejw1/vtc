@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Emgu.CV;
 
-namespace VTC
+namespace VTC.CaptureSource
 {
     public class VideoFileCapture : CaptureSource
     {
