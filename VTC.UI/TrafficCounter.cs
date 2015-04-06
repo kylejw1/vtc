@@ -15,7 +15,8 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using VTC.Kernel;
 using VTC.Kernel.Vistas;
-using VTC.ServerReporting.ReportItems;
+using VTC.Reporting;
+using VTC.Reporting.ReportItems;
 using VTC.Settings;
 
 namespace VTC
@@ -309,8 +310,8 @@ namespace VTC
           {
               StateEstimate[] stateEstimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
               string postString;
-              string postUrl = ServerReporting.ReportItems.HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
-              ServerReporting.ReportItems.HttpPostReportItem.SendStatePOST(postUrl, postString);
+              string postUrl = HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
+              HttpPostReportItem.SendStatePOST(postUrl, postString);
               success = true;
           }
           catch (Exception ex)

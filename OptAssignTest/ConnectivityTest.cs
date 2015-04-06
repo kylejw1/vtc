@@ -9,9 +9,9 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VTC.Kernel;
 using VTC.Kernel.Vistas;
-using VTC.ServerReporting.ReportItems;
 using System.ServiceModel.Web;
 using System.Runtime.Serialization.Json;
+using VTC.Reporting.ReportItems;
 
 namespace OptAssignTest
 {
@@ -80,9 +80,9 @@ namespace OptAssignTest
             stateEstimates[0].y = y;
             string postString;
 
-            string postUrl = VTC.ServerReporting.ReportItems.HttpPostReportItem.PostStateString(stateEstimates, "4",
+            string postUrl = HttpPostReportItem.PostStateString(stateEstimates, "4",
                 "dev.traffic-camera.com", out postString);
-            VTC.ServerReporting.ReportItems.HttpPostReportItem.SendStatePOST(postUrl, postString);
+            HttpPostReportItem.SendStatePOST(postUrl, postString);
         }
 
         private static StateEstimate GetSingleState()
