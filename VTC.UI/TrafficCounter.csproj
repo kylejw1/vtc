@@ -133,7 +133,6 @@
     <Compile Include="ExportTrainingSet\ExportTrainingSet.Designer.cs">
       <DependentUpon>ExportTrainingSet.cs</DependentUpon>
     </Compile>
-    <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
     <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>
