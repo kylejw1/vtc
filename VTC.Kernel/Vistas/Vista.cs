@@ -6,9 +6,6 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
-using Emgu.CV.ML;
-using Emgu.CV.ML.MlEnum;
-using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
 
