@@ -17,14 +17,12 @@ using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
-using VTC.ExportTrainingSet;
 
 namespace VTC
 {
    public partial class TrafficCounter : Form
    {
       private readonly AppSettings _settings;
-      private readonly string _filename; // filename with local video (debug mode).
        private const string IpCamerasFilename = "ipCameras.txt";
 
       private readonly DateTime _applicationStartTime;
@@ -63,16 +61,23 @@ namespace VTC
        /// Constructor.
        /// </summary>
        /// <param name="settings">Application settings.</param>
-       /// <param name="filename">Local file with video.</param>
-       public TrafficCounter(AppSettings settings, string filename = null)
+       /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
+       public TrafficCounter(AppSettings settings, string appArgument = null)
       {
-           _settings = settings;
-           _filename = filename;
-
           InitializeComponent();
 
           //Initialize the camera selection combobox.
-          InitializeCameraSelection();
+           bool unitTestsMode = false;
+           if ("-unitTests".Equals(appArgument))
+           {
+               unitTestsMode = DetectTestScenarios();
+           }
+
+           if (! unitTestsMode)
+           {
+               InitializeCameraSelection(appArgument);
+               _settings = settings;
+           }
 
           //Initialize parameters.
           LoadParameters();
@@ -140,15 +145,16 @@ namespace VTC
            CameraComboBox.Items.Add(camera.ToString());
        }
 
-      /// <summary>
-      /// Method for initializing the camera selection combobox.
-      /// </summary>
-      void InitializeCameraSelection()
+       /// <summary>
+       /// Method for initializing the camera selection combobox.
+       /// </summary>
+       /// <param name="filename">Local file with video</param>
+       void InitializeCameraSelection(string filename)
       {
           // Add video file as source, if provided
-          if (UseLocalVideo(_filename))
+          if (UseLocalVideo(filename))
           {
-              AddCamera(new VideoFileCapture("File: " + Path.GetFileName(_filename), _filename));
+              AddCamera(new VideoFileCapture(filename));
           }
 
           //List all video input devices.
@@ -180,8 +186,6 @@ namespace VTC
               }
           }
 
-          PopulateUnitTests();
-
           //Disable eventhandler for the changing combobox index.
           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
 
@@ -195,9 +199,14 @@ namespace VTC
           CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
       }
 
-       private void PopulateUnitTests()
+       /// <summary>
+       /// Try to detect unit tests. Play unit tests (if detected).
+       /// </summary>
+       /// <returns><c>true</c> if unit tests detected.</returns>
+       /// <remarks>IMPORTANT: unit tests use own settings!!!</remarks>
+       private bool DetectTestScenarios()
        {
-           
+           return false;
        }
 
        /// <summary>

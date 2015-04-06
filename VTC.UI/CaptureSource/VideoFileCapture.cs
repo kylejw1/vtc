@@ -1,23 +1,21 @@
-﻿using Emgu.CV;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
+using Emgu.CV;
 
 namespace VTC
 {
     public class VideoFileCapture : CaptureSource
     {
-        private string Path;
+        private readonly string _path;
 
-        public VideoFileCapture(string name, string path) : base(name)
+        public VideoFileCapture(string path)
+            : base("File: " + Path.GetFileName(path))
         {
-            Path = path;
+            _path = path;
         }
 
         protected override Capture GetCapture()
         {
-            return new Capture(Path);
+            return new Capture(_path);
         }
     }
 }
