@@ -15,7 +15,7 @@ namespace VTC
             SystemDeviceIndex = systemDeviceIndex;
         }
 
-        public override Capture GetCapture()
+        protected override Capture GetCapture()
         {
             return new Capture(SystemDeviceIndex);
         }

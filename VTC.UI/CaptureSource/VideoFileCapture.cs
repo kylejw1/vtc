@@ -15,7 +15,7 @@ namespace VTC
             Path = path;
         }
 
-        public override Capture GetCapture()
+        protected override Capture GetCapture()
         {
             return new Capture(Path);
         }

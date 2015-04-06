@@ -15,7 +15,7 @@ namespace VTC
             ConnectionString = connectionString;
         }
 
-        public override Capture GetCapture()
+        protected override Capture GetCapture()
         {
             return new Capture(ConnectionString);
         }

@@ -8,11 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using System.Web;
 using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using VTC.Kernel;
 using VTC.Kernel.Vistas;
@@ -27,31 +25,32 @@ namespace VTC
    {
       private readonly AppSettings _settings;
       private readonly string _filename; // filename with local video (debug mode).
-      private static Capture _cameraCapture;
+       private const string IpCamerasFilename = "ipCameras.txt";
 
-      private DateTime _applicationStartTime;
+      private readonly DateTime _applicationStartTime;
 
-      private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
-      private CaptureSource _selectedCamera = null;
+      private readonly List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
+      private CaptureSource _selectedCamera;
+
+       /// <summary>
+       /// Active camera.
+       /// </summary>
       private CaptureSource SelectedCamera
       {
+          get { return _selectedCamera; }
           set
           {
               if (value == _selectedCamera) return;
 
-              _selectedCamera = value;
-
-              if (null != _cameraCapture)
+              if (_selectedCamera != null)
               {
-                  _cameraCapture.Dispose();
+                  _selectedCamera.Destroy();
               }
 
-              _cameraCapture = _selectedCamera.GetCapture();
+              _selectedCamera = value;
+              _selectedCamera.Init(_settings);
 
-              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
-              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
-
-              _vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
+              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
           }
       }
 
@@ -168,9 +167,9 @@ namespace VTC
               deviceIndex++;
           }
 
-          if (File.Exists("ipCameras.txt"))
+          if (File.Exists(IpCamerasFilename))
           {
-              var ipCameraStrings = File.ReadAllLines("ipCameras.txt");
+              var ipCameraStrings = File.ReadAllLines(IpCamerasFilename);
 
               foreach (var str in ipCameraStrings)
               {
@@ -180,6 +179,8 @@ namespace VTC
                   AddCamera(new IpCamera(split[0], split[1]));
               }
           }
+
+          PopulateUnitTests();
 
           //Disable eventhandler for the changing combobox index.
           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
@@ -194,7 +195,12 @@ namespace VTC
           CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
       }
 
-      /// <summary>
+       private void PopulateUnitTests()
+       {
+           
+       }
+
+       /// <summary>
       /// Method which reacts to the change of the camera selection combobox.
       /// </summary>
       private void CameraComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -266,15 +272,16 @@ namespace VTC
 
       void ProcessFrame(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               
               //Workaround - dispose and restart capture if camera starts returning null. 
               //TODO: Investigate - why is this necessary?
-              if (frame == null) 
+              if (frame == null)
               {
-                _cameraCapture.Dispose();
-                _cameraCapture = _selectedCamera.GetCapture();
+                  SelectedCamera.Destroy();
+                  SelectedCamera.Init(_settings);
+                  
                 Debug.WriteLine("Restarting camera: " + DateTime.Now);
                 return;
               }
@@ -415,7 +422,7 @@ namespace VTC
 
       private void resampleBackgroundButton_Click(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               if (frame != null)
                   RefreshBackground(frame);
@@ -424,7 +431,7 @@ namespace VTC
 
       private void exportTrainingImagesButton_Click(object sender, EventArgs e)
       {
-          using(Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               if (frame != null)
               {
