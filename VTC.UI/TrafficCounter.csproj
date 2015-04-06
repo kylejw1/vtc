@@ -127,6 +127,12 @@
     <Compile Include="CaptureSource\VideoFileCapture.cs" />
     <Compile Include="CaptureSource\CaptureSource.cs" />
     <Compile Include="CaptureSource\IpCamera.cs" />
+    <Compile Include="ExportTrainingSet\ExportTrainingSet.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportTrainingSet\ExportTrainingSet.Designer.cs">
+      <DependentUpon>ExportTrainingSet.cs</DependentUpon>
+    </Compile>
     <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
     <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
@@ -157,6 +163,9 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ExportTrainingSet\ExportTrainingSet.resx">
+      <DependentUpon>ExportTrainingSet.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RegionConfig\PolygonBuilderControl.resx">
       <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
     </EmbeddedResource>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
@@ -17,13 +18,14 @@ using VTC.Kernel;
 using VTC.Kernel.Vistas;
 using VTC.ServerReporting.ReportItems;
 using VTC.Settings;
+using VTC.ExportTrainingSet;
 
 namespace VTC
 {
    public partial class TrafficCounter : Form
    {
-       private readonly AppSettings _settings;
-       private readonly string _filename; // filename with local video (debug mode).
+      private readonly AppSettings _settings;
+      private readonly string _filename; // filename with local video (debug mode).
       private static Capture _cameraCapture;
 
       private DateTime _applicationStartTime;
@@ -48,12 +50,12 @@ namespace VTC
               _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
               _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
 
-              Vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
+              _vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
           }
       }
 
       //************* Multiple hypothesis tracking parameters ***************  
-      Vista Vista = null;
+      Vista _vista = null;
        
        //private MultipleHypothesisTracker MHT = null;
 
@@ -74,6 +76,9 @@ namespace VTC
 
           //Initialize parameters.
           LoadParameters();
+
+           //Clear sample files
+           ClearRGBSamplesFile();
 
            _applicationStartTime = DateTime.Now;
           Run();
@@ -203,7 +208,7 @@ namespace VTC
       private void RefreshBackground(Image<Bgr, Byte> frame) 
       {
           //Refresh background.
-          Vista.InitializeBackground(frame);
+          _vista.InitializeBackground(frame);
       }
       
        /// <summary>
@@ -248,7 +253,7 @@ namespace VTC
        /// <returns>Byte array containing the current frame in PNG format</returns>
       private Byte[] GetCameraFrameBytes()
       {
-           using (var bmp = Vista.Color_Background.ToBitmap())
+           using (var bmp = _vista.Color_Background.ToBitmap())
            using (var stream = new MemoryStream())
            {
                bmp.Save(stream, ImageFormat.Png);
@@ -273,23 +278,62 @@ namespace VTC
                 return;
               }
 
+              Image<Bgr, Byte> frameForProcessing = frame.Clone(); // Necessary so that frame.Data becomes accessible
+
               // Send the new image frame to the vista for processing
-              Vista.Update(frame);
+              _vista.Update(frameForProcessing);
 
               // Update image boxes
-              imageBox1.Image = Vista.GetCurrentStateImage();
-              imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-              resampleBackgroundButton.Image = Vista.Movement_Mask;
+              UpdateImageBoxes(frameForProcessing);
 
               // Update statistics
-              trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
+              trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
+              tbVistaStats.Text = _vista.GetStatString();
 
-              tbVistaStats.Text = Vista.GetStatString();
+              // Save R,G,B samples
+              StoreRGBSample(frameForProcessing);
 
               //System.Threading.Thread.Sleep(33);
               TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
               timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
+          }
+      }
+
+
+       private void ClearRGBSamplesFile()
+       {
+           string path = @"RGB.txt";
+            using (StreamWriter sw = File.CreateText(path))
+            {
+            }
+       }
+
+       private void StoreRGBSample(Image<Bgr, byte> frame)
+       {
+           if (frame != null && saveRGBSamplesCheckBox.Checked)
+           {
+               Bgr pixel = frame[RGBSamplePoint.Y, RGBSamplePoint.X];
+               double r = pixel.Red;
+               double g = pixel.Green;
+               double b = pixel.Blue;
+
+               string path = @"RGB.txt";
+               using (StreamWriter sw = File.AppendText(path))
+                   sw.WriteLine(r + "," + g + "," + b);    
+           }
+       }
+
+       private void UpdateImageBoxes(Image<Bgr, Byte> frame)
+      {
+          imageBox1.Image = _vista.GetCurrentStateImage();
+          imageBox2.Image = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
+          imageBox3.Image = _vista.BackgroundUpdateMoG;
+          if (_vista.Movement_Mask != null)
+          {
+              Image<Bgr, Byte> movementTimesImage = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>());
+              movementMaskBox.Image = movementTimesImage;
+              //resampleBackgroundButton.Image = _vista.Movement_Mask;
           }
       }
 
@@ -307,7 +351,7 @@ namespace VTC
           bool success = false;
           try
           {
-              StateEstimate[] stateEstimates = Vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
+              StateEstimate[] stateEstimates = _vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
               string postString;
               string postUrl = ServerReporting.ReportItems.HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
               ServerReporting.ReportItems.HttpPostReportItem.SendStatePOST(postUrl, postString);
@@ -343,11 +387,11 @@ namespace VTC
 
       private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
-          RegionEditor r = new RegionEditor(Vista.Color_Background, Vista.RegionConfiguration);
+          RegionEditor r = new RegionEditor(_vista.Color_Background, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)
           {
-              Vista.RegionConfiguration = r.RegionConfig;
-              Vista.RegionConfiguration.Save(_settings.RegionConfigPath);
+              _vista.RegionConfiguration = r.RegionConfig;
+              _vista.RegionConfiguration.Save(_settings.RegionConfigPath);
           }
       }
 
@@ -370,9 +414,37 @@ namespace VTC
 
       private void resampleBackgroundButton_Click(object sender, EventArgs e)
       {
-          Image<Bgr, Byte> frame = _cameraCapture.QueryFrame();
-          if(frame != null)
-            RefreshBackground(frame);
+          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          {
+              if (frame != null)
+                  RefreshBackground(frame);
+          }
+      }
+
+      private void exportTrainingImagesButton_Click(object sender, EventArgs e)
+      {
+          using(Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          {
+              if (frame != null)
+              {
+                  
+                  //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr,float>());
+                  ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, _vista.Training_Image.Convert<Bgr,float>(), _vista.CurrentVehicles);
+                  eT.Show();
+              }
+          }
+
+      }
+
+       private Point RGBSamplePoint;
+
+       private void imageBox1_Click(object sender, EventArgs e)
+       {
+          if(Cursor.Position.X < imageBox1.Width && Cursor.Position.Y < imageBox1.Height && Cursor.Position.X >= 0 && Cursor.Position.Y >= 0)
+          {
+              RGBSamplePoint = imageBox1.PointToClient(Cursor.Position);
+              rgbCoordinateTextbox.Text = RGBSamplePoint.ToString();
+          }
       }
    }
 }

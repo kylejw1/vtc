@@ -41,17 +41,24 @@ namespace OptAssignTest
         [Description("Send and read back state values from server in order to measure end-to-end loopback time.")]
         public void ServerLoopback()
         {
+
+            GetSingleState(); // Warm up GetRequestStream() - JIT is slow
+
             DateTime testStart = DateTime.Now;
             int numReps = 10;
             int maxFailedChecks = 10;
             int failedChecks = 0;
 
+            
+
             for (int i = 0; i < numReps; i++)
             {
                 DateTime iterationStart = DateTime.Now;
                 SendSingleVehicle(i,10);
+
                 StateEstimate result;
                 result = GetSingleState();
+
                 while (result.x != i)
                 {
                     result = GetSingleState();
@@ -128,7 +135,6 @@ namespace OptAssignTest
                         stateEstimate.y = Convert.ToDouble(y_string);
 
                         objStream.Close();
-                        wrGETURL.Abort();
                     }
                 }
             }

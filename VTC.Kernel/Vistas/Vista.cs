@@ -6,6 +6,9 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
+using Emgu.CV.ML;
+using Emgu.CV.ML.MlEnum;
+using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
 
@@ -29,8 +32,8 @@ namespace VTC.Kernel.Vistas
         private static readonly Bgr _greenColor = new Bgr(Color.Green);
         private static readonly Bgr _stateColorGreen = new Bgr(0.0, 255.0, 0.0);
         private static readonly Bgr _stateColorRed = new Bgr(0.0, 0.0, 255.0);
-        private readonly Bgr _thresholdColor;
-
+        private readonly Gray _thresholdColor;
+        private static readonly Gray _ceilingColor = new Gray(255);
         #endregion
         
         //************* Abstract methods ****************
@@ -42,8 +45,9 @@ namespace VTC.Kernel.Vistas
         private Image<Bgr, float> ROI_image;          //Area occupied by traffic
         private readonly int Width;
         private readonly int Height;
-        public Image<Gray, byte> Movement_Mask { get; private set; }      //Thresholded, b&w movement mask
+        public Image<Gray, Byte> Movement_Mask { get; private set; }      //Thresholded, b&w movement mask
         public Image<Bgr, float> Color_Background { get; private set; }   //Average Background being formed
+        public Image<Bgr, Byte> Training_Image { get; private set; } //Image to be exported for training set
 
         //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
@@ -147,7 +151,7 @@ namespace VTC.Kernel.Vistas
             LastDetectionCount = 0;
             RawMass = 0;
 
-            _thresholdColor = new Bgr(Settings.ColorThreshold, Settings.ColorThreshold, Settings.ColorThreshold);
+            _thresholdColor = new Gray(Settings.ColorThreshold);
             MHT = new MultipleHypothesisTracker(settings);
 
             CarRadius = Settings.CarRadius;
@@ -175,12 +179,11 @@ namespace VTC.Kernel.Vistas
             }
             else
             {
-                int count = CountObjects();
-
-                if (count > Settings.MaxObjectCount)
-                    count = Settings.MaxObjectCount;
+                Movement_Mask = MovementMask(newFrame);
 
                 UpdateBackground(newFrame);
+
+                Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
                 //var measurements = FindBlobCenters(newFrame, count);
                 var measurements = FindClosedBlobCenters(newFrame);
@@ -208,6 +211,34 @@ namespace VTC.Kernel.Vistas
             }
         }
 
+        //Calculate background using something like Mixture of Gaussians
+        private const int MaxSamples = 30;
+        public Image<Bgr, float> BackgroundUpdateMoG;
+        public Queue<Image<Bgr, float>> FrameSamples = new Queue<Image<Bgr, float>>(MaxSamples);
+        private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
+        {
+            Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
+            FrameSamples.Enqueue(newImageSample);
+            BackgroundUpdateMoG = new Image<Bgr, float>(newImageSample.Width, newImageSample.Height);
+
+            int numSamples = FrameSamples.Count();
+            for (int i = 0; i < newImageSample.Width; i++)
+                for (int j = 0; j < newImageSample.Height; j++ )
+                {
+                    
+                    var redPixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
+                    var greenPixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
+                    var bluePixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
+                    
+                    //TODO: Write EM algorithm to calculate background from samples. Choose the tighter distribution as the background. 
+                }
+
+                    //BackgroundUpdateMoG = backgroundMask;
+            //Color_Background.RunningAvg(backgroundTotalUpdate, Settings.Alpha);
+        }
+
+        
+
         public void InitializeBackground(Image<Bgr, Byte> frame)
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
@@ -217,35 +248,20 @@ namespace VTC.Kernel.Vistas
         }
 
 
-        private int CountObjects()
+        private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame)
         {
-            Color_Difference = Color_Background.AbsDiff(Frame.Convert<Bgr, float>());
+            Image<Bgr, float> colorDifference = Color_Background.AbsDiff(frame.Convert<Bgr, float>());
+            Image<Bgr, float> maskedDifference = colorDifference.And(ROI_image);  
+            Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
 
-            double raw_mass;
-            using (Image<Bgr, float> Masked_Difference = Color_Difference.And(ROI_image))
-            {
-                Masked_Difference._ThresholdBinary(_thresholdColor, _whiteColor);
-                Movement_Mask = Masked_Difference.Convert<Gray, Byte>();
-                Movement_Mask._Erode(1);
-                Movement_Mask._Dilate(1);
-                Movement_Mask._Erode(1);
-                Movement_Mask._Dilate(1);
-                Movement_Mask._SmoothGaussian(5, 5, 1, 1);
-                using (Image<Bgr, double> int_img = Masked_Difference.Integral())
-                {
-                    int lim_x = Masked_Difference.Width - 1;
-                    int lim_y = Masked_Difference.Height - 1;
-                    raw_mass = (int_img[lim_y, lim_x].Blue + int_img[lim_y, lim_x].Red + int_img[lim_y, lim_x].Green);
-                }
-            }
+            movementMask._Erode(1);
+            movementMask._Dilate(1);
+            movementMask._Erode(1);
+            movementMask._Dilate(1);
+            movementMask._SmoothGaussian(5, 5, 1, 1);
+            movementMask._ThresholdBinary(_thresholdColor, _ceilingColor);
 
-            int count = Convert.ToInt32((raw_mass - NoiseMass) / PerCar);
-            if (count < 0)
-                count = 0;
-            if (count > Settings.MaxObjectCount)
-                count = Settings.MaxObjectCount;
-
-            return count;
+            return movementMask;
         }
 
         private Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
@@ -303,7 +319,10 @@ namespace VTC.Kernel.Vistas
                 BlobAreaComparer areaComparer = new BlobAreaComparer();
                 SortedList<CvBlob, int> blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
                 foreach (Emgu.CV.Cvb.CvBlob targetBlob in resultingImgBlobs.Values)
-                    blobsWithArea.Add(targetBlob, targetBlob.Area);
+                    if(targetBlob.Area > 25)
+                        blobsWithArea.Add(targetBlob, targetBlob.Area);
+
+                numWebcamBlobsFound = blobsWithArea.Count();
 
                 coordinates = new Measurements[numWebcamBlobsFound];
                 for(int i=0; i<numWebcamBlobsFound; i++)

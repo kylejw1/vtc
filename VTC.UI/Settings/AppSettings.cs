@@ -2,6 +2,7 @@ using System;
 using System.Configuration;
 using System.Globalization;
 using VTC.Kernel.Settings;
+using System.Linq;
 
 namespace VTC.Settings
 {
@@ -34,13 +35,13 @@ namespace VTC.Settings
         public string ServerUrl { get; set; }
 
         public double Alpha { get; private set; }
-
         public int ColorThreshold { get; private set; }
 
         public double NoiseMass { get; private set; }
         public int MaxObjectCount { get; private set; }
         public double PerCarMinimum { get; set; }
         public int CarRadius { get; set; }
+
 
         public int MissThreshold { get; private set; }
         public int MaxHypothesisTreeDepth { get; private set; }
@@ -52,6 +53,11 @@ namespace VTC.Settings
         public double LambdaN { get; private set; }
         public double Pd { get; private set; }
         public double Px { get; private set; }
+
+        public int ClassifierSubframeWidth { get; private set; }
+        public int ClassifierSubframeHeight { get; private set; }
+
+        public String[] Classes { get; private set; }
 
         public string RegionConfigPath { get; private set; }
 
@@ -98,6 +104,12 @@ namespace VTC.Settings
 
             ServerUrl = ConfigurationManager.AppSettings["server_url"];
             IntersectionID = ConfigurationManager.AppSettings[IntersectionIdKey];
+
+            String[] classKeyStrings = ConfigurationManager.AppSettings.AllKeys;
+            Classes = classKeyStrings.Where(this_key => this_key.Contains("class")).Select(element => element.Substring(6,element.Length-6)).ToArray();
+            ClassifierSubframeWidth = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeWidth"]);
+            ClassifierSubframeHeight = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeHeight"]);
+            
 
             RegionConfigPath = ConfigurationManager.AppSettings["RegionConfig"];
 

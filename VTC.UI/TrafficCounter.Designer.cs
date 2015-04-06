@@ -37,6 +37,7 @@ namespace VTC
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.exportTrainingImagesButton = new System.Windows.Forms.Button();
             this.timeActiveTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
@@ -58,13 +59,17 @@ namespace VTC
             this.trackCountBox = new System.Windows.Forms.TextBox();
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
+            this.imageBox3 = new Emgu.CV.UI.ImageBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
-            this.resampleBackgroundButton = new Emgu.CV.UI.ImageBox();
+            this.movementMaskBox = new Emgu.CV.UI.ImageBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
+            this.rgbCoordinateTextbox = new System.Windows.Forms.TextBox();
+            this.saveRGBSamplesCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -79,9 +84,14 @@ namespace VTC
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
+            this.splitContainer4.Panel1.SuspendLayout();
+            this.splitContainer4.Panel2.SuspendLayout();
+            this.splitContainer4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox3)).BeginInit();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.resampleBackgroundButton)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.movementMaskBox)).BeginInit();
             this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -101,7 +111,7 @@ namespace VTC
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1073, 731);
-            this.splitContainer1.SplitterDistance = 527;
+            this.splitContainer1.SplitterDistance = 536;
             this.splitContainer1.TabIndex = 0;
             // 
             // splitContainer3
@@ -118,6 +128,9 @@ namespace VTC
             // 
             // splitContainer3.Panel2
             // 
+            this.splitContainer3.Panel2.Controls.Add(this.saveRGBSamplesCheckBox);
+            this.splitContainer3.Panel2.Controls.Add(this.rgbCoordinateTextbox);
+            this.splitContainer3.Panel2.Controls.Add(this.exportTrainingImagesButton);
             this.splitContainer3.Panel2.Controls.Add(this.timeActiveTextBox);
             this.splitContainer3.Panel2.Controls.Add(this.label11);
             this.splitContainer3.Panel2.Controls.Add(this.button1);
@@ -138,7 +151,7 @@ namespace VTC
             this.splitContainer3.Panel2.Controls.Add(this.label10);
             this.splitContainer3.Panel2.Controls.Add(this.trackCountBox);
             this.splitContainer3.Panel2.Controls.Add(this.pushStateCheckbox);
-            this.splitContainer3.Size = new System.Drawing.Size(527, 731);
+            this.splitContainer3.Size = new System.Drawing.Size(536, 731);
             this.splitContainer3.SplitterDistance = 365;
             this.splitContainer3.TabIndex = 0;
             // 
@@ -147,9 +160,10 @@ namespace VTC
             this.imageBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBox1.Location = new System.Drawing.Point(0, 20);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(527, 345);
+            this.imageBox1.Size = new System.Drawing.Size(536, 345);
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
+            this.imageBox1.Click += new System.EventHandler(this.imageBox1_Click);
             this.imageBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imageBox1_MouseDown);
             // 
             // panel1
@@ -158,7 +172,7 @@ namespace VTC
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(527, 20);
+            this.panel1.Size = new System.Drawing.Size(536, 20);
             this.panel1.TabIndex = 0;
             // 
             // label1
@@ -169,6 +183,16 @@ namespace VTC
             this.label1.Size = new System.Drawing.Size(46, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Camera ";
+            // 
+            // exportTrainingImagesButton
+            // 
+            this.exportTrainingImagesButton.Location = new System.Drawing.Point(256, 122);
+            this.exportTrainingImagesButton.Name = "exportTrainingImagesButton";
+            this.exportTrainingImagesButton.Size = new System.Drawing.Size(196, 23);
+            this.exportTrainingImagesButton.TabIndex = 42;
+            this.exportTrainingImagesButton.Text = "Export training images";
+            this.exportTrainingImagesButton.UseVisualStyleBackColor = true;
+            this.exportTrainingImagesButton.Click += new System.EventHandler(this.exportTrainingImagesButton_Click);
             // 
             // timeActiveTextBox
             // 
@@ -354,25 +378,51 @@ namespace VTC
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.imageBox2);
+            this.splitContainer2.Panel1.Controls.Add(this.splitContainer4);
             this.splitContainer2.Panel1.Controls.Add(this.panel2);
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.resampleBackgroundButton);
+            this.splitContainer2.Panel2.Controls.Add(this.movementMaskBox);
             this.splitContainer2.Panel2.Controls.Add(this.panel3);
-            this.splitContainer2.Size = new System.Drawing.Size(542, 731);
+            this.splitContainer2.Size = new System.Drawing.Size(533, 731);
             this.splitContainer2.SplitterDistance = 365;
             this.splitContainer2.TabIndex = 0;
+            // 
+            // splitContainer4
+            // 
+            this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer4.Location = new System.Drawing.Point(0, 20);
+            this.splitContainer4.Name = "splitContainer4";
+            // 
+            // splitContainer4.Panel1
+            // 
+            this.splitContainer4.Panel1.Controls.Add(this.imageBox2);
+            // 
+            // splitContainer4.Panel2
+            // 
+            this.splitContainer4.Panel2.Controls.Add(this.imageBox3);
+            this.splitContainer4.Size = new System.Drawing.Size(533, 345);
+            this.splitContainer4.SplitterDistance = 266;
+            this.splitContainer4.TabIndex = 11;
             // 
             // imageBox2
             // 
             this.imageBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBox2.Location = new System.Drawing.Point(0, 20);
+            this.imageBox2.Location = new System.Drawing.Point(0, 0);
             this.imageBox2.Name = "imageBox2";
-            this.imageBox2.Size = new System.Drawing.Size(542, 345);
-            this.imageBox2.TabIndex = 10;
+            this.imageBox2.Size = new System.Drawing.Size(266, 345);
+            this.imageBox2.TabIndex = 11;
             this.imageBox2.TabStop = false;
+            // 
+            // imageBox3
+            // 
+            this.imageBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBox3.Location = new System.Drawing.Point(0, 0);
+            this.imageBox3.Name = "imageBox3";
+            this.imageBox3.Size = new System.Drawing.Size(263, 345);
+            this.imageBox3.TabIndex = 12;
+            this.imageBox3.TabStop = false;
             // 
             // panel2
             // 
@@ -380,7 +430,7 @@ namespace VTC
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(542, 20);
+            this.panel2.Size = new System.Drawing.Size(533, 20);
             this.panel2.TabIndex = 9;
             // 
             // label2
@@ -392,15 +442,14 @@ namespace VTC
             this.label2.TabIndex = 0;
             this.label2.Text = "Background";
             // 
-            // resampleBackgroundButton
+            // movementMaskBox
             // 
-            this.resampleBackgroundButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resampleBackgroundButton.Location = new System.Drawing.Point(0, 20);
-            this.resampleBackgroundButton.Name = "resampleBackgroundButton";
-            this.resampleBackgroundButton.Size = new System.Drawing.Size(542, 342);
-            this.resampleBackgroundButton.TabIndex = 6;
-            this.resampleBackgroundButton.TabStop = false;
-            this.resampleBackgroundButton.Click += new System.EventHandler(this.resampleBackgroundButton_Click);
+            this.movementMaskBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.movementMaskBox.Location = new System.Drawing.Point(0, 20);
+            this.movementMaskBox.Name = "movementMaskBox";
+            this.movementMaskBox.Size = new System.Drawing.Size(533, 342);
+            this.movementMaskBox.TabIndex = 6;
+            this.movementMaskBox.TabStop = false;
             // 
             // panel3
             // 
@@ -408,7 +457,7 @@ namespace VTC
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(542, 20);
+            this.panel3.Size = new System.Drawing.Size(533, 20);
             this.panel3.TabIndex = 5;
             // 
             // label3
@@ -425,6 +474,23 @@ namespace VTC
             this.pushStateTimer.Enabled = true;
             this.pushStateTimer.Interval = 10000;
             this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
+            // 
+            // rgbCoordinateTextbox
+            // 
+            this.rgbCoordinateTextbox.Location = new System.Drawing.Point(6, 258);
+            this.rgbCoordinateTextbox.Name = "rgbCoordinateTextbox";
+            this.rgbCoordinateTextbox.Size = new System.Drawing.Size(100, 20);
+            this.rgbCoordinateTextbox.TabIndex = 43;
+            // 
+            // saveRGBSamplesCheckBox
+            // 
+            this.saveRGBSamplesCheckBox.AutoSize = true;
+            this.saveRGBSamplesCheckBox.Location = new System.Drawing.Point(10, 285);
+            this.saveRGBSamplesCheckBox.Name = "saveRGBSamplesCheckBox";
+            this.saveRGBSamplesCheckBox.Size = new System.Drawing.Size(87, 17);
+            this.saveRGBSamplesCheckBox.TabIndex = 44;
+            this.saveRGBSamplesCheckBox.Text = "Sample RGB";
+            this.saveRGBSamplesCheckBox.UseVisualStyleBackColor = true;
             // 
             // TrafficCounter
             // 
@@ -453,10 +519,15 @@ namespace VTC
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.splitContainer4.Panel1.ResumeLayout(false);
+            this.splitContainer4.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
+            this.splitContainer4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox3)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.resampleBackgroundButton)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.movementMaskBox)).EndInit();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.ResumeLayout(false);
@@ -471,8 +542,7 @@ namespace VTC
       private System.Windows.Forms.Label label1;
       private System.Windows.Forms.SplitContainer splitContainer2;
       private System.Windows.Forms.SplitContainer splitContainer3;
-      private Emgu.CV.UI.ImageBox resampleBackgroundButton;
-      private Emgu.CV.UI.ImageBox imageBox2;
+      private Emgu.CV.UI.ImageBox movementMaskBox;
       private System.Windows.Forms.Panel panel2;
       private System.Windows.Forms.CheckBox pushStateCheckbox;
       private System.Windows.Forms.Label label10;
@@ -498,5 +568,11 @@ namespace VTC
       private Button button1;
       private TextBox timeActiveTextBox;
       private Label label11;
+      private Button exportTrainingImagesButton;
+      private SplitContainer splitContainer4;
+      private Emgu.CV.UI.ImageBox imageBox2;
+      private Emgu.CV.UI.ImageBox imageBox3;
+      private CheckBox saveRGBSamplesCheckBox;
+      private TextBox rgbCoordinateTextbox;
    }
 }

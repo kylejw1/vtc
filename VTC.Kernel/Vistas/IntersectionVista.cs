@@ -152,7 +152,7 @@ namespace VTC.Kernel.Vistas
                         myWriter = new StreamWriter(objRequest.GetRequestStream());
                         myWriter.Write(post_string);
                         myWriter.Close();
-                        objRequest.GetResponse();
+                        objRequest.GetResponse().Close();
                         success = true;
                     }
                     catch (Exception ex)
