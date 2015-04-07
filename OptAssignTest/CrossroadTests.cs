@@ -41,6 +41,7 @@ namespace OptAssignTest
             return script;
         }
 
+        public override IEnumerable<CaptureContext> GetCaptures()
         {
             return new[]
             {
