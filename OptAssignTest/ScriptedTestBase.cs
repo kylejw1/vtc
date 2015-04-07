@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using OptAssignTest.Framework;
 using VTC.Kernel.Settings;
+using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 
 namespace OptAssignTest
@@ -11,7 +14,7 @@ namespace OptAssignTest
     /// <summary>
     /// Base class for scripted tests.
     /// </summary>
-    public class ScriptedTestBase : TestBase
+    public class ScriptedTestBase : TestBase, ICaptureContextProvider
     {
         /// <summary>
         /// Frames to skip before validation.
@@ -40,6 +43,15 @@ namespace OptAssignTest
                 // run validation for the current frame
                 testAction(vista, frame);
             }
+        }
+
+        /// <summary>
+        /// Get available video sources.
+        /// </summary>
+        /// <returns></returns>
+        public virtual IEnumerable<CaptureContext> GetCaptures()
+        {
+            return Enumerable.Empty<CaptureContext>();
         }
     }
 }

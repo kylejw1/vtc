@@ -79,6 +79,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Framework\CaptureEmulator.cs" />
     <Compile Include="Framework\Car.cs" />
     <Compile Include="Framework\CarUtilities.cs" />
     <Compile Include="ColorChangeTests.cs" />
@@ -112,9 +113,6 @@
       <Name>VTC.Reporting</Name>
       <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

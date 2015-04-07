@@ -75,6 +75,8 @@
     <Compile Include="RegionConfig\RegionConfig.cs" />
     <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
     <Compile Include="Settings\ISettings.cs" />
+    <Compile Include="Video\CaptureContext.cs" />
+    <Compile Include="Video\ICaptureContextProvider.cs" />
     <Compile Include="Video\ICaptureSource.cs" />
     <Compile Include="Vistas\IntersectionVista.cs" />
     <Compile Include="Vistas\Vista.cs" />
