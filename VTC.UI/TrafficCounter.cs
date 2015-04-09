@@ -71,17 +71,33 @@ namespace VTC
 
            _settings = settings;
 
-          //Initialize the camera selection combobox.
+           // check if app should run in unit test visualization mode
            bool unitTestsMode = false;
            if ((appArgument != null) && appArgument.EndsWith(".dll", true, CultureInfo.InvariantCulture))
            {
                unitTestsMode = DetectTestScenarios(appArgument);
            }
 
+           // otherwise - run in standard mode
            if (! unitTestsMode)
            {
                InitializeCameraSelection(appArgument);
            }
+
+
+           //Disable eventhandler for the changing combobox index.
+           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
+
+           //Set the index if a device could be found.
+           if (_cameras.Count > 0)
+           {
+               CameraComboBox.SelectedIndex = 0;
+           }
+
+           //Enable eventhandler for the changing combobox index.
+           CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
+
+
 
           //Initialize parameters.
           LoadParameters();
@@ -190,17 +206,6 @@ namespace VTC
               }
           }
 
-          //Disable eventhandler for the changing combobox index.
-          CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
-
-          //Set the index if a device could be found.
-          if (_cameras.Count > 0)
-          {
-              CameraComboBox.SelectedIndex = 0;
-          }
-
-          //Enable eventhandler for the changing combobox index.
-          CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
       }
 
        /// <summary>

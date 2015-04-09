@@ -26,6 +26,9 @@ It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV i
 ##Using existing video for debugging
 Pass pathname of local video as command line argument.
 
+##Visualizing unit tests
+Pass full pathname to assembly with unit tests.
+
 #Debug output
 Debug output is written to C:\TrafficCounter\VTClog.txt (see app.config)
 

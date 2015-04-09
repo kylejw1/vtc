@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptAssignTest.Framework;
+using VTC.Kernel.Video;
 
 namespace OptAssignTest
 {
@@ -12,12 +14,7 @@ namespace OptAssignTest
         public void VisibilityLoss_ShouldBeDetected()
         {
             uint frameWhenDetectionLost = (uint) (DefaultSettings.FrameHeight / 2);
-
-            var script = new Script();
-            script
-                .CreateCar(VehicleRadius)
-                .AddVerticalPath(DefaultSettings) 
-                .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
+            var script = VisibilityLossScript(frameWhenDetectionLost);
 
             RunScript(DefaultSettings, script, (vista, frame) =>
                 {
@@ -49,14 +46,9 @@ namespace OptAssignTest
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
             uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
-
             var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold - 10);
 
-            var script = new Script();
-            script
-                .CreateCar(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
-                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
+            var script = ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence);
 
             RunScript(DefaultSettings, script, (vista, frame) =>
                 {
@@ -94,11 +86,7 @@ namespace OptAssignTest
 
             var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold + 10);
 
-            var script = new Script();
-            script
-                .CreateCar(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
-                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence)); // car hidden in the middle
+            var script = ReappearenceAfterThresholdScript(frameWhenDetectionLost, frameWithReappearence);
 
             RunScript(DefaultSettings, script, (vista, frame) =>
                 {
@@ -130,5 +118,53 @@ namespace OptAssignTest
                 });
         }
 
+        public override IEnumerable<CaptureContext> GetCaptures()
+        {
+            // ER: dislike that it's calculated in different places (need it because it's reused in RunScript). 
+            // Possible source of future errors.
+            // think - maybe script should expose it somehow?
+            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold - 10);
+            var frameWithReappearenceTooLate = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold + 10);
+
+            return new[]
+            {
+                new CaptureContext(new CaptureEmulator("Visibility loss", VisibilityLossScript(frameWhenDetectionLost)), DefaultSettings),
+                new CaptureContext(new CaptureEmulator("Reappearence (within threshold)", ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence)), DefaultSettings),
+                new CaptureContext(new CaptureEmulator("Reappearence (after threshold)", ReappearenceAfterThresholdScript(frameWhenDetectionLost, frameWithReappearenceTooLate)), DefaultSettings),
+            };
+        }
+
+        private static Script ReappearenceAfterThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
+        {
+            var script = new Script();
+            script
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(DefaultSettings)
+                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
+                // car hidden in the middle
+            return script;
+        }
+
+        private static Script VisibilityLossScript(uint frameWhenDetectionLost)
+        {
+            var script = new Script();
+            script
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(DefaultSettings)
+                .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
+            return script;
+        }
+
+        private static Script ReappearenceWithinThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
+        {
+            var script = new Script();
+            script
+                .CreateCar(VehicleRadius)
+                .AddVerticalPath(DefaultSettings)
+                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
+            // car hidden in the middle
+            return script;
+        }
     }
 }
