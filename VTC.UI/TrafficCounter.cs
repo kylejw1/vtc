@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using DirectShowLib;
@@ -68,17 +69,18 @@ namespace VTC
       {
           InitializeComponent();
 
+           _settings = settings;
+
           //Initialize the camera selection combobox.
            bool unitTestsMode = false;
-           if ("-unitTests".Equals(appArgument))
+           if ((appArgument != null) && appArgument.EndsWith(".dll", true, CultureInfo.InvariantCulture))
            {
-               unitTestsMode = DetectTestScenarios();
+               unitTestsMode = DetectTestScenarios(appArgument);
            }
 
            if (! unitTestsMode)
            {
                InitializeCameraSelection(appArgument);
-               _settings = settings;
            }
 
           //Initialize parameters.
@@ -141,7 +143,7 @@ namespace VTC
            return false;
        }
 
-       private void AddCamera(CaptureSource.CaptureSource camera)
+       private void AddCamera(ICaptureSource camera)
        {
            _cameras.Add(camera);
            CameraComboBox.Items.Add(camera.Name);
@@ -204,11 +206,44 @@ namespace VTC
        /// <summary>
        /// Try to detect unit tests. Play unit tests (if detected).
        /// </summary>
+       /// <param name="assemblyName">Assembly name with test scenarios.</param>
        /// <returns><c>true</c> if unit tests detected.</returns>
        /// <remarks>IMPORTANT: unit tests use own settings!!!</remarks>
-       private bool DetectTestScenarios()
+       private bool DetectTestScenarios(string assemblyName)
        {
-           return false;
+           bool result = false;
+
+           try
+           {
+               while (! string.IsNullOrWhiteSpace(assemblyName))
+               {
+                   if (! File.Exists(assemblyName)) break;
+
+                   var assembly = Assembly.LoadFile(assemblyName);
+                   if (assembly == null) break;
+
+                   var contexts = assembly.GetTypes()
+                                    .Where(t => t.GetInterfaces().Contains(typeof (ICaptureContextProvider))
+                                            && (t.GetConstructor(Type.EmptyTypes) != null)) // expected default constructor
+                                    .Select(t => Activator.CreateInstance(t) as ICaptureContextProvider)
+                                    .SelectMany(instance => instance.GetCaptures())
+                                    .ToArray();
+
+                   foreach (var captureContext in contexts)
+                   {
+                       AddCamera(captureContext.Capture);
+                   }
+
+                   result = true;
+                   break;
+               }
+           }
+           catch (Exception e)
+           {
+               Log(e.ToString());
+           }
+
+           return result;
        }
 
        /// <summary>

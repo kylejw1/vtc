@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.Kernel.Settings;
@@ -45,16 +46,25 @@ namespace OptAssignTest.Framework
             Image<Bgr, byte> image;
             if (_frame == 0)
             {
-                image = _background; // check - should it be cloned?
+                image = _background.Clone(); // check - should it be cloned?
             }
             else
             {
                 image = _background.Clone();
-                _script.Draw(_frame++, image);
+                _script.Draw(_frame, image);
             }
 
             // start script again
-            if (_script.IsDone(_frame)) _frame = 0;
+            if (_script.IsDone(_frame))
+            {
+                _frame = 0;
+            }
+            else
+            {
+                _frame++;
+            }
+
+            Thread.Sleep(0);
 
             return image;
         }
