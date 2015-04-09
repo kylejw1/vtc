@@ -46,7 +46,7 @@ namespace OptAssignTest.Framework
             Image<Bgr, byte> image;
             if (_frame == 0)
             {
-                image = _background.Clone(); // check - should it be cloned?
+                image = _background; // check - should it be cloned?
             }
             else
             {

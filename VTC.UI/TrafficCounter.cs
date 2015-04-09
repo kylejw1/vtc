@@ -15,6 +15,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.CaptureSource;
 using VTC.Kernel;
+using VTC.Kernel.RegionConfig;
 using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
@@ -32,6 +33,10 @@ namespace VTC
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
       private ICaptureSource _selectedCamera;
+
+        // unit tests has own settings, so need to store "pairs" (capture, settings)
+      private CaptureContext[] _testCaptureContexts;
+
 
        /// <summary>
        /// Active camera.
@@ -52,6 +57,28 @@ namespace VTC
               _selectedCamera.Init(_settings);
 
               _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
+
+
+              // kind-of ugly... to refactor someday
+              if (_unitTestsMode)
+              {
+                  // create mask for the whole image
+                  var polygon = new Polygon();
+                  polygon.AddRange(new[]
+                    {
+                        new Point(0, 0), 
+                        new Point(0, (int) _settings.FrameHeight),
+                        new Point((int) _settings.FrameWidth, (int) _settings.FrameHeight), 
+                        new Point((int) _settings.FrameWidth, 0),
+                        new Point(0, 0)
+                    });
+
+                  var regionConfig = new RegionConfig
+                  {
+                      RoiMask = polygon
+                  };
+                  _vista.RegionConfiguration = regionConfig;
+              }
           }
       }
 
@@ -72,14 +99,14 @@ namespace VTC
            _settings = settings;
 
            // check if app should run in unit test visualization mode
-           bool unitTestsMode = false;
+           _unitTestsMode = false;
            if ((appArgument != null) && appArgument.EndsWith(".dll", true, CultureInfo.InvariantCulture))
            {
-               unitTestsMode = DetectTestScenarios(appArgument);
+               _unitTestsMode = DetectTestScenarios(appArgument);
            }
 
            // otherwise - run in standard mode
-           if (! unitTestsMode)
+           if (! _unitTestsMode)
            {
                InitializeCameraSelection(appArgument);
            }
@@ -227,14 +254,14 @@ namespace VTC
                    var assembly = Assembly.LoadFile(assemblyName);
                    if (assembly == null) break;
 
-                   var contexts = assembly.GetTypes()
-                                    .Where(t => t.GetInterfaces().Contains(typeof (ICaptureContextProvider))
-                                            && (t.GetConstructor(Type.EmptyTypes) != null)) // expected default constructor
-                                    .Select(t => Activator.CreateInstance(t) as ICaptureContextProvider)
-                                    .SelectMany(instance => instance.GetCaptures())
-                                    .ToArray();
+                   _testCaptureContexts = assembly.GetTypes()
+                       .Where(t => t.GetInterfaces().Contains(typeof (ICaptureContextProvider))
+                                   && (t.GetConstructor(Type.EmptyTypes) != null)) // expected default constructor
+                       .Select(t => Activator.CreateInstance(t) as ICaptureContextProvider)
+                       .SelectMany(instance => instance.GetCaptures())
+                       .ToArray();
 
-                   foreach (var captureContext in contexts)
+                   foreach (var captureContext in _testCaptureContexts)
                    {
                        AddCamera(captureContext.Capture);
                    }
@@ -258,6 +285,8 @@ namespace VTC
       {
         //Change the capture device.
         SelectedCamera = _cameras[CameraComboBox.SelectedIndex];   
+
+          // TODO: change settings if app in unit tests visualization mode
       }
 
       /// <summary>
@@ -496,6 +525,7 @@ namespace VTC
       }
 
        private Point RGBSamplePoint;
+       private readonly bool _unitTestsMode;
 
        private void imageBox1_Click(object sender, EventArgs e)
        {
