@@ -87,23 +87,85 @@ namespace VTC
           //Run();
       }
 
-       Random r = new Random();
-       void t_Tick(object sender, EventArgs e)
+       System.Drawing.Point Kyle(System.Drawing.Point point, List<System.Drawing.Point> points)
        {
-          
-
-
-           var points = new List<System.Drawing.Point>();
-           while (points.Count < 100)
+           System.Drawing.Point min = points.First();
+           int minVal = int.MaxValue;
+           foreach (var pt in points)
            {
-               points.Add(new System.Drawing.Point(r.Next(640), r.Next(480)));
+               var deltaX = point.X - pt.X;
+               var deltaY = point.Y - pt.Y;
+
+               var dist = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2);
+
+               if (dist < minVal)
+               {
+                   minVal = (int)dist;
+                   min = pt;
+               }
            }
 
-           var kyle = new System.Drawing.Point(r.Next(640), r.Next(480));
+           return min;
+       }
 
-           var nearest = Kernel.Fast2dNearestNeighbor.FindNearestNeighbor(kyle, points,
-              640,
-              480);
+       Random r = new Random();
+       List<System.Drawing.Point> neighbors = null;
+       void t_Tick(object sender, EventArgs e)
+       {
+           if (null == neighbors)
+           {
+               neighbors = new List<System.Drawing.Point>();
+               while (neighbors.Count < 100)
+               {
+                   neighbors.Add(new System.Drawing.Point(r.Next(640), r.Next(480)));
+               }
+           }
+
+           var newNeighbors = new List<System.Drawing.Point>();
+           foreach (var neighbor in neighbors)
+           {
+               var delta = (r.Next(3) - 1);
+               newNeighbors.Add(new System.Drawing.Point(neighbor.X + delta, neighbor.Y + delta));
+           }
+           neighbors = newNeighbors;
+
+           var swBrute = new Stopwatch();
+
+           swBrute.Start();
+           for (int x = 0; x < 50; x++)
+           {
+               for (int y = 0; y < 50; y++)
+               {
+                   var kyle = new System.Drawing.Point(x, y);
+
+                   var nearest = Kyle(kyle, points);
+               }
+           }
+           swBrute.Stop();
+
+
+
+
+
+           var sw = new Stopwatch();
+
+           sw.Start();
+           for (int x = 0; x < 50; x++)
+           {
+               for (int y = 0; y < 50; y++)
+               {
+                   var kyle = new System.Drawing.Point(x,y);
+                   var nearest = Kernel.Fast2dNearestNeighbor.FindNearestNeighbor(kyle, points,
+                      640,
+                      480);
+               }
+           }
+           sw.Stop();
+
+
+
+
+
 
            var img = new Image<Bgr, Byte>(640, 480);
            var white = new Bgr(System.Drawing.Color.White);
@@ -114,8 +176,8 @@ namespace VTC
                var pts = new CircleF(new System.Drawing.PointF(pt.X, pt.Y), 3);
                img.Draw(pts, white, 2);
            }
-           img.Draw(new CircleF(new System.Drawing.PointF(kyle.X, kyle.Y), 3), blue, 2);
-           img.Draw(new CircleF(new System.Drawing.PointF(nearest.X, nearest.Y), 3), red, 2);
+          // img.Draw(new CircleF(new System.Drawing.PointF(kyle.X, kyle.Y), 3), blue, 2);
+          // img.Draw(new CircleF(new System.Drawing.PointF(nearest.X, nearest.Y), 3), red, 2);
 
            imageBox1.Image = img;
        }
