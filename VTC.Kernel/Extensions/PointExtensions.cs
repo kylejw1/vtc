@@ -20,6 +20,27 @@ namespace VTC.Kernel.Extensions
             return distance;
         }
 
+        public static int NearestNeighborIndex(this Point point, IEnumerable<Point> neighbors)
+        {
+            // Assumes at least one neighbor
+
+            int nearest = 0;
+            double nearestDistance = double.MaxValue;
+            var neighborsList = neighbors.ToList();
+
+            for (int i = 0; i < neighborsList.Count; i++)
+            {
+                var dist = point.DistanceTo(neighborsList[i]);
+                if (dist < nearestDistance)
+                {
+                    nearestDistance = dist;
+                    nearest = i;
+                }
+            }
+
+            return nearest;
+        }
+
         public static Point NearestNeighbor(this Point point, IEnumerable<Point> neighbors)
         {
             // Assumes at least one neighbor
