@@ -32,7 +32,7 @@ namespace VTC.Kernel
         private Velocity[,] _velocityField;
         private int _height;
         private int _width;
-        private double alpha = 0.05;
+        private double alpha = 0.005;
         private Mutex _updateMutex = new Mutex();
 
         public VelocityField(int width, int height, int imageWidth, int imageHeight)
@@ -70,9 +70,6 @@ namespace VTC.Kernel
 
             try
             {
-                if (!measurements.Any())
-                    return;
-
                 var neighbors = new List<Point>();
                 var velocities = new List<Velocity>();
 
@@ -88,6 +85,9 @@ namespace VTC.Kernel
                         // TODO: Handle indicies outside the image width (eg. negatives)
                     }
                 }
+
+                if (!neighbors.Any())
+                    return;
 
                 var point = new Point();
                 for (int x = 0; x < _width; x++)
