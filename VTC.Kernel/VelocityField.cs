@@ -32,7 +32,7 @@ namespace VTC.Kernel
         private Velocity[,] _velocityField;
         private int _height;
         private int _width;
-        private double alpha = 0.01;
+        private double alpha = 0.05;
         private Mutex _updateMutex = new Mutex();
 
         public VelocityField(int width, int height, int imageWidth, int imageHeight)

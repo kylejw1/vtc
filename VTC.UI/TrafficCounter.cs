@@ -89,7 +89,7 @@ namespace VTC
        private void TOnTick(object sender, EventArgs eventArgs)
        {
            resampleBackgroundButton.Image = null;
-           var image = new Emgu.CV.Image<Bgr, Byte>(1280, 760);
+           var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
            Vista.VelocityField.Draw(image, new Bgr(System.Drawing.Color.White), 1);
            resampleBackgroundButton.Image = image;
        }
