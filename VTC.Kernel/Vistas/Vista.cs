@@ -44,6 +44,7 @@ namespace VTC.Kernel.Vistas
         private readonly int Height;
         public Image<Gray, byte> Movement_Mask { get; private set; }      //Thresholded, b&w movement mask
         public Image<Bgr, float> Color_Background { get; private set; }   //Average Background being formed
+        public VelocityField VelocityField { get; private set; }
 
         //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
@@ -155,6 +156,7 @@ namespace VTC.Kernel.Vistas
 
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
+            VelocityField = new VelocityField(50, 50, Width, Height);
         }
 
         public virtual void ResetStats()
@@ -194,6 +196,17 @@ namespace VTC.Kernel.Vistas
 
                 // Now update child class specific stats
                 UpdateChildClassStats(MHT.DeletedVehicles);
+
+                var meas = MHT.CurrentVehicles.Select(v =>
+                {
+                    var lastState = v.state_history.Last();
+                    var coords = new Point((int)lastState.x, (int)lastState.y);
+                    var velocity = new VelocityField.Velocity(lastState.vx, lastState.vy);
+
+                    return new Tuple<Point, VelocityField.Velocity>(coords, velocity);
+                });
+
+                VelocityField.TryInsertEventsAsync(meas);
             }
         }
 

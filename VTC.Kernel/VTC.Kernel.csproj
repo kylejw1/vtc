@@ -61,7 +61,6 @@
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="Extensions\LineSegment2DExtensions.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
-    <Compile Include="Fast2dNearestNeighbor.cs" />
     <Compile Include="HungarianAlgorithm.cs" />
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="NodeClass.cs" />
@@ -71,6 +70,7 @@
     <Compile Include="RegionConfig\RegionConfig.cs" />
     <Compile Include="Settings\IMultipleHypothesisSettings.cs" />
     <Compile Include="Settings\ISettings.cs" />
+    <Compile Include="VelocityField.cs" />
     <Compile Include="Vistas\IntersectionVista.cs" />
     <Compile Include="Vistas\Vista.cs" />
   </ItemGroup>

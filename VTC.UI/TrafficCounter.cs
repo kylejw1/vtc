@@ -14,9 +14,11 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using VTC.Kernel;
+using VTC.Kernel.Extensions;
 using VTC.Kernel.Vistas;
 using VTC.ServerReporting.ReportItems;
 using VTC.Settings;
+using VTC.Kernel.Extensions;
 
 namespace VTC
 {
@@ -66,16 +68,8 @@ namespace VTC
       {
           InitializeComponent();
 
-          var t = new System.Windows.Forms.Timer();
-          t.Tick += t_Tick;
-          t.Interval = 5000;
-          t.Start();
-          
-
            _settings = settings;
            _filename = filename;
-
-          
 
           //Initialize the camera selection combobox.
           InitializeCameraSelection();
@@ -83,106 +77,24 @@ namespace VTC
           //Initialize parameters.
           LoadParameters();
 
+          System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+           t.Interval = 5000;
+           t.Tick += TOnTick;
+           t.Start();
+
            _applicationStartTime = DateTime.Now;
-          //Run();
+           Run();
       }
 
-       System.Drawing.Point Kyle(System.Drawing.Point point, List<System.Drawing.Point> points)
+       private void TOnTick(object sender, EventArgs eventArgs)
        {
-           System.Drawing.Point min = points.First();
-           int minVal = int.MaxValue;
-           foreach (var pt in points)
-           {
-               var deltaX = point.X - pt.X;
-               var deltaY = point.Y - pt.Y;
-
-               var dist = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2);
-
-               if (dist < minVal)
-               {
-                   minVal = (int)dist;
-                   min = pt;
-               }
-           }
-
-           return min;
+           resampleBackgroundButton.Image = null;
+           var image = new Emgu.CV.Image<Bgr, Byte>(1280, 760);
+           Vista.VelocityField.Draw(image, new Bgr(System.Drawing.Color.White), 1);
+           resampleBackgroundButton.Image = image;
        }
 
-       Random r = new Random();
-       List<System.Drawing.Point> neighbors = null;
-       void t_Tick(object sender, EventArgs e)
-       {
-           if (null == neighbors)
-           {
-               neighbors = new List<System.Drawing.Point>();
-               while (neighbors.Count < 100)
-               {
-                   neighbors.Add(new System.Drawing.Point(r.Next(640), r.Next(480)));
-               }
-           }
-
-           var newNeighbors = new List<System.Drawing.Point>();
-           foreach (var neighbor in neighbors)
-           {
-               var delta = (r.Next(3) - 1);
-               newNeighbors.Add(new System.Drawing.Point(neighbor.X + delta, neighbor.Y + delta));
-           }
-           neighbors = newNeighbors;
-
-           var swBrute = new Stopwatch();
-
-           swBrute.Start();
-           for (int x = 0; x < 50; x++)
-           {
-               for (int y = 0; y < 50; y++)
-               {
-                   var kyle = new System.Drawing.Point(x, y);
-
-                   var nearest = Kyle(kyle, points);
-               }
-           }
-           swBrute.Stop();
-
-
-
-
-
-           var sw = new Stopwatch();
-
-           sw.Start();
-           for (int x = 0; x < 50; x++)
-           {
-               for (int y = 0; y < 50; y++)
-               {
-                   var kyle = new System.Drawing.Point(x,y);
-                   var nearest = Kernel.Fast2dNearestNeighbor.FindNearestNeighbor(kyle, points,
-                      640,
-                      480);
-               }
-           }
-           sw.Stop();
-
-
-
-
-
-
-           var img = new Image<Bgr, Byte>(640, 480);
-           var white = new Bgr(System.Drawing.Color.White);
-           var red = new Bgr(System.Drawing.Color.Red);
-           var blue = new Bgr(System.Drawing.Color.Blue);
-           foreach (var pt in points)
-           {
-               var pts = new CircleF(new System.Drawing.PointF(pt.X, pt.Y), 3);
-               img.Draw(pts, white, 2);
-           }
-          // img.Draw(new CircleF(new System.Drawing.PointF(kyle.X, kyle.Y), 3), blue, 2);
-          // img.Draw(new CircleF(new System.Drawing.PointF(nearest.X, nearest.Y), 3), red, 2);
-
-           imageBox1.Image = img;
-       }
-
-      void Run()
+       void Run()
       {
          try
          {
@@ -382,7 +294,7 @@ namespace VTC
               // Update image boxes
               imageBox1.Image = Vista.GetCurrentStateImage();
               imageBox2.Image = Vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-              resampleBackgroundButton.Image = Vista.Movement_Mask;
+              //resampleBackgroundButton.Image = Vista.Movement_Mask;
 
               // Update statistics
               trackCountBox.Text = Vista.CurrentVehicles.Count.ToString();
