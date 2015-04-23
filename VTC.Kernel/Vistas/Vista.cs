@@ -34,22 +34,28 @@ namespace VTC.Kernel.Vistas
         private static readonly Bgr _stateColorRed = new Bgr(0.0, 0.0, 255.0);
         private readonly Gray _thresholdColor;
         private static readonly Gray _ceilingColor = new Gray(255);
+
         #endregion
-        
+
         //************* Abstract methods ****************
         protected abstract void UpdateChildClassStats(List<Vehicle> deleted);
 
         //************* Main image variables ***************
-        private Image<Bgr, Byte> Frame;               //current Frame from camera
-        private Image<Bgr, float> Color_Difference;   //Difference between the two frames
-        private Image<Bgr, float> ROI_image;          //Area occupied by traffic
+        private Image<Bgr, Byte> Frame; //current Frame from camera
+        private Image<Bgr, float> Color_Difference; //Difference between the two frames
+        private Image<Bgr, float> ROI_image; //Area occupied by traffic
         private readonly int Width;
         private readonly int Height;
-        public Image<Gray, Byte> Movement_Mask { get; private set; }      //Thresholded, b&w movement mask
-        public Image<Bgr, float> Color_Background { get; private set; }   //Average Background being formed
+        public Image<Gray, Byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
+        public Image<Gray, Byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
+        public Image<Bgr, float> Color_Background { get; private set; } //Average Background being formed
         public Image<Bgr, Byte> Training_Image { get; private set; } //Image to be exported for training set
 
-        //************* Object detection parameters ***************  
+        public Image<Bgr, Byte>[] MeanImages; // Mixture of Gaussian parameters
+        public Image<Gray, Byte>[] VarianceImages; 
+        public Image<Gray, Byte>[] WeightImages;
+
+    //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
 
@@ -156,6 +162,8 @@ namespace VTC.Kernel.Vistas
 
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
+
+            BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
         }
 
         public virtual void ResetStats()
@@ -168,9 +176,11 @@ namespace VTC.Kernel.Vistas
             return "Vehicles detected: " + TotalDeleted;               
         }
 
+        private int numProcessedFrames = 0;
+        private int backgroundFrameDownsampling = 100;
         public void Update(Image<Bgr, Byte> newFrame)
         {
-
+            numProcessedFrames++;
             Frame = newFrame;
 
             if (Color_Background == null) //we need at least one frame to initialize the background
@@ -179,9 +189,14 @@ namespace VTC.Kernel.Vistas
             }
             else
             {
-                Movement_Mask = MovementMask(newFrame);
+                Movement_Mask = MovementMask(newFrame, Color_Background);
+                //if (BackgroundUpdateMoG != null)
+                //    Movement_MaskMoG = MovementMask(newFrame, BackgroundUpdateMoG);
 
                 UpdateBackground(newFrame);
+
+                //if(numProcessedFrames%backgroundFrameDownsampling == 0)
+                //UpdateBackgroundMoG(newFrame);
 
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
@@ -211,30 +226,36 @@ namespace VTC.Kernel.Vistas
             }
         }
 
-        //Calculate background using something like Mixture of Gaussians
-        private const int MaxSamples = 30;
+        //Calculate background using Mixture of Gaussians
+        private const int MaxSamples = 100;
         public Image<Bgr, float> BackgroundUpdateMoG;
+        public Image<Bgr, float> MovementImageMoG;
         public Queue<Image<Bgr, float>> FrameSamples = new Queue<Image<Bgr, float>>(MaxSamples);
         private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
         {
             Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
             FrameSamples.Enqueue(newImageSample);
-            BackgroundUpdateMoG = new Image<Bgr, float>(newImageSample.Width, newImageSample.Height);
 
             int numSamples = FrameSamples.Count();
-            for (int i = 0; i < newImageSample.Width; i++)
-                for (int j = 0; j < newImageSample.Height; j++ )
-                {
-                    
-                    var redPixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
-                    var greenPixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
-                    var bluePixelSamples = FrameSamples.Select(x => x.Data[i, j, 0]).ToList();
-                    
-                    //TODO: Write EM algorithm to calculate background from samples. Choose the tighter distribution as the background. 
-                }
+            if (numSamples == MaxSamples)
+            {
+                for (int i = 0; i < newImageSample.Width; i++)
+                    for (int j = 0; j < newImageSample.Height; j++)
+                    {
+                        var samplePoints = FrameSamples.Select(x => new int[3] { Convert.ToInt32(x.Data[j, i, 0]), Convert.ToInt32(x.Data[j, i, 1]), Convert.ToInt32(x.Data[j, i, 2]) }).ToArray();
 
-                    //BackgroundUpdateMoG = backgroundMask;
-            //Color_Background.RunningAvg(backgroundTotalUpdate, Settings.Alpha);
+                        if(i==336 && j == 185)
+                            Console.WriteLine("Here it is");
+
+                        MixtureModel mm = new MixtureModel(samplePoints);
+                        mm.Train();
+                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mm.Means[0][0];
+                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mm.Means[0][1];
+                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mm.Means[0][2];
+                    }
+
+                FrameSamples.Clear();
+            }
         }
 
         
@@ -248,9 +269,9 @@ namespace VTC.Kernel.Vistas
         }
 
 
-        private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame)
+        private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
-            Image<Bgr, float> colorDifference = Color_Background.AbsDiff(frame.Convert<Bgr, float>());
+            Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
             Image<Bgr, float> maskedDifference = colorDifference.And(ROI_image);  
             Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
 
