@@ -1,20 +1,83 @@
-﻿using Emgu.CV;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using VTC.Kernel.Settings;
+using VTC.Kernel.Video;
 
-namespace VTC
+namespace VTC.CaptureSource
 {
-    public abstract class CaptureSource
+    public abstract class CaptureSource : ICaptureSource
     {
-        private string Name;
+        private readonly string _name;
+        private Capture _cameraCapture;
 
-        public abstract Capture GetCapture();
-
-        public CaptureSource(string name)
+        public int Width
         {
-            Name = name;
+            get
+            {
+                if (_cameraCapture == null) throw new ApplicationException("Camera is not initialized.");
+                return _cameraCapture.Width;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                if (_cameraCapture == null) throw new ApplicationException("Camera is not initialized.");
+                return _cameraCapture.Height;
+            }
+        }
+
+        public string Name
+        {
+            get { return _name; }
+        }
+
+
+        protected abstract Capture GetCapture();
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="name">Capture source name.</param>
+        protected CaptureSource(string name)
+        {
+            _name = name;
+        }
+
+        /// <summary>
+        /// Get next frame from camera.
+        /// </summary>
+        /// <returns></returns>
+        public Image<Bgr, Byte> QueryFrame()
+        {
+            return _cameraCapture.QueryFrame();
+        }
+
+        /// <summary>
+        /// Initialize camera.
+        /// </summary>
+        /// <param name="settings"></param>
+        public void Init(ISettings settings)
+        {
+            _cameraCapture = GetCapture();
+
+            _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, settings.FrameHeight);
+            _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, settings.FrameWidth);
+        }
+
+        /// <summary>
+        /// Destroy underlying camera.
+        /// </summary>
+        public void Destroy()
+        {
+            if (null != _cameraCapture)
+            {
+                _cameraCapture.Dispose();
+                _cameraCapture = null;
+            }
         }
 
         public override string ToString()

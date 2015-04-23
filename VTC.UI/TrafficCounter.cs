@@ -7,27 +7,27 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
-using System.Web;
 using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using VTC.CaptureSource;
 using VTC.Kernel;
+using VTC.Kernel.RegionConfig;
+using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
-using VTC.ExportTrainingSet;
 
 namespace VTC
 {
    public partial class TrafficCounter : Form
    {
       private readonly AppSettings _settings;
-      private readonly string _filename; // filename with local video (debug mode).
-      private static Capture _cameraCapture;
+       private const string IpCamerasFilename = "ipCameras.txt";
 
        private VideoDisplay _mainDisplay;
        private VideoDisplay _movementDisplay;
@@ -36,28 +36,56 @@ namespace VTC
        //private VideoDisplay _mixtureMovementDisplay;
 
       private DateTime _applicationStartTime;
+      private readonly DateTime _applicationStartTime;
 
-      private List<CaptureSource> _cameras = new List<CaptureSource>(); //List of all video input devices. Index, file location, name
-      private CaptureSource _selectedCamera = null;
-      private CaptureSource SelectedCamera
+      private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
+      private ICaptureSource _selectedCamera;
+
+        // unit tests has own settings, so need to store "pairs" (capture, settings)
+      private CaptureContext[] _testCaptureContexts;
+
+
+       /// <summary>
+       /// Active camera.
+       /// </summary>
+      private ICaptureSource SelectedCamera
       {
+          get { return _selectedCamera; }
           set
           {
               if (value == _selectedCamera) return;
 
-              _selectedCamera = value;
-
-              if (null != _cameraCapture)
+              if (_selectedCamera != null)
               {
-                  _cameraCapture.Dispose();
+                  _selectedCamera.Destroy();
               }
 
-              _cameraCapture = _selectedCamera.GetCapture();
+              _selectedCamera = value;
+              _selectedCamera.Init(_settings);
 
-              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, _settings.FrameHeight);
-              _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, _settings.FrameWidth);
+              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
 
-              _vista = new IntersectionVista(_settings, _cameraCapture.Width, _cameraCapture.Height);
+
+              // kind-of ugly... to refactor someday
+              if (_unitTestsMode)
+              {
+                  // create mask for the whole image
+                  var polygon = new Polygon();
+                  polygon.AddRange(new[]
+                    {
+                        new Point(0, 0), 
+                        new Point(0, (int) _settings.FrameHeight),
+                        new Point((int) _settings.FrameWidth, (int) _settings.FrameHeight), 
+                        new Point((int) _settings.FrameWidth, 0),
+                        new Point(0, 0)
+                    });
+
+                  var regionConfig = new RegionConfig
+                  {
+                      RoiMask = polygon
+                  };
+                  _vista.RegionConfiguration = regionConfig;
+              }
           }
       }
 
@@ -70,16 +98,40 @@ namespace VTC
        /// Constructor.
        /// </summary>
        /// <param name="settings">Application settings.</param>
-       /// <param name="filename">Local file with video.</param>
-       public TrafficCounter(AppSettings settings, string filename = null)
+       /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
+       public TrafficCounter(AppSettings settings, string appArgument = null)
       {
-           _settings = settings;
-           _filename = filename;
-
           InitializeComponent();
 
-          //Initialize the camera selection combobox.
-          InitializeCameraSelection();
+           _settings = settings;
+
+           // check if app should run in unit test visualization mode
+           _unitTestsMode = false;
+           if ((appArgument != null) && appArgument.EndsWith(".dll", true, CultureInfo.InvariantCulture))
+           {
+               _unitTestsMode = DetectTestScenarios(appArgument);
+           }
+
+           // otherwise - run in standard mode
+           if (! _unitTestsMode)
+           {
+               InitializeCameraSelection(appArgument);
+           }
+
+
+           //Disable eventhandler for the changing combobox index.
+           CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
+
+           //Set the index if a device could be found.
+           if (_cameras.Count > 0)
+           {
+               CameraComboBox.SelectedIndex = 0;
+           }
+
+           //Enable eventhandler for the changing combobox index.
+           CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
+
+
 
           //Initialize parameters.
           LoadParameters();
@@ -158,21 +210,22 @@ namespace VTC
            return false;
        }
 
-       private void AddCamera(CaptureSource camera)
+       private void AddCamera(ICaptureSource camera)
        {
            _cameras.Add(camera);
-           CameraComboBox.Items.Add(camera.ToString());
+           CameraComboBox.Items.Add(camera.Name);
        }
 
-      /// <summary>
-      /// Method for initializing the camera selection combobox.
-      /// </summary>
-      void InitializeCameraSelection()
+       /// <summary>
+       /// Method for initializing the camera selection combobox.
+       /// </summary>
+       /// <param name="filename">Local file with video</param>
+       void InitializeCameraSelection(string filename)
       {
           // Add video file as source, if provided
-          if (UseLocalVideo(_filename))
+          if (UseLocalVideo(filename))
           {
-              AddCamera(new VideoFileCapture("File: " + Path.GetFileName(_filename), _filename));
+              AddCamera(new VideoFileCapture(filename));
           }
 
           //List all video input devices.
@@ -191,9 +244,9 @@ namespace VTC
               deviceIndex++;
           }
 
-          if (File.Exists("ipCameras.txt"))
+          if (File.Exists(IpCamerasFilename))
           {
-              var ipCameraStrings = File.ReadAllLines("ipCameras.txt");
+              var ipCameraStrings = File.ReadAllLines(IpCamerasFilename);
 
               foreach (var str in ipCameraStrings)
               {
@@ -204,26 +257,60 @@ namespace VTC
               }
           }
 
-          //Disable eventhandler for the changing combobox index.
-          CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
-
-          //Set the index if a device could be found.
-          if (_cameras.Count > 0)
-          {
-              CameraComboBox.SelectedIndex = 0;
-          }
-
-          //Enable eventhandler for the changing combobox index.
-          CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
       }
 
-      /// <summary>
+       /// <summary>
+       /// Try to detect unit tests. Play unit tests (if detected).
+       /// </summary>
+       /// <param name="assemblyName">Assembly name with test scenarios.</param>
+       /// <returns><c>true</c> if unit tests detected.</returns>
+       /// <remarks>IMPORTANT: unit tests use own settings!!!</remarks>
+       private bool DetectTestScenarios(string assemblyName)
+       {
+           bool result = false;
+
+           try
+           {
+               while (! string.IsNullOrWhiteSpace(assemblyName))
+               {
+                   if (! File.Exists(assemblyName)) break;
+
+                   var assembly = Assembly.LoadFile(assemblyName);
+                   if (assembly == null) break;
+
+                   _testCaptureContexts = assembly.GetTypes()
+                       .Where(t => t.GetInterfaces().Contains(typeof (ICaptureContextProvider))
+                                   && (t.GetConstructor(Type.EmptyTypes) != null)) // expected default constructor
+                       .Select(t => Activator.CreateInstance(t) as ICaptureContextProvider)
+                       .SelectMany(instance => instance.GetCaptures())
+                       .ToArray();
+
+                   foreach (var captureContext in _testCaptureContexts)
+                   {
+                       AddCamera(captureContext.Capture);
+                   }
+
+                   result = true;
+                   break;
+               }
+           }
+           catch (Exception e)
+           {
+               Log(e.ToString());
+           }
+
+           return result;
+       }
+
+       /// <summary>
       /// Method which reacts to the change of the camera selection combobox.
       /// </summary>
       private void CameraComboBox_SelectedIndexChanged(object sender, EventArgs e)
       {
         //Change the capture device.
         SelectedCamera = _cameras[CameraComboBox.SelectedIndex];   
+
+          // TODO: change settings if app in unit tests visualization mode
       }
 
       /// <summary>
@@ -289,15 +376,16 @@ namespace VTC
 
       void ProcessFrame(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               
               //Workaround - dispose and restart capture if camera starts returning null. 
               //TODO: Investigate - why is this necessary?
-              if (frame == null) 
+              if (frame == null)
               {
-                _cameraCapture.Dispose();
-                _cameraCapture = _selectedCamera.GetCapture();
+                  SelectedCamera.Destroy();
+                  SelectedCamera.Init(_settings);
+                  
                 Debug.WriteLine("Restarting camera: " + DateTime.Now);
                 return;
               }
@@ -448,7 +536,7 @@ namespace VTC
 
       private void resampleBackgroundButton_Click(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               if (frame != null)
                   RefreshBackground(frame);
@@ -457,7 +545,7 @@ namespace VTC
 
       private void exportTrainingImagesButton_Click(object sender, EventArgs e)
       {
-          using(Image<Bgr, Byte> frame = _cameraCapture.QueryFrame())
+          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
           {
               if (frame != null)
               {
@@ -471,6 +559,8 @@ namespace VTC
       }
 
        private Point RGBSamplePoint;
+       private readonly bool _unitTestsMode;
+
        private void updateSamplePoint_Click(object sender, EventArgs e)
        {
            string text = rgbCoordinateTextbox.Text;

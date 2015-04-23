@@ -4,7 +4,7 @@ Video Traffic Counter
 
 ---
 
-Live: [www.traffic-camera.com](http://www.traffic-camera.com) Development: [dev.traffic-camera.com](http://dev.traffic-camera.com)
+Live: [www.traffic-camera.com](http://www.traffic-camera.com)<br> Development: [dev.traffic-camera.com](http://dev.traffic-camera.com)
 
 Realtime video-based object tracking software. Written in C# using Emgu CV. Requires a webcam.
 
@@ -25,6 +25,10 @@ It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV i
 
 ##Using existing video for debugging
 Pass pathname of local video as command line argument.
+
+##Visualizing unit tests
+Pass full pathname to assembly with unit tests. <br>
+**IMPORTANT:** unit tests using **OWN** settings. Check unit test source code to see values!
 
 #Debug output
 Debug output is written to C:\TrafficCounter\VTClog.txt (see app.config)
