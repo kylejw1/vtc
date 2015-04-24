@@ -34,6 +34,7 @@ namespace VTC
        private VideoDisplay _mainDisplay;
        private VideoDisplay _movementDisplay;
        private VideoDisplay _backgroundDisplay;
+       private VideoDisplay _velocityFieldDisplay;
        //private VideoDisplay _mixtureDisplay;
        //private VideoDisplay _mixtureMovementDisplay;
 
@@ -152,10 +153,9 @@ namespace VTC
 
        private void TOnTick(object sender, EventArgs eventArgs)
        {
-           //resampleBackgroundButton.Image = null;
-           //var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
-           //Vista.VelocityField.Draw(image, new Bgr(System.Drawing.Color.White), 1);
-           //resampleBackgroundButton.Image = image;
+           var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
+           _vista.VelocityField.Draw(image, new Bgr(System.Drawing.Color.White), 1);
+           _velocityFieldDisplay.Update(image);
        }
 
        private void CreateVideoWindows()
@@ -163,11 +163,13 @@ namespace VTC
            _mainDisplay = new VideoDisplay("Main", new Point(25,25));
            _movementDisplay = new VideoDisplay("Movement", new Point(50 + _mainDisplay.Width + _mainDisplay.Location.X, 25));
            _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
+           _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
            //_mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            //_mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _mainDisplay.Show();
            _movementDisplay.Show();
            _backgroundDisplay.Show();
+           _velocityFieldDisplay.Show();
            //_mixtureDisplay.Show();
            //_mixtureMovementDisplay.Show();
        }
