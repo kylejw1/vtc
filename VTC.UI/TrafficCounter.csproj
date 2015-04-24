@@ -127,7 +127,12 @@
     <Compile Include="CaptureSource\VideoFileCapture.cs" />
     <Compile Include="CaptureSource\CaptureSource.cs" />
     <Compile Include="CaptureSource\IpCamera.cs" />
-    <Compile Include="ServerReporting\ReportItems\HttpPostReportItem.cs" />
+    <Compile Include="ExportTrainingSet\ExportTrainingSet.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportTrainingSet\ExportTrainingSet.Designer.cs">
+      <DependentUpon>ExportTrainingSet.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>
@@ -143,20 +148,26 @@
     <Compile Include="RegionConfig\RegionEditor.Designer.cs">
       <DependentUpon>RegionEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="ServerReporting\ReportItem.cs" />
-    <Compile Include="ServerReporting\ReportItems\FtpSendFileReportItem.cs" />
-    <Compile Include="ServerReporting\ServerReporter.cs" />
     <Compile Include="TrafficCounter.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="TrafficCounter.Designer.cs">
       <DependentUpon>TrafficCounter.cs</DependentUpon>
     </Compile>
+    <Compile Include="VideoDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VideoDisplay.Designer.cs">
+      <DependentUpon>VideoDisplay.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ExportTrainingSet\ExportTrainingSet.resx">
+      <DependentUpon>ExportTrainingSet.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RegionConfig\PolygonBuilderControl.resx">
       <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -166,6 +177,9 @@
     <EmbeddedResource Include="TrafficCounter.resx">
       <SubType>Designer</SubType>
       <DependentUpon>TrafficCounter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VideoDisplay.resx">
+      <DependentUpon>VideoDisplay.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +236,10 @@
     <ProjectReference Include="..\VTC.Kernel\VTC.Kernel.csproj">
       <Project>{d8a795d9-f343-4db5-a993-eb35d1a4c182}</Project>
       <Name>VTC.Kernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VTC.Reporting\VTC.Reporting.csproj">
+      <Project>{0CE41230-5E22-4B13-8520-AE201EED01BB}</Project>
+      <Name>VTC.Reporting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -9,9 +9,9 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VTC.Kernel;
 using VTC.Kernel.Vistas;
-using VTC.ServerReporting.ReportItems;
 using System.ServiceModel.Web;
 using System.Runtime.Serialization.Json;
+using VTC.Reporting.ReportItems;
 
 namespace OptAssignTest
 {
@@ -41,17 +41,24 @@ namespace OptAssignTest
         [Description("Send and read back state values from server in order to measure end-to-end loopback time.")]
         public void ServerLoopback()
         {
+
+            GetSingleState(); // Warm up GetRequestStream() - JIT is slow
+
             DateTime testStart = DateTime.Now;
             int numReps = 10;
             int maxFailedChecks = 10;
             int failedChecks = 0;
 
+            
+
             for (int i = 0; i < numReps; i++)
             {
                 DateTime iterationStart = DateTime.Now;
                 SendSingleVehicle(i,10);
+
                 StateEstimate result;
                 result = GetSingleState();
+
                 while (result.x != i)
                 {
                     result = GetSingleState();
@@ -80,9 +87,9 @@ namespace OptAssignTest
             stateEstimates[0].y = y;
             string postString;
 
-            string postUrl = VTC.ServerReporting.ReportItems.HttpPostReportItem.PostStateString(stateEstimates, "4",
+            string postUrl = HttpPostReportItem.PostStateString(stateEstimates, "4",
                 "dev.traffic-camera.com", out postString);
-            VTC.ServerReporting.ReportItems.HttpPostReportItem.SendStatePOST(postUrl, postString);
+            HttpPostReportItem.SendStatePOST(postUrl, postString);
         }
 
         private static StateEstimate GetSingleState()
@@ -128,7 +135,6 @@ namespace OptAssignTest
                         stateEstimate.y = Convert.ToDouble(y_string);
 
                         objStream.Close();
-                        wrGETURL.Abort();
                     }
                 }
             }

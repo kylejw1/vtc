@@ -15,10 +15,10 @@ namespace VTC
          Application.EnableVisualStyles();
          Application.SetCompatibleTextRenderingDefault(false);
 
-         string filename = null;
-         if (args.Length == 1) filename = args[0];
+         string appArgument = null;
+         if (args.Length == 1) appArgument = args[0];
 
-          var mainForm = new TrafficCounter(new AppSettings(), filename);
+          var mainForm = new TrafficCounter(new AppSettings(), appArgument);
 
           Application.Run(mainForm);
       }

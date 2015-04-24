@@ -79,6 +79,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Framework\CaptureEmulator.cs" />
     <Compile Include="Framework\Car.cs" />
     <Compile Include="Framework\CarUtilities.cs" />
     <Compile Include="ColorChangeTests.cs" />
@@ -107,13 +108,11 @@
       <Name>VTC.Kernel</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\VTC.UI\TrafficCounter.csproj">
-      <Project>{6a2c2cf3-4f2c-43b5-b34c-a4a24b60b093}</Project>
-      <Name>TrafficCounter</Name>
+    <ProjectReference Include="..\VTC.Reporting\VTC.Reporting.csproj">
+      <Project>{0ce41230-5e22-4b13-8520-ae201eed01bb}</Project>
+      <Name>VTC.Reporting</Name>
+      <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

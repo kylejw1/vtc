@@ -1,10 +1,6 @@
 ﻿using Emgu.CV;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace VTC
+namespace VTC.CaptureSource
 {
     public class IpCamera : CaptureSource
     {
@@ -15,7 +11,7 @@ namespace VTC
             ConnectionString = connectionString;
         }
 
-        public override Capture GetCapture()
+        protected override Capture GetCapture()
         {
             return new Capture(ConnectionString);
         }
