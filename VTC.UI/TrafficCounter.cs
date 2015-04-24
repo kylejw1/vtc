@@ -35,7 +35,6 @@ namespace VTC
        //private VideoDisplay _mixtureDisplay;
        //private VideoDisplay _mixtureMovementDisplay;
 
-      private DateTime _applicationStartTime;
       private readonly DateTime _applicationStartTime;
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
