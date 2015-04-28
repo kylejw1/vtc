@@ -220,7 +220,7 @@ namespace VTC.Kernel.Vistas
                     return new Tuple<Point, VelocityField.Velocity>(coords, velocity);
                 });
 
-                VelocityField.TryInsertEventsAsync(meas);
+                VelocityField.TryInsertVelocitiesAsync(meas);
             }
         }
 

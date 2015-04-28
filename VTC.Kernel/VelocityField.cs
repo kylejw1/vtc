@@ -17,43 +17,34 @@ namespace VTC.Kernel
     {
         public struct Velocity
         {
-            public double X;
-            public double Y;
+            public double v_x;
+            public double v_y;
 
             public Velocity(double x, double y)
             {
-                X = x;
-                Y = y;
+                v_x = x;
+                v_y = y;
             }
         }
 
-        private int[] _horizontalCoordLookup;
-        private int[] _verticalCoordLookup;
+        private Dictionary<int, int> _horizontalCoordLookup = new Dictionary<int,int>();
+        private Dictionary<int, int> _verticalCoordLookup = new Dictionary<int, int>();
         private Velocity[,] _velocityField;
-        private int _height;
-        private int _width;
-        private double alpha = 0.005;
+        private int _fieldHeight;
+        private int _fieldWidth;
+        private int _sourceWidth;
+        private int _sourceHeight;
+        private double alpha = 0.01;
         private Mutex _updateMutex = new Mutex();
 
-        public VelocityField(int width, int height, int imageWidth, int imageHeight)
+        public VelocityField(int fieldWidth, int fieldHeight, int sourceWidth, int sourceHeight)
         {
-            _horizontalCoordLookup = new int[imageWidth];
-            _verticalCoordLookup = new int[imageHeight];
+            _fieldWidth = fieldWidth;
+            _fieldHeight = fieldHeight;
+            _sourceHeight = sourceHeight;
+            _sourceWidth = sourceWidth;
 
-            for (int i = 0; i < imageWidth; i++)
-            {
-                _horizontalCoordLookup[i] = (i * width) / imageWidth;
-            }
-
-            for (int i = 0; i < imageHeight; i++)
-            {
-                _verticalCoordLookup[i] = (i * height) / imageHeight;
-            }
-
-            _velocityField = new Velocity[width, height];
-            _width = width;
-            _height = height;
-
+            _velocityField = new Velocity[_fieldWidth, _fieldHeight];
         }
 
         public Velocity GetAvgVelocity(Point p)
@@ -61,7 +52,7 @@ namespace VTC.Kernel
             return _velocityField[p.X, p.Y];
         }
 
-        private void InsertMeasurements(IEnumerable<Tuple<Point, Velocity>> measurements)
+        private void InsertVelocities(IEnumerable<Tuple<Point, Velocity>> measurements)
         {
             if (!_updateMutex.WaitOne(0))
             {
@@ -75,38 +66,47 @@ namespace VTC.Kernel
 
                 foreach (var m in measurements)
                 {
-                    try
+                    // Cache the normalized values for efficiency
+                    int x, y;
+                    if (!_horizontalCoordLookup.ContainsKey(m.Item1.X))
                     {
-                        neighbors.Add(new Point(_horizontalCoordLookup[m.Item1.X], _verticalCoordLookup[m.Item1.Y]));
-                        velocities.Add(m.Item2);
+                        _horizontalCoordLookup[m.Item1.X] = (m.Item1.X * _fieldWidth) / _sourceWidth;
                     }
-                    catch
+
+                    x = _horizontalCoordLookup[m.Item1.X];
+
+                    if (!_verticalCoordLookup.ContainsKey(m.Item1.Y))
                     {
-                        // TODO: Handle indicies outside the image width (eg. negatives)
+                        _horizontalCoordLookup[m.Item1.Y] = (m.Item1.Y * _fieldHeight) / _sourceHeight;
                     }
+
+                    y = _horizontalCoordLookup[m.Item1.Y];
+
+                    neighbors.Add(new Point(x,y));
+                    velocities.Add(m.Item2);
                 }
 
                 if (!neighbors.Any())
                     return;
 
                 var point = new Point();
-                for (int x = 0; x < _width; x++)
+                for (int x = 0; x < _fieldWidth; x++)
                 {
                     point.X = x;
-                    for (int y = 0; y < _height; y++)
+                    for (int y = 0; y < _fieldHeight; y++)
                     {
                         point.Y = y;
 
                         var nearest = point.NearestNeighborIndex(neighbors);
 
-                        var vx = _velocityField[x, y].X*(1 - alpha);
-                        vx += (velocities[nearest].X*alpha);
+                        var vx = _velocityField[x, y].v_x*(1 - alpha);
+                        vx += (velocities[nearest].v_x*alpha);
 
-                        var vy = _velocityField[x, y].Y*(1 - alpha);
-                        vy += (velocities[nearest].Y*alpha);
+                        var vy = _velocityField[x, y].v_y*(1 - alpha);
+                        vy += (velocities[nearest].v_y*alpha);
 
-                        _velocityField[x, y].X = vx;
-                        _velocityField[x, y].Y = vy;
+                        _velocityField[x, y].v_x = vx;
+                        _velocityField[x, y].v_y = vy;
                     }
                 }
             }
@@ -116,9 +116,9 @@ namespace VTC.Kernel
             }
         }
 
-        internal void TryInsertEventsAsync(IEnumerable<Tuple<Point, Velocity>> measurements)
+        internal void TryInsertVelocitiesAsync(IEnumerable<Tuple<Point, Velocity>> measurements)
         {
-            Task.Factory.StartNew(() => InsertMeasurements(measurements.ToList()));
+            Task.Factory.StartNew(() => InsertVelocities(measurements.ToList()));
         }
 
         public void Draw<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) where TColor : struct, IColor where TDepth : new()
@@ -126,19 +126,19 @@ namespace VTC.Kernel
             _updateMutex.WaitOne();
             try
             {
-                var segmentWidth = image.Width/_width;
-                var segmentHeight = image.Height/_height;
+                var segmentWidth = image.Width/_fieldWidth;
+                var segmentHeight = image.Height/_fieldHeight;
 
                 var cursorStart = new Point(segmentWidth/2, segmentHeight/2);
 
-                for (int x = 0; x < _width; x++)
+                for (int x = 0; x < _fieldWidth; x++)
                 {
                 
-                    for (int y = 0; y < _height; y++)
+                    for (int y = 0; y < _fieldHeight; y++)
                     {
                         var cursorEnd = new Point(
-                            (int) (cursorStart.X + _velocityField[x, y].X),
-                            (int) (cursorStart.Y + _velocityField[x, y].Y)
+                            (int) (cursorStart.X + _velocityField[x, y].v_x),
+                            (int) (cursorStart.Y + _velocityField[x, y].v_y)
                             );
 
                         var line = new LineSegment2D(cursorStart, cursorEnd);
