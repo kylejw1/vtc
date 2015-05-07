@@ -154,7 +154,7 @@ namespace VTC
        private void TOnTick(object sender, EventArgs eventArgs)
        {
            var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
-           _vista.VelocityField.Draw(image, new Bgr(System.Drawing.Color.White), 1);
+           _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
            _velocityFieldDisplay.Update(image);
        }
 

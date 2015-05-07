@@ -47,13 +47,38 @@ namespace VTC.Kernel
             _velocityField = new Velocity[_fieldWidth, _fieldHeight];
         }
 
-        public Velocity GetAvgVelocity(Point p)
+        public Velocity GetAvgVelocity(int x, int y)
         {
-            return _velocityField[p.X, p.Y];
+            GetNormalizedCoordinate(x, y, out x, out y);
+            return _velocityField[x, y];
         }
 
-        private void InsertVelocities(IEnumerable<Tuple<Point, Velocity>> measurements)
+        public Velocity GetAvgVelocity(Point p)
         {
+            return GetAvgVelocity(p.X, p.Y);
+        }
+
+        private void GetNormalizedCoordinate(int x, int y, out int xNormal, out int yNormal)
+        {
+            // Cache the normalized values to reduce multiplication and division
+            if (!_horizontalCoordLookup.ContainsKey(x))
+            {
+                _horizontalCoordLookup[x] = (x * _fieldWidth) / _sourceWidth;
+            }
+
+            xNormal = _horizontalCoordLookup[x];
+
+            if (!_verticalCoordLookup.ContainsKey(y))
+            {
+                _horizontalCoordLookup[y] = (y * _fieldHeight) / _sourceHeight;
+            }
+
+            yNormal = _horizontalCoordLookup[y];
+        }
+
+        private void InsertVelocities(Dictionary<Point, Velocity> measurements)
+        {
+            // If we're already busy inserting velocities, just abort
             if (!_updateMutex.WaitOne(0))
             {
                 return;
@@ -64,26 +89,18 @@ namespace VTC.Kernel
                 var neighbors = new List<Point>();
                 var velocities = new List<Velocity>();
 
-                foreach (var m in measurements)
+                // Since the velocity field grid is smaller that the source image, we need to
+                // Normalize the measurement coordinates
+                foreach (var kvp in measurements)
                 {
-                    // Cache the normalized values for efficiency
+                    var pt = kvp.Key;
+                    var vel = kvp.Value;
+
                     int x, y;
-                    if (!_horizontalCoordLookup.ContainsKey(m.Item1.X))
-                    {
-                        _horizontalCoordLookup[m.Item1.X] = (m.Item1.X * _fieldWidth) / _sourceWidth;
-                    }
-
-                    x = _horizontalCoordLookup[m.Item1.X];
-
-                    if (!_verticalCoordLookup.ContainsKey(m.Item1.Y))
-                    {
-                        _horizontalCoordLookup[m.Item1.Y] = (m.Item1.Y * _fieldHeight) / _sourceHeight;
-                    }
-
-                    y = _horizontalCoordLookup[m.Item1.Y];
+                    GetNormalizedCoordinate(pt.X, pt.Y, out x, out y);
 
                     neighbors.Add(new Point(x,y));
-                    velocities.Add(m.Item2);
+                    velocities.Add(vel);
                 }
 
                 if (!neighbors.Any())
@@ -116,12 +133,14 @@ namespace VTC.Kernel
             }
         }
 
-        internal void TryInsertVelocitiesAsync(IEnumerable<Tuple<Point, Velocity>> measurements)
+        internal void TryInsertVelocitiesAsync(Dictionary<Point, Velocity> measurements)
         {
-            Task.Factory.StartNew(() => InsertVelocities(measurements.ToList()));
+            Task.Factory.StartNew(() => InsertVelocities(measurements));
         }
 
-        public void Draw<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) where TColor : struct, IColor where TDepth : new()
+        public void Draw<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
+            where TColor : struct, IColor 
+            where TDepth : new()
         {
             _updateMutex.WaitOne();
             try
@@ -144,7 +163,7 @@ namespace VTC.Kernel
                         var line = new LineSegment2D(cursorStart, cursorEnd);
 
                         image.Draw(line, color, thickness);
-                        image.Draw(new CircleF(cursorEnd, 3), color, thickness);
+                        image.Draw(new CircleF(cursorStart, 2), color, thickness);
 
                         cursorStart.Y += segmentHeight;
                     }
