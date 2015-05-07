@@ -15,12 +15,14 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.CaptureSource;
 using VTC.Kernel;
+using VTC.Kernel.Extensions;
 using VTC.Kernel.RegionConfig;
 using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
+using VTC.Kernel.Extensions;
 
 namespace VTC
 {
@@ -28,6 +30,13 @@ namespace VTC
    {
       private readonly AppSettings _settings;
        private const string IpCamerasFilename = "ipCameras.txt";
+
+       private VideoDisplay _mainDisplay;
+       private VideoDisplay _movementDisplay;
+       private VideoDisplay _backgroundDisplay;
+       private VideoDisplay _velocityFieldDisplay;
+       //private VideoDisplay _mixtureDisplay;
+       //private VideoDisplay _mixtureMovementDisplay;
 
       private readonly DateTime _applicationStartTime;
 
@@ -124,19 +133,48 @@ namespace VTC
            //Enable eventhandler for the changing combobox index.
            CameraComboBox.SelectedIndexChanged += CameraComboBox_SelectedIndexChanged;
 
-
-
           //Initialize parameters.
           LoadParameters();
 
+          System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+           t.Interval = 5000;
+           t.Tick += TOnTick;
+           t.Start();
            //Clear sample files
            ClearRGBSamplesFile();
 
+           //Create video windows
+           CreateVideoWindows();
+
            _applicationStartTime = DateTime.Now;
-          Run();
+           Run();
       }
 
-      void Run()
+
+       private void TOnTick(object sender, EventArgs eventArgs)
+       {
+           var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
+           _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
+           _velocityFieldDisplay.Update(image);
+       }
+
+       private void CreateVideoWindows()
+       {
+           _mainDisplay = new VideoDisplay("Main", new Point(25,25));
+           _movementDisplay = new VideoDisplay("Movement", new Point(50 + _mainDisplay.Width + _mainDisplay.Location.X, 25));
+           _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
+           _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
+           //_mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
+           //_mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
+           _mainDisplay.Show();
+           _movementDisplay.Show();
+           _backgroundDisplay.Show();
+           _velocityFieldDisplay.Show();
+           //_mixtureDisplay.Show();
+           //_mixtureMovementDisplay.Show();
+       }
+
+       void Run()
       {
          try
          {
@@ -381,7 +419,7 @@ namespace VTC
               // Save R,G,B samples
               StoreRGBSample(frameForProcessing);
 
-              //System.Threading.Thread.Sleep(33);
+              System.Threading.Thread.Sleep(33);
               TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
               timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
@@ -413,16 +451,26 @@ namespace VTC
        }
 
        private void UpdateImageBoxes(Image<Bgr, Byte> frame)
-      {
-          imageBox1.Image = _vista.GetCurrentStateImage();
-          imageBox2.Image = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-          imageBox3.Image = _vista.BackgroundUpdateMoG;
+       {
+           Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage();
+           Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
+           Image<Bgr, float> mogImage = _vista.BackgroundUpdateMoG;
+
+           _mainDisplay.Update(stateImage);
+           _backgroundDisplay.Update(backgroundImage);
+           //_mixtureDisplay.Update(mogImage);
+
           if (_vista.Movement_Mask != null)
           {
               Image<Bgr, Byte> movementTimesImage = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>());
-              movementMaskBox.Image = movementTimesImage;
-              //resampleBackgroundButton.Image = _vista.Movement_Mask;
+              _movementDisplay.Update(movementTimesImage);
           }
+
+           //if (_vista.Movement_MaskMoG != null)
+           //{
+           //    Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_MaskMoG.Convert<Bgr, byte>());
+           //    _mixtureMovementDisplay.Update(movementTimesImageMoG);
+           //}
       }
 
       void PushStateProcess(object sender, EventArgs e)
@@ -527,13 +575,13 @@ namespace VTC
        private Point RGBSamplePoint;
        private readonly bool _unitTestsMode;
 
-       private void imageBox1_Click(object sender, EventArgs e)
+       private void updateSamplePoint_Click(object sender, EventArgs e)
        {
-          if(Cursor.Position.X < imageBox1.Width && Cursor.Position.Y < imageBox1.Height && Cursor.Position.X >= 0 && Cursor.Position.Y >= 0)
-          {
-              RGBSamplePoint = imageBox1.PointToClient(Cursor.Position);
-              rgbCoordinateTextbox.Text = RGBSamplePoint.ToString();
-          }
-      }
+           string text = rgbCoordinateTextbox.Text;
+           string first = text.Split(',')[0];
+           string second = text.Split(',')[1];
+           RGBSamplePoint.X = Convert.ToInt32(first);
+           RGBSamplePoint.Y = Convert.ToInt32(second);
+       }
    }
 }

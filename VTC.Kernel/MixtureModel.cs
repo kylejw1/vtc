@@ -17,10 +17,10 @@ namespace VTC.Kernel
         private int _numSamples;
         private int _numDimensions;
         private const int NumComponents = 2;
-        private const int NumIterations = 15;
+        private const int NumIterations = 2;
 
         private const double _varianceMax = 50;
-        private const double _varianceMin = 5;
+        private const double _varianceMin = 1;
 
         public double[][] Means = new double[NumComponents][];
         public double[][] Variances = new double[NumComponents][];
@@ -91,6 +91,42 @@ namespace VTC.Kernel
                 UpdateParameters();
 
                 PrintParameters();
+            }
+
+            //Ensure that the Gaussians are returned in order of weight/ (total variance)
+            double sumOfVariances0 = Variances[0][0] + Variances[0][1] + Variances[0][2];
+            double sumOfVariances1 = Variances[1][0] + Variances[1][1] + Variances[1][2];
+
+            double likelihood0 = Weights[0]/sumOfVariances0;
+            double likelihood1 = Weights[1]/sumOfVariances1;
+            if (likelihood1 > likelihood0)
+            {
+                double[] tempVariance = new double[3];
+                double[] tempMean = new double[3];
+
+                tempVariance[0] = Variances[0][0];
+                tempVariance[1] = Variances[0][1];
+                tempVariance[2] = Variances[0][2];
+
+                Variances[0][0] = Variances[1][0];
+                Variances[0][1] = Variances[1][1];
+                Variances[0][2] = Variances[1][2];
+
+                Variances[1][0] = tempVariance[0];
+                Variances[1][1] = tempVariance[1];
+                Variances[1][2] = tempVariance[2];
+
+                tempMean[0] = Means[0][0];
+                tempMean[1] = Means[0][1];
+                tempMean[2] = Means[0][2];
+
+                Means[0][0] = Means[1][0];
+                Means[0][1] = Means[1][1];
+                Means[0][2] = Means[1][2];
+
+                Means[1][0] = tempMean[0];
+                Means[1][1] = tempMean[1];
+                Means[1][2] = tempMean[2];
             }
         }
 

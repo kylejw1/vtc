@@ -4,6 +4,7 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.Kernel.RegionConfig;
+using System.Collections.Generic;
 
 namespace VTC.Kernel.Extensions
 {
@@ -17,6 +18,47 @@ namespace VTC.Kernel.Extensions
             var distance = Math.Sqrt(Math.Pow(distanceX, 2) + Math.Pow(distanceY, 2));
 
             return distance;
+        }
+
+        public static int NearestNeighborIndex(this Point point, IEnumerable<Point> neighbors)
+        {
+            // Assumes at least one neighbor
+
+            int nearest = 0;
+            double nearestDistance = double.MaxValue;
+            var neighborsList = neighbors.ToList();
+
+            for (int i = 0; i < neighborsList.Count; i++)
+            {
+                var dist = point.DistanceTo(neighborsList[i]);
+                if (dist < nearestDistance)
+                {
+                    nearestDistance = dist;
+                    nearest = i;
+                }
+            }
+
+            return nearest;
+        }
+
+        public static Point NearestNeighbor(this Point point, IEnumerable<Point> neighbors)
+        {
+            // Assumes at least one neighbor
+
+            Point nearest = neighbors.First();
+            double nearestDistance = double.MaxValue;
+
+            foreach (var pt in neighbors)
+            {
+                var dist = point.DistanceTo(pt);
+                if (dist < nearestDistance)
+                {
+                    nearestDistance = dist;
+                    nearest = pt;
+                }
+            }
+
+            return nearest;
         }
 
         public static bool PolygonEnclosesPoint(this Point point, Polygon poly)
