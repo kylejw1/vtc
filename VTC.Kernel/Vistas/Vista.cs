@@ -179,6 +179,14 @@ namespace VTC.Kernel.Vistas
             MHT.VelocityField.Draw(image, color, thickness);
         }
 
+        public Emgu.CV.Image<Gray, Byte> VelocityProjection()
+        {
+            if (null == MHT)
+                return null;
+
+            return MHT.VelocityField.ProjectedPointsImage;
+        }
+
         public virtual void ResetStats()
         {
             TotalDeleted = 0;

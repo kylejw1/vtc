@@ -35,6 +35,7 @@ namespace VTC
        private VideoDisplay _movementDisplay;
        private VideoDisplay _backgroundDisplay;
        private VideoDisplay _velocityFieldDisplay;
+       private VideoDisplay _velocityProjectDisplay;
        //private VideoDisplay _mixtureDisplay;
        //private VideoDisplay _mixtureMovementDisplay;
 
@@ -137,7 +138,7 @@ namespace VTC
           LoadParameters();
 
           System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
-           t.Interval = 5000;
+           t.Interval = 1000;
            t.Tick += TOnTick;
            t.Start();
            //Clear sample files
@@ -156,6 +157,10 @@ namespace VTC
            var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
            _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
            _velocityFieldDisplay.Update(image);
+           Image<Gray, byte> pimage = new Image<Gray, byte>(50, 50);
+           pimage = _vista.VelocityProjection();
+           _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
+
        }
 
        private void CreateVideoWindows()
@@ -164,13 +169,14 @@ namespace VTC
            _movementDisplay = new VideoDisplay("Movement", new Point(50 + _mainDisplay.Width + _mainDisplay.Location.X, 25));
            _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
            _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
+           _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            //_mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            //_mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _mainDisplay.Show();
            _movementDisplay.Show();
            _backgroundDisplay.Show();
            _velocityFieldDisplay.Show();
-           //_mixtureDisplay.Show();
+           _velocityProjectDisplay.Show();
            //_mixtureMovementDisplay.Show();
        }
 
