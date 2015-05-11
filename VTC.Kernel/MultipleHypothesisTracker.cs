@@ -4,6 +4,7 @@ using System.Linq;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra.Double;
 using VTC.Kernel.Settings;
+using System.Drawing;
 
 namespace VTC.Kernel
 {
@@ -15,6 +16,7 @@ namespace VTC.Kernel
     {
         private readonly IMultipleHypothesisSettings _settings;
         private HypothesisTree HypothesisTree = null;
+        public VelocityField VelocityField { get; private set; }
 
         public int ValidationRegionDeviation
         {
@@ -46,13 +48,14 @@ namespace VTC.Kernel
         /// <summary>
         /// Default ctor
         /// </summary>
-        public MultipleHypothesisTracker(IMultipleHypothesisSettings settings)
+        public MultipleHypothesisTracker(IMultipleHypothesisSettings settings, VelocityField velocityField)
         {
             _settings = settings;
 
             StateHypothesis initialHypothesis = new StateHypothesis(_settings.MissThreshold);
             HypothesisTree = new HypothesisTree(initialHypothesis);
-            
+
+            VelocityField = velocityField;
         }
 
         /// <summary>
@@ -107,6 +110,19 @@ namespace VTC.Kernel
 
             }
 
+
+            // Insert velocities of current vehicles into the velocity field for later use when adding new vehicles
+            var pointVelocityDic = new Dictionary<Point, VelocityField.Velocity>();
+            foreach (var v in CurrentVehicles)
+            {
+                var lastState = v.state_history.Last();
+                var coords = new Point((int)lastState.x, (int)lastState.y);
+                var velocity = new VelocityField.Velocity(lastState.vx, lastState.vy);
+
+                pointVelocityDic[coords] = velocity;
+            }
+
+            VelocityField.TryInsertVelocitiesAsync(pointVelocityDic);
         }
 
         /// <summary>
@@ -199,12 +215,15 @@ namespace VTC.Kernel
                     //Account for new vehicles
                     if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets < _settings.MaxTargets) //Add new vehicle
                     {
+                        // Find predicted velocity
+                        var velocity = VelocityField.GetAvgVelocity((int)coords[j].x, (int)coords[j].y);
+
                         //Creating new vehicle
                         child_hypothesis.AddVehicle(
                             Convert.ToInt16(coords[j].x), 
                             Convert.ToInt16(coords[j].y), 
-                            0, 
-                            0,
+                            velocity.v_x, 
+                            velocity.v_y,
                             Convert.ToInt16(coords[j].red),
                             Convert.ToInt16(coords[j].green),
                             Convert.ToInt16(coords[j].blue));

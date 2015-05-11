@@ -258,7 +258,7 @@ namespace VTC.Kernel
             return newVehicleStateEstimates;
         }
 
-        public void AddVehicle(int x, int y, int vx, int vy, int red, int green, int blue)
+        public void AddVehicle(int x, int y, double vx, double vy, int red, int green, int blue)
         {
             StateEstimate initial_state = new StateEstimate();
             initial_state.x = x;

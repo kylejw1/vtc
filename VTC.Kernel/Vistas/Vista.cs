@@ -43,6 +43,7 @@ namespace VTC.Kernel.Vistas
         private Image<Bgr, float> ROI_image; //Area occupied by traffic
         private readonly int Width;
         private readonly int Height;
+        
         public Image<Gray, Byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
         public Image<Gray, Byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
         public Image<Bgr, float> Color_Background { get; private set; } //Average Background being formed
@@ -55,6 +56,9 @@ namespace VTC.Kernel.Vistas
     //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
+
+        //TODO: Decide later where this should go (could be here)
+        //private 
 
         public double CarRadius
         {
@@ -154,13 +158,25 @@ namespace VTC.Kernel.Vistas
             LastDetectionCount = 0;
             RawMass = 0;
 
+            var vf = new VelocityField(50, 50, Width, Height); 
+
             _thresholdColor = new Gray(Settings.ColorThreshold);
-            MHT = new MultipleHypothesisTracker(settings);
+            MHT = new MultipleHypothesisTracker(settings, vf);
 
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
 
             BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
+        }
+
+        public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
+            where TColor : struct, IColor 
+            where TDepth : new()
+        {
+            if (null == MHT)
+                return;
+
+            MHT.VelocityField.Draw(image, color, thickness);
         }
 
         public virtual void ResetStats()
