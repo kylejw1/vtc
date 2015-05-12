@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
@@ -36,8 +37,8 @@ namespace VTC
        private VideoDisplay _backgroundDisplay;
        private VideoDisplay _velocityFieldDisplay;
        private VideoDisplay _velocityProjectDisplay;
-       //private VideoDisplay _mixtureDisplay;
-       //private VideoDisplay _mixtureMovementDisplay;
+       private VideoDisplay _mixtureDisplay;
+       private VideoDisplay _mixtureMovementDisplay;
 
       private readonly DateTime _applicationStartTime;
 
@@ -154,13 +155,15 @@ namespace VTC
 
        private void TOnTick(object sender, EventArgs eventArgs)
        {
-           var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
-           _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
-           _velocityFieldDisplay.Update(image);
-           Image<Gray, byte> pimage = new Image<Gray, byte>(50, 50);
-           pimage = _vista.VelocityProjection();
-           _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
-
+           if (_vista != null)
+           {
+               var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
+               _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
+               _velocityFieldDisplay.Update(image);
+               Image<Gray, byte> pimage = new Image<Gray, byte>(50, 50);
+               pimage = _vista.VelocityProjection();
+               _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());    
+           }
        }
 
        private void CreateVideoWindows()
@@ -170,14 +173,15 @@ namespace VTC
            _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
            _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
            _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
-           //_mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
-           //_mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
+           _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
+           _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _mainDisplay.Show();
            _movementDisplay.Show();
            _backgroundDisplay.Show();
            _velocityFieldDisplay.Show();
            _velocityProjectDisplay.Show();
-           //_mixtureMovementDisplay.Show();
+           _mixtureDisplay.Show();
+           _mixtureMovementDisplay.Show();
        }
 
        void Run()
@@ -189,7 +193,7 @@ namespace VTC
          catch (Exception e)
          {
              Console.WriteLine(e.Message);
-            return;
+             throw;
          }
          
          Application.Idle += ProcessFrame;
@@ -464,7 +468,7 @@ namespace VTC
 
            _mainDisplay.Update(stateImage);
            _backgroundDisplay.Update(backgroundImage);
-           //_mixtureDisplay.Update(mogImage);
+           _mixtureDisplay.Update(mogImage);
 
           if (_vista.Movement_Mask != null)
           {
@@ -472,11 +476,11 @@ namespace VTC
               _movementDisplay.Update(movementTimesImage);
           }
 
-           //if (_vista.Movement_MaskMoG != null)
-           //{
-           //    Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_MaskMoG.Convert<Bgr, byte>());
-           //    _mixtureMovementDisplay.Update(movementTimesImageMoG);
-           //}
+          if (_vista.Movement_MaskMoG != null)
+          {
+              Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_MaskMoG.Convert<Bgr, byte>());
+              _mixtureMovementDisplay.Update(movementTimesImageMoG);
+          }
       }
 
       void PushStateProcess(object sender, EventArgs e)

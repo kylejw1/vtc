@@ -53,6 +53,8 @@ namespace VTC.Kernel.Vistas
         public Image<Gray, Byte>[] VarianceImages; 
         public Image<Gray, Byte>[] WeightImages;
 
+        private MixtureModel[,] mmImage; //2D array of mixture models
+
     //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
         public int LastDetectionCount { get; private set; }
@@ -167,6 +169,11 @@ namespace VTC.Kernel.Vistas
             NoiseMass = Settings.NoiseMass;
 
             BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
+            mmImage = new MixtureModel[Width,Height];
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    mmImage[i, j] = new MixtureModel();
+            
         }
 
         public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
@@ -198,7 +205,7 @@ namespace VTC.Kernel.Vistas
         }
 
         private int numProcessedFrames = 0;
-        private int backgroundFrameDownsampling = 100;
+        private int backgroundFrameDownsampling = 200;
         public void Update(Image<Bgr, Byte> newFrame)
         {
             numProcessedFrames++;
@@ -211,13 +218,17 @@ namespace VTC.Kernel.Vistas
             else
             {
                 Movement_Mask = MovementMask(newFrame, Color_Background);
-                //if (BackgroundUpdateMoG != null)
-                //    Movement_MaskMoG = MovementMask(newFrame, BackgroundUpdateMoG);
+                if (BackgroundUpdateMoG != null)
+                    Movement_MaskMoG = MovementMask(newFrame, BackgroundUpdateMoG);
 
                 UpdateBackground(newFrame);
 
-                //if(numProcessedFrames%backgroundFrameDownsampling == 0)
-                //UpdateBackgroundMoG(newFrame);
+                if (numProcessedFrames%backgroundFrameDownsampling == 0)
+                {
+                    //UpdateBackgroundMoG(newFrame);
+                    UpdateBackgroundMoGIncremental(newFrame);
+                }
+                
 
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
@@ -279,6 +290,20 @@ namespace VTC.Kernel.Vistas
             }
         }
 
+        private void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
+        {
+            Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
+            for (int i = 0; i < newImageSample.Width; i++)
+                for (int j = 0; j < newImageSample.Height; j++)
+                {
+                    var samplePoint = new int[] {frame.Data[j,i,0], frame.Data[j,i,1], frame.Data[j,i,2]};
+                    mmImage[i,j].TrainIncremental(samplePoint);
+
+                    BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i,j].Means[0][0];
+                    BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i,j].Means[0][1];
+                    BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i,j].Means[0][2];
+                }
+        }
         
 
         public void InitializeBackground(Image<Bgr, Byte> frame)
