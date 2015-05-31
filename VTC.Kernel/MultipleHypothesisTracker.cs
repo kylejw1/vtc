@@ -185,6 +185,7 @@ namespace VTC.Kernel
                     costs[i, j] = -costs[i, j];
 
             List<int[]> k_best = OptAssign.FindKBestAssignments(costs, _settings.KHypotheses);
+            int numTargetsCreated = 0;
 
             //Generate child hypotheses from k-best assignments
             for (int i = 0; i < k_best.Count; i++)
@@ -213,12 +214,13 @@ namespace VTC.Kernel
                 {
 
                     //Account for new vehicles
-                    if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets < _settings.MaxTargets) //Add new vehicle
+                    if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets + numTargetsCreated < _settings.MaxTargets) //Add new vehicle
                     {
                         // Find predicted velocity
                         var velocity = VelocityField.GetAvgVelocity((int)coords[j].x, (int)coords[j].y);
 
                         //Creating new vehicle
+                        numTargetsCreated++;
                         child_hypothesis.AddVehicle(
                             Convert.ToInt16(coords[j].x), 
                             Convert.ToInt16(coords[j].y), 

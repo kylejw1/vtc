@@ -57,6 +57,7 @@ namespace VTC
             this.label10 = new System.Windows.Forms.Label();
             this.trackCountBox = new System.Windows.Forms.TextBox();
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
+            this.MoGcheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -277,11 +278,23 @@ namespace VTC
             this.pushStateCheckbox.UseVisualStyleBackColor = true;
             this.pushStateCheckbox.CheckedChanged += new System.EventHandler(this.pushStateCheckbox_CheckedChanged);
             // 
+            // MoGcheckBox
+            // 
+            this.MoGcheckBox.AutoSize = true;
+            this.MoGcheckBox.Location = new System.Drawing.Point(366, 71);
+            this.MoGcheckBox.Name = "MoGcheckBox";
+            this.MoGcheckBox.Size = new System.Drawing.Size(85, 17);
+            this.MoGcheckBox.TabIndex = 70;
+            this.MoGcheckBox.Text = "Enable MoG";
+            this.MoGcheckBox.UseVisualStyleBackColor = true;
+            this.MoGcheckBox.CheckedChanged += new System.EventHandler(this.MoGcheckBox_CheckedChanged);
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(554, 361);
+            this.ClientSize = new System.Drawing.Size(554, 390);
+            this.Controls.Add(this.MoGcheckBox);
             this.Controls.Add(this.updateSamplePoint);
             this.Controls.Add(this.saveRGBSamplesCheckBox);
             this.Controls.Add(this.rgbCoordinateTextbox);
@@ -342,6 +355,7 @@ namespace VTC
       private Label label10;
       private TextBox trackCountBox;
       private CheckBox pushStateCheckbox;
+      private CheckBox MoGcheckBox;
 
 
    }

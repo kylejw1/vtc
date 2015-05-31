@@ -593,5 +593,10 @@ namespace VTC
            RGBSamplePoint.X = Convert.ToInt32(first);
            RGBSamplePoint.Y = Convert.ToInt32(second);
        }
+
+       private void MoGcheckBox_CheckedChanged(object sender, EventArgs e)
+       {
+           _vista.EnableMoG = MoGcheckBox.Checked;
+       }
    }
 }

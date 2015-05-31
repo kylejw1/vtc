@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+
 using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Cvb;
@@ -54,6 +55,9 @@ namespace VTC.Kernel.Vistas
         public Image<Gray, Byte>[] WeightImages;
 
         private MixtureModel[,] mmImage; //2D array of mixture models
+
+        //*************************** Image processing controls ***************************
+        public bool EnableMoG; //If true, MoG background is used instead of rolling background
 
     //************* Object detection parameters ***************  
         public double RawMass { get; private set; }
@@ -205,7 +209,7 @@ namespace VTC.Kernel.Vistas
         }
 
         private int numProcessedFrames = 0;
-        private int backgroundFrameDownsampling = 200;
+        private int backgroundFrameDownsampling = 50;
         public void Update(Image<Bgr, Byte> newFrame)
         {
             numProcessedFrames++;
@@ -217,9 +221,14 @@ namespace VTC.Kernel.Vistas
             }
             else
             {
-                Movement_Mask = MovementMask(newFrame, Color_Background);
+
                 if (BackgroundUpdateMoG != null)
                     Movement_MaskMoG = MovementMask(newFrame, BackgroundUpdateMoG);
+
+                if (!EnableMoG)
+                    Movement_Mask = MovementMask(newFrame, Color_Background);
+                else
+                    Movement_Mask = Movement_MaskMoG;
 
                 UpdateBackground(newFrame);
 
@@ -275,10 +284,6 @@ namespace VTC.Kernel.Vistas
                     for (int j = 0; j < newImageSample.Height; j++)
                     {
                         var samplePoints = FrameSamples.Select(x => new int[3] { Convert.ToInt32(x.Data[j, i, 0]), Convert.ToInt32(x.Data[j, i, 1]), Convert.ToInt32(x.Data[j, i, 2]) }).ToArray();
-
-                        if(i==336 && j == 185)
-                            Console.WriteLine("Here it is");
-
                         MixtureModel mm = new MixtureModel(samplePoints);
                         mm.Train();
                         BackgroundUpdateMoG.Data[j, i, 0] = (float)mm.Means[0][0];
@@ -376,6 +381,54 @@ namespace VTC.Kernel.Vistas
 
             using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
             {
+                Contour<Point> outlines = tempMovement_Mask.FindContours();
+                for (Contour<Point> c = outlines; c != null; c = c.HNext)
+                {
+                    Contour<Point> c_approx = c.ApproxPoly(2);
+                    Point[] points = c_approx.Select(s => new Point(s.X, s.Y)).ToArray();
+                    //frame.DrawPolyline(points, true, new Bgr(0, 0, 255), 1);
+                    double contourArea = c_approx.GetConvexHull(Emgu.CV.CvEnum.ORIENTATION.CV_CLOCKWISE).Area;
+
+                    List<Point> innerAngles = new List<Point>();
+                    for (int offset = 0; offset < c_approx.Count(); offset++)
+                    {
+                        Point first = c_approx[0 + offset];
+
+                        Point second;
+                        if (1 + offset < c_approx.Count())
+                            second = c_approx[1 + offset];
+                        else
+                            second = c_approx[1 + offset - c_approx.Count()];
+
+                        Point third;
+                        if (2 + offset < c_approx.Count())
+                            third = c_approx[2 + offset];
+                        else
+                            third = c_approx[2 + offset - c_approx.Count()];
+
+                        System.Windows.Vector vector1 = new System.Windows.Vector(first.X - second.X, first.Y - second.Y);
+                        System.Windows.Vector vector2 = new System.Windows.Vector(third.X - second.X, third.Y - second.Y);
+                        double angle = System.Windows.Vector.AngleBetween(vector1, vector2);
+                        Point centerpoint = new Point((first.X + second.X + third.X) / 3, (first.Y + second.Y + third.Y) / 3);
+                        bool isConcave = (tempMovement_Mask.Data[centerpoint.Y, centerpoint.X, 0] == 0);
+                        if (Math.Abs(angle) < 160 && isConcave && contourArea > 25)
+                        { 
+                            innerAngles.Add(second);
+                            frame.Draw(new CircleF(new PointF(second.X, second.Y), 1), new Bgr(255.0, 0, 0), 1);
+                        }
+                    }
+
+                    if (innerAngles.Count() >= 2)
+                    {
+                        double length = Math.Sqrt(Math.Pow((innerAngles[0].X - innerAngles[1].X), 2) + Math.Pow((innerAngles[0].Y - innerAngles[1].Y), 2));
+                        if (length < 10)
+                        { 
+                            frame.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Bgr(40, 40, 40), 2);
+                            tempMovement_Mask.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Gray(0), 2); 
+                        }
+                    }
+                }
+
                 Emgu.CV.Cvb.CvBlobs resultingImgBlobs = new Emgu.CV.Cvb.CvBlobs();
                 Emgu.CV.Cvb.CvBlobDetector bDetect = new Emgu.CV.Cvb.CvBlobDetector();
                 bDetect.Detect(tempMovement_Mask, resultingImgBlobs);
@@ -386,7 +439,7 @@ namespace VTC.Kernel.Vistas
                 BlobAreaComparer areaComparer = new BlobAreaComparer();
                 SortedList<CvBlob, int> blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
                 foreach (Emgu.CV.Cvb.CvBlob targetBlob in resultingImgBlobs.Values)
-                    if(targetBlob.Area > 25)
+                    if(targetBlob.Area > 50)
                         blobsWithArea.Add(targetBlob, targetBlob.Area);
 
                 numWebcamBlobsFound = blobsWithArea.Count();
@@ -409,8 +462,7 @@ namespace VTC.Kernel.Vistas
                     coordinates[i] = coords;
                     //Do this last so that it doesn't interfere with color sampling
                     frame.Draw(new CircleF(new PointF((float) x, (float) y), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                }
-                
+                } 
             }
             return coordinates;
         }
