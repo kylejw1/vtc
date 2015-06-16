@@ -54,7 +54,7 @@ namespace VTC.Kernel.Vistas
         public Image<Gray, Byte>[] VarianceImages; 
         public Image<Gray, Byte>[] WeightImages;
 
-        private MixtureModel[,] mmImage; //2D array of mixture models
+        public MoGBackground MoGBackgroundSingleton; 
 
         //*************************** Image processing controls ***************************
         public bool EnableMoG; //If true, MoG background is used instead of rolling background
@@ -172,11 +172,7 @@ namespace VTC.Kernel.Vistas
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
 
-            BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
-            mmImage = new MixtureModel[Width,Height];
-            for (int i = 0; i < Width; i++)
-                for (int j = 0; j < Height; j++)
-                    mmImage[i, j] = new MixtureModel();
+            MoGBackgroundSingleton = new MoGBackground(Width, Height);
             
         }
 
@@ -222,8 +218,9 @@ namespace VTC.Kernel.Vistas
             else
             {
 
-                if (BackgroundUpdateMoG != null)
-                    Movement_MaskMoG = MovementMask(newFrame, BackgroundUpdateMoG);
+                
+                if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
+                    Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
 
                 if (!EnableMoG)
                     Movement_Mask = MovementMask(newFrame, Color_Background);
@@ -269,45 +266,33 @@ namespace VTC.Kernel.Vistas
 
         //Calculate background using Mixture of Gaussians
         private const int MaxSamples = 100;
-        public Image<Bgr, float> BackgroundUpdateMoG;
-        public Image<Bgr, float> MovementImageMoG;
         public Queue<Image<Bgr, float>> FrameSamples = new Queue<Image<Bgr, float>>(MaxSamples);
-        private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
-        {
-            Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
-            FrameSamples.Enqueue(newImageSample);
+        //private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
+        //{
+        //    Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
+        //    FrameSamples.Enqueue(newImageSample);
 
-            int numSamples = FrameSamples.Count();
-            if (numSamples == MaxSamples)
-            {
-                for (int i = 0; i < newImageSample.Width; i++)
-                    for (int j = 0; j < newImageSample.Height; j++)
-                    {
-                        var samplePoints = FrameSamples.Select(x => new int[3] { Convert.ToInt32(x.Data[j, i, 0]), Convert.ToInt32(x.Data[j, i, 1]), Convert.ToInt32(x.Data[j, i, 2]) }).ToArray();
-                        MixtureModel mm = new MixtureModel(samplePoints);
-                        mm.Train();
-                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mm.Means[0][0];
-                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mm.Means[0][1];
-                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mm.Means[0][2];
-                    }
+        //    int numSamples = FrameSamples.Count();
+        //    if (numSamples == MaxSamples)
+        //    {
+        //        for (int i = 0; i < newImageSample.Width; i++)
+        //            for (int j = 0; j < newImageSample.Height; j++)
+        //            {
+        //                var samplePoints = FrameSamples.Select(x => new int[3] { Convert.ToInt32(x.Data[j, i, 0]), Convert.ToInt32(x.Data[j, i, 1]), Convert.ToInt32(x.Data[j, i, 2]) }).ToArray();
+        //                MixtureModel mm = new MixtureModel(samplePoints);
+        //                mm.Train();
+        //                BackgroundUpdateMoG.Data[j, i, 0] = (float)mm.Means[0][0];
+        //                BackgroundUpdateMoG.Data[j, i, 1] = (float)mm.Means[0][1];
+        //                BackgroundUpdateMoG.Data[j, i, 2] = (float)mm.Means[0][2];
+        //            }
 
-                FrameSamples.Clear();
-            }
-        }
+        //        FrameSamples.Clear();
+        //    }
+        //}
 
         private void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
         {
-            Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
-            for (int i = 0; i < newImageSample.Width; i++)
-                for (int j = 0; j < newImageSample.Height; j++)
-                {
-                    var samplePoint = new int[] {frame.Data[j,i,0], frame.Data[j,i,1], frame.Data[j,i,2]};
-                    mmImage[i,j].TrainIncremental(samplePoint);
-
-                    BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i,j].Means[0][0];
-                    BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i,j].Means[0][1];
-                    BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i,j].Means[0][2];
-                }
+            MoGBackgroundSingleton.TryUpdatingBackgroundAsync(frame);
         }
         
 

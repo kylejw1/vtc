@@ -3,15 +3,71 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MathNet.Numerics.Distributions;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VTC.Kernel
 {
+
+    public class MoGBackground
+    {
+        public MixtureModel[,] mmImage; //2D array of mixture models
+        public Image<Bgr, float> BackgroundUpdateMoG;
+        private Mutex _updateMutex = new Mutex();
+
+        public MoGBackground(int Width, int Height)
+        {
+            BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
+            mmImage = new MixtureModel[Width, Height];
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    mmImage[i, j] = new MixtureModel();
+        }
+
+        public void TryUpdatingBackgroundAsync(Image<Bgr, Byte> frame)
+        {
+            Task.Factory.StartNew(() => UpdateBackgroundMoGIncremental(frame));
+        }
+
+        public void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
+        {
+            // If we're already busy updating background, just abort
+            if (!_updateMutex.WaitOne(0))
+            {
+                return;
+            }
+
+            try
+            {
+                Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
+                for (int i = 0; i < newImageSample.Width; i++)
+                    for (int j = 0; j < newImageSample.Height; j++)
+                    {
+                        var samplePoint = new int[] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
+                        mmImage[i, j].TrainIncremental(samplePoint);
+
+                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i, j].Means[0][0];
+                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i, j].Means[0][1];
+                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i, j].Means[0][2];
+                    }
+            }
+            finally
+            {
+                _updateMutex.ReleaseMutex();
+            }
+            
+        }
+    }
+
     public class MixtureModel
     {
 
         private int[][] _samples; // _numSamples X _numDimensions
         public double[][] Assignments;
         private int _numSamples;
+
         private int _numDimensions = 3;
         private const int NumComponents = 2;
         private const int NumIterations = 2;

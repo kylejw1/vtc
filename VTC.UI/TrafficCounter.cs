@@ -464,7 +464,7 @@ namespace VTC
        {
            Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage();
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-           Image<Bgr, float> mogImage = _vista.BackgroundUpdateMoG;
+           Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundUpdateMoG;
 
            _mainDisplay.Update(stateImage);
            _backgroundDisplay.Update(backgroundImage);
