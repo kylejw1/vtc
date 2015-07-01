@@ -399,7 +399,9 @@ namespace VTC.Kernel.Vistas
                         if (Math.Abs(angle) < 160 && isConcave && contourArea > 25)
                         { 
                             innerAngles.Add(second);
-                            frame.Draw(new CircleF(new PointF(second.X, second.Y), 1), new Bgr(255.0, 0, 0), 1);
+
+                            //For drawing inner-corner pints
+                            //frame.Draw(new CircleF(new PointF(second.X, second.Y), 1), new Bgr(255.0, 0, 0), 1);
                         }
                     }
 
@@ -408,7 +410,8 @@ namespace VTC.Kernel.Vistas
                         double length = Math.Sqrt(Math.Pow((innerAngles[0].X - innerAngles[1].X), 2) + Math.Pow((innerAngles[0].Y - innerAngles[1].Y), 2));
                         if (length < 10)
                         { 
-                            frame.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Bgr(40, 40, 40), 2);
+                            //For drawing splitting line
+                            //frame.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Bgr(40, 40, 40), 2);
                             tempMovement_Mask.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Gray(0), 2); 
                         }
                     }
