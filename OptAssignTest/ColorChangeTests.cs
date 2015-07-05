@@ -62,7 +62,8 @@ namespace OptAssignTest
         {
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings)
                 .CarColor(frame => _colors[frame%_colors.Length]); // car slightly changes color *each* frame
             return script;
@@ -75,7 +76,8 @@ namespace OptAssignTest
 
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings)
                 .CarColor(frame => _colors[frame/segmentLength]);
             return script;

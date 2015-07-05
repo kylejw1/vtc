@@ -17,22 +17,25 @@ namespace OptAssignTest.Framework
 
         private IPathGenerator _path;
 
-        /// <summary>
-        /// Car size.
-        /// </summary>
-        public uint CarRadius
-        {
-            get { return _carRadius; }
-        }
-        private readonly uint _carRadius;
+        private Func<uint, uint> _carRadius; 
 
         /// <summary>
-        /// Constructor.
+        /// Set car size.
         /// </summary>
-        /// <param name="carRadius">Car size.</param>
-        public Car(uint carRadius) 
+        public Car SetSize(uint carSize)
         {
-            _carRadius = carRadius;
+            _carRadius = _ => carSize;
+            return this;
+        }
+
+        /// <summary>
+        /// Set car size.
+        /// </summary>
+        /// <param name="carSizeFunc">Calculate car size based in frame number.</param>
+        public Car SetSize(Func<uint, uint> carSizeFunc)
+        {
+            _carRadius = carSizeFunc;
+            return this;
         }
 
         /// <summary>
@@ -96,7 +99,10 @@ namespace OptAssignTest.Framework
             Point? position = _path.GetPosition(frame);
             if (position.HasValue)
             {
-                scene.Draw(new CircleF(new PointF(position.Value.X, position.Value.Y), CarRadius), _carColor(frame), 0); // TODO: someday move out actual drawing out of here
+                uint carSize = _carRadius(frame);
+                var carColor = _carColor(frame);
+
+                scene.Draw(new CircleF(new PointF(position.Value.X, position.Value.Y), carSize), carColor, 0); // TODO: someday move out actual drawing out of here
             }
         }
 

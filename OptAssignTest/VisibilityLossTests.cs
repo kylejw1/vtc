@@ -139,7 +139,8 @@ namespace OptAssignTest
         {
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
                 // car hidden in the middle
@@ -150,7 +151,8 @@ namespace OptAssignTest
         {
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings)
                 .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
             return script;
@@ -160,7 +162,8 @@ namespace OptAssignTest
         {
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
             // car hidden in the middle
