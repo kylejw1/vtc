@@ -23,10 +23,9 @@ namespace OptAssignTest.Framework
         /// <summary>
         /// Create new car in the collection.
         /// </summary>
-        /// <returns></returns>
-        public Car CreateCar(uint carRadius)
+        public Car CreateCar()
         {
-            var car = new Car(carRadius);
+            var car = new Car();
             _cars.Add(car);
             return car;
         }

@@ -31,11 +31,13 @@ namespace OptAssignTest
             var script = new Script();
 
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings);
 
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddHorizontalPath(DefaultSettings, Direction.East);
 
             return script;

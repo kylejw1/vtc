@@ -106,7 +106,8 @@ namespace OptAssignTest
         {
             var script = new Script();
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.South, Direction.West);
             return script;
         }
@@ -117,12 +118,14 @@ namespace OptAssignTest
 
             // vehicle enters at bottom and turns right at center
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.South, Direction.East, new Path.Vector(VehicleRadius + 1, 0));
 
             // vehicle goes from bottom to up
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddVerticalPath(DefaultSettings, Direction.South, new Path.Vector(-VehicleRadius, 0));
             return script;
         }
@@ -134,12 +137,14 @@ namespace OptAssignTest
 
             // vehicle enters at bottom and turns left at center
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
 
             // vehicle enters at top and turns right at center
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1));
             return script;
         }
@@ -153,12 +158,14 @@ namespace OptAssignTest
 
             // vehicle enters at bottom and turns left at center
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
 
             // vehicle enters at top and turns right at center
             script
-                .CreateCar(VehicleRadius)
+                .CreateCar()
+                .SetSize(VehicleRadius)
                 .AddTurn(DefaultSettings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1))
                 .Visibility(frame => Math.Abs(expectedTurnFrame - frame) > 5); // loss of detection during turn
             return script;

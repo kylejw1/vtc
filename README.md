@@ -21,6 +21,9 @@ It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV i
 ##Manifest
 * It's necessary to remove manifest to run project on dev machine.
 
+##Image debugger visualizer
+During debugging it's useful to view image objects as a raster image, not as a array or bytes. To install image visualizer follow instructions at `\Thirdparty\ImageVisualizer\readme.txt`.
+
 #Running app
 
 ##Using existing video for debugging

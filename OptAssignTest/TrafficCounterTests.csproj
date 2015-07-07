@@ -93,6 +93,7 @@
     <Compile Include="Framework\Script.cs" />
     <Compile Include="ScriptedTestBase.cs" />
     <Compile Include="Framework\SectionPath.cs" />
+    <Compile Include="SizeChangeTests.cs" />
     <Compile Include="TurnsTests.cs" />
     <Compile Include="ConnectivityTest.cs" />
     <Compile Include="VisibilityLossTests.cs" />

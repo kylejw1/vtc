@@ -191,7 +191,7 @@ namespace OptAssignTest.Framework
 
             // create generator with vertical path
             Script script = new Script();
-            script.CreateCar(VehicleRadius).AddVerticalPath(settings, direction);
+            script.CreateCar().SetSize(VehicleRadius).AddVerticalPath(settings, direction);
 
             Assert.IsFalse(script.IsDone(0), "Should not be done for beginning.");
             Assert.IsFalse(script.IsDone(settings.VerticalPathLength() - 1), "Should not be done for last point.");
@@ -204,7 +204,7 @@ namespace OptAssignTest.Framework
 
             // create generator with horizontal path
             Script script = new Script();
-            script.CreateCar(VehicleRadius).AddHorizontalPath(settings, direction);
+            script.CreateCar().SetSize(VehicleRadius).AddHorizontalPath(settings, direction);
 
             Assert.IsFalse(script.IsDone(0), "Should not be done for beginning.");
             Assert.IsFalse(script.IsDone(settings.HorizontalPathLength() - 1), "Should not be done for last point.");

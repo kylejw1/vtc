@@ -1,5 +1,4 @@
-﻿using VTC;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using VTC.Kernel;
@@ -72,11 +71,10 @@ namespace OptAssignTest
         [TestMethod()]
         public void BestAssignmentTest()
         {
-            int[,] costs = new int[,] {{2,0},{0,2}}; // TODO: Initialize to an appropriate value
-            int[] expected = new int[] {1,0}; // TODO: Initialize to an appropriate value
-            int[] actual;
-            int[,] updated_costs = new int[,]{};
-            actual = OptAssign.BestAssignment(costs);
+            int[,] costs = {{2,0},{0,2}}; // TODO: Initialize to an appropriate value
+            int[] expected = {1,0}; // TODO: Initialize to an appropriate value
+            int[,] updated_costs = {};
+            var actual = OptAssign.BestAssignment(costs);
 
             string actual_string = "";
             foreach(var item in actual)
@@ -98,11 +96,10 @@ namespace OptAssignTest
         [TestMethod()]
         public void BestAssignmentFloatTest()
         {
-            double[,] costs = new double[,] { { 2.0, 0.0 }, { 0.0, 2.0 } }; // TODO: Initialize to an appropriate value
-            int[] expected = new int[] { 1, 0 }; // TODO: Initialize to an appropriate value
-            int[] actual;
-            int[,] updated_costs = new int[,] { };
-            actual = OptAssign.BestAssignment(costs);
+            double[,] costs = { { 2.0, 0.0 }, { 0.0, 2.0 } }; // TODO: Initialize to an appropriate value
+            int[] expected = { 1, 0 }; // TODO: Initialize to an appropriate value
+            int[,] updated_costs = { };
+            var actual = OptAssign.BestAssignment(costs);
 
             string actual_string = "";
             foreach (var item in actual)
@@ -124,11 +121,10 @@ namespace OptAssignTest
         [TestMethod()]
         public void BestAssignmentRectangularTest()
         {
-            int[,] costs = new int[,] { { 2, 0, 5}, { 0, 2, 5} }; 
-            int[] expected = new int[] { 1, 0 }; 
-            int[] actual;
-            int[,] updated_costs = new int[,] { };
-            actual = OptAssign.BestAssignment(costs);
+            int[,] costs = { { 2, 0, 5}, { 0, 2, 5} }; 
+            int[] expected = { 1, 0 };
+            int[,] updated_costs = { };
+            var actual = OptAssign.BestAssignment(costs);
 
             string actual_string = "";
             foreach (var item in actual)
@@ -150,8 +146,8 @@ namespace OptAssignTest
         [TestMethod()]
         public void FindKBestAssignmentsTest()
         {
-            int[,] costs = new int[,] { {5,0}, {1,2} }; 
-            int[,] updated_costs = new int[,]{};
+            int[,] costs = { {5,0}, {1,2} }; 
+            int[,] updated_costs = {};
             int k = 2; 
             List<int[]> expected = new List<int[]>(); 
             int[] assignment1 = {1, 0};
@@ -159,8 +155,7 @@ namespace OptAssignTest
             expected.Add(assignment1);
             expected.Add(assignment2);
 
-            List<int[]> actual;
-            actual = OptAssign.FindKBestAssignments(costs, k);
+            var actual = OptAssign.FindKBestAssignments(costs, k);
 
 
             Assert.AreEqual(expected.Count, actual.Count);
@@ -178,8 +173,8 @@ namespace OptAssignTest
         [TestMethod()]
         public void FindKBestAssignmentsDoubleTest()
         {
-            double[,] costs = new double[,] { { 5.0, 0.0 }, { 1.0, 2.0 } };
-            double[,] updated_costs = new double[,] { };
+            double[,] costs = { { 5.0, 0.0 }, { 1.0, 2.0 } };
+            double[,] updated_costs = { };
             int k = 2;
             List<int[]> expected = new List<int[]>();
             int[] assignment1 = { 1, 0 };
@@ -187,8 +182,7 @@ namespace OptAssignTest
             expected.Add(assignment1);
             expected.Add(assignment2);
 
-            List<int[]> actual;
-            actual = OptAssign.FindKBestAssignments(costs, k);
+            var actual = OptAssign.FindKBestAssignments(costs, k);
 
             Assert.AreEqual(expected.Count, actual.Count);
             if (expected.Count == actual.Count)
@@ -205,8 +199,8 @@ namespace OptAssignTest
         [TestMethod()]
         public void ExceedKBestAssignmentsDoubleTest()
         {
-            double[,] costs = new double[,] { { 5.0, 0.0 }, { 1.0, 2.0 } };
-            double[,] updated_costs = new double[,] { };
+            double[,] costs = { { 5.0, 0.0 }, { 1.0, 2.0 } };
+            double[,] updated_costs = { };
             int k = 4;
             List<int[]> expected = new List<int[]>();
             int[] assignment1 = { 1, 0 };
@@ -214,8 +208,7 @@ namespace OptAssignTest
             expected.Add(assignment1);
             expected.Add(assignment2);
 
-            List<int[]> actual;
-            actual = OptAssign.FindKBestAssignments(costs, k);
+            var actual = OptAssign.FindKBestAssignments(costs, k);
 
             Assert.AreEqual(expected.Count, actual.Count);
             if (expected.Count == actual.Count)
@@ -232,8 +225,8 @@ namespace OptAssignTest
         [TestMethod()]
         public void Find3x3KBestAssignmentsTest()
         {
-            int[,] costs = new int[,] { { 3,1,5}, {0,0,2}, { 2,1,6 } };
-            int[,] updated_costs = new int[,] { };
+            int[,] costs = { { 3,1,5}, {0,0,2}, { 2,1,6 } };
+            int[,] updated_costs = { };
             int k = 2;
             List<int[]> expected = new List<int[]>();
             int[] assignment1 = { 1, 2, 0 };
@@ -241,8 +234,7 @@ namespace OptAssignTest
             expected.Add(assignment1);
             expected.Add(assignment2);
 
-            List<int[]> actual;
-            actual = OptAssign.FindKBestAssignments(costs, k);
+            var actual = OptAssign.FindKBestAssignments(costs, k);
 
             Assert.AreEqual(expected.Count, actual.Count);
             if (expected.Count == actual.Count)
@@ -259,18 +251,15 @@ namespace OptAssignTest
         [TestMethod()]
         public void partition_assignmentTest()
         {
-            int[] assignment = {1,0}; 
+            int[] assignment = {1,0};
 
-            List<int[]> exclusion_list = new List<int[]>();
-            exclusion_list.Add(new int[] { 0, 1 });
+            List<int[]> exclusion_list = new List<int[]> {new[] {0, 1}};
             List<int[]> inclusion_list = new List<int[]>();
             MurtyNode node1 = new MurtyNode(inclusion_list, exclusion_list);
 
-            List<MurtyNode> expected = new List<MurtyNode>(); 
-            expected.Add(node1);
+            List<MurtyNode> expected = new List<MurtyNode> {node1};
 
-            List<MurtyNode> actual;
-            actual = OptAssign.partition_assignment(assignment);
+            var actual = OptAssign.partition_assignment(assignment);
 
             Assert.AreEqual(expected.Count, actual.Count);
 
@@ -302,16 +291,13 @@ namespace OptAssignTest
         {
             int[,] cost = {{1,0},{0,1}}; 
             MurtyNode node = new MurtyNode(); // TODO: Initialize to an appropriate value
-            List<int[]> inclusion_list = new List<int[]>();
-            List<int[]> exclusion_list = new List<int[]>();
-            exclusion_list.Add( new int[] { 0, 0 } );
-            inclusion_list.Add( new int[] { 1, 0 } );
+            List<int[]> inclusion_list = new List<int[]> {new[] {1, 0}};
+            List<int[]> exclusion_list = new List<int[]> { new[] { 0, 0 } };
             node.exclusion_list = exclusion_list;
             node.inclusion_list = inclusion_list;
 
             int[,] expected = {{int.MaxValue, 0},{int.MinValue, 1}}; // TODO: Initialize to an appropriate value
-            int[,] actual;
-            actual = OptAssign.adjusted_cost(cost, node);
+            var actual = OptAssign.adjusted_cost(cost, node);
 
             for (int i = 0; i < cost.GetLength(0); i++)
                 for (int j = 0; j < cost.GetLength(1); j++)
@@ -332,11 +318,10 @@ namespace OptAssignTest
         [TestMethod()]
         public void assignmentCostTest()
         {
-            int[,] cost = new int[,] { {5,1}, {2,3} }; // TODO: Initialize to an appropriate value
-            int[] assignment = new int[] { 0, 1}; // TODO: Initialize to an appropriate value
+            int[,] cost = { {5,1}, {2,3} }; // TODO: Initialize to an appropriate value
+            int[] assignment = { 0, 1}; // TODO: Initialize to an appropriate value
             int expected = 8; // TODO: Initialize to an appropriate value
-            int actual;
-            actual = OptAssign.assignmentCost(cost, assignment);
+            var actual = OptAssign.assignmentCost(cost, assignment);
             Assert.AreEqual(expected, actual);
         }
 
@@ -346,20 +331,18 @@ namespace OptAssignTest
         [TestMethod()]
         public void findBestNodeTest()
         {
-            int[,] costs = new int[,] { {3,1,5}, {0,0,2}, {2,1,6}  };
+            int[,] costs = { {3,1,5}, {0,0,2}, {2,1,6}  };
             int[,] updated_costs = null;
             int[] optimal_assignment = OptAssign.BestAssignment(costs);
             List<MurtyNode> partition = OptAssign.partition_assignment(optimal_assignment); // TODO: Initialize to an appropriate value
 
             MurtyNode expected = new MurtyNode(); // TODO: Initialize to an appropriate value
-            List<int[]> exclusions = new List<int[]>();
-            exclusions.Add(new int[] {0,1} );
+            List<int[]> exclusions = new List<int[]> {new[] {0, 1}};
             expected.exclusion_list = exclusions;
             List<int[]> inclusions = new List<int[]>();
             expected.inclusion_list = inclusions;
 
-            MurtyNode actual;
-            actual = OptAssign.findBestNode(costs, partition);
+            var actual = OptAssign.findBestNode(costs, partition);
 
             Assert.AreEqual(expected.exclusion_list.Count, actual.exclusion_list.Count);
             Assert.AreEqual(expected.inclusion_list.Count, actual.inclusion_list.Count);

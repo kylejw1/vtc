@@ -9,21 +9,18 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.CaptureSource;
 using VTC.Kernel;
-using VTC.Kernel.Extensions;
 using VTC.Kernel.RegionConfig;
 using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
-using VTC.Kernel.Extensions;
 
 namespace VTC
 {
