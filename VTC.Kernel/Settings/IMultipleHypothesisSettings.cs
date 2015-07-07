@@ -51,5 +51,73 @@ namespace VTC.Kernel.Settings
         /// Probability of track termination.
         /// </summary>
         double Px { get; }
+
+        /// <summary>
+        /// Timestep between frames in seconds.
+        /// </summary>
+        double Timestep { get; }
+
+        /// <summary>
+        /// Process noise matrix multiplier - position
+        /// </summary>
+        double Q_position { get; }
+
+        /// <summary>
+        /// Process noise matrix multiplier - color
+        /// </summary>
+        double Q_color { get; }
+
+        /// <summary>
+        /// Measurement noise matrix multiplier for position
+        /// </summary>
+        double R_position { get; }
+
+        /// <summary>
+        /// Measurement noise matrix multiplier for color
+        /// </summary>
+        double R_color { get; }
+
+        /// <summary>
+        /// Covariance gain when a measurement is missed
+        /// </summary>
+        double CompensationGain { get; }
+
+
+        /// <summary>
+        /// Initial X Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovX { get; }
+
+        /// <summary>
+        /// Initial Y Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovY { get; }
+
+        /// <summary>
+        /// Initial VX Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovVX { get; }
+
+        /// <summary>
+        /// Initial VY Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovVY { get; }
+
+        /// <summary>
+        /// Initial R Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovR { get; }
+
+        /// <summary>
+        /// Initial G Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovG { get; }
+
+        /// <summary>
+        /// Initial B Covariance for vehicles
+        /// </summary>
+        double VehicleInitialCovB { get; }
+
+      
     }
 }

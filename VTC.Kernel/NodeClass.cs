@@ -258,7 +258,7 @@ namespace VTC.Kernel
             return newVehicleStateEstimates;
         }
 
-        public void AddVehicle(int x, int y, double vx, double vy, int red, int green, int blue)
+        public void AddVehicle(int x, int y, double vx, double vy, int red, int green, int blue, Turn turn, double covx, double covy, double cov_vx, double cov_vy, double cov_r, double cov_g, double cov_b)
         {
             StateEstimate initial_state = new StateEstimate();
             initial_state.x = x;
@@ -270,28 +270,19 @@ namespace VTC.Kernel
             initial_state.vx = vx;
             initial_state.vy = vy;
             initial_state.is_pedestrian = false;
+            initial_state.turn = turn;
+            initial_state.cov_x = covx;
+            initial_state.cov_y = covy;
+            initial_state.cov_vx = cov_vx;
+            initial_state.cov_vy = cov_vy;
+            initial_state.cov_red = cov_r;
+            initial_state.cov_green = cov_g;
+            initial_state.cov_blue = cov_b;
+
             Vehicle newVehicle = new Vehicle(initial_state);
             vehicles.Add(newVehicle);
             new_vehicles.Add(newVehicle);
         }
-
-        public void AddPedestrian(int x, int y, int vx, int vy, int red, int green, int blue)
-        {
-            StateEstimate initial_state = new StateEstimate();
-            initial_state.x = x;
-            initial_state.y = y;
-            initial_state.red = red;
-            initial_state.green = green;
-            initial_state.blue = blue;
-
-            initial_state.vx = vx;
-            initial_state.vy = vy;
-            initial_state.is_pedestrian = true;
-            Vehicle newVehicle = new Vehicle(initial_state);
-            vehicles.Add(newVehicle);
-            new_vehicles.Add(newVehicle);
-        }
-
     }
 
     /// <summary>
@@ -306,18 +297,26 @@ namespace VTC.Kernel
         public DenseMatrix Q; //Covariance
         public DenseMatrix R; //
 
-        public double compensation_gain = 30; //Gain applied to process noise when a measurement is missed
-
         //TODO: Pull these values from settings file instead of hard-coding
-        public double q = 200.0; // Process noise matrix multiplier
-        public double r_position = 5.0; // Position measurement noise matrix multiplier
-        // TODO: What value for r_colour?
-        public double r_colour = 50.0; // Colour measurement noise matrix multiplier
-
-        public double dt = 0.033; //Timestep between frames
-        //public double dt = 1.00; //Timestep between frames
+        public double CompensationGain = 30; //Gain applied to process noise when a measurement is missed
 
         public HypothesisTree(StateHypothesis value) : base(value)
+        {
+        }
+
+
+        // ************************************************ //
+        // *************** System Dynamics: *************** //
+        // ************************************************ //
+        //  x_new  = x_old + dt*vx;
+        //  vy_new = vy_old
+        //  y_new  = y_old + dt*vy
+        //  vx_new = vx_old
+        //  R_new = R_old
+        //  G_new = G_old
+        //  B_new = B_old
+        // ************************************************ //
+        public void PopulateSystemDynamicsMatrices(double q_position, double q_color, double r_position, double r_color, double dt, double compensation_gain)
         {
             H = new DenseMatrix(5, 7); // Measurement equation: x,y,R,G,B are observed (not velocities)
             H[0, 0] = 1;
@@ -326,15 +325,8 @@ namespace VTC.Kernel
             H[3, 5] = 1;
             H[4, 6] = 1;
 
-            //  x_new  = x_old + dt*vx;
-            //  vy_new = vy_old
-            //  y_new  = y_old + dt*vy
-            //  vx_new = vx_old
-            //  R_new = R_old
-            //  G_new = G_old
-            //  B_new = B_old
             F = new DenseMatrix(7, 7); //Motion equation
-            F[0, 0] = 1;    
+            F[0, 0] = 1;
             F[0, 1] = dt;
             F[1, 1] = 1;
             F[2, 2] = 1;
@@ -345,28 +337,26 @@ namespace VTC.Kernel
             F[6, 6] = 1;
 
             Q = new DenseMatrix(7, 7); //Process covariance
-            Q[0, 0] = (dt * dt * dt * dt / 4) * q;
-            Q[0, 1] = (dt * dt * dt / 3) * q;
-            Q[1, 0] = (dt * dt * dt / 3) * q;
-            Q[1, 1] = (dt * dt / 2) * q;
-            Q[2, 2] = (dt * dt * dt * dt / 4) * q;
-            Q[2, 3] = (dt * dt * dt / 3) * q;
-            Q[3, 2] = (dt * dt * dt / 3) * q;
-            Q[3, 3] = (dt * dt / 2) * q;
-            //Q[4, 4] = 0; //Interpreted to mean that the actual color is not changing at all
-            //Q[5, 5] = 0;
-            //Q[6, 6] = 0;
-            Q[4, 4] = 20.0; //Interpreted to mean that the actual color is not changing at all
-            Q[5, 5] = 20.0;
-            Q[6, 6] = 20.0;
+            Q[0, 0] = (dt * dt * dt * dt / 4) * q_position;  
+            Q[0, 1] = (dt * dt * dt / 3) * q_position;
+            Q[1, 0] = (dt * dt * dt / 3) * q_position;
+            Q[1, 1] = (dt * dt / 2) * q_position;
+            Q[2, 2] = (dt * dt * dt * dt / 4) * q_position;
+            Q[2, 3] = (dt * dt * dt / 3) * q_position;
+            Q[3, 2] = (dt * dt * dt / 3) * q_position;
+            Q[3, 3] = (dt * dt / 2) * q_position;
+            Q[4, 4] = q_color; 
+            Q[5, 5] = q_color;
+            Q[6, 6] = q_color;
 
             R = new DenseMatrix(5, 5); //Measurement covariance
             R[0, 0] = r_position;
             R[1, 1] = r_position;
-            R[2, 2] = r_colour;
-            R[3, 3] = r_colour;
-            R[4, 4] = r_colour;
+            R[2, 2] = r_color;
+            R[3, 3] = r_color;
+            R[4, 4] = r_color;
 
+            CompensationGain = compensation_gain;
         }
 
         /// <summary>
@@ -462,6 +452,11 @@ namespace VTC.Kernel
         public HypothesisTree GetChild(int index)
         {
             HypothesisTree child = (HypothesisTree) this.children[index];
+            child.Q = this.Q;
+            child.R = this.R;
+            child.P = this.P;
+            child.H = this.H;
+            child.F = this.F;
             
             foreach (Node<StateHypothesis> thisChild in children)
             thisChild.parent = null;
@@ -715,7 +710,7 @@ namespace VTC.Kernel
         public double cov_blue;
 
         public double path_length;    //Total path length travelled so far
-        public int turn;              //enum Turn to indicate turn decision (left, right or straight)
+        public Turn turn;              //enum Turn to indicate turn decision (left, right or straight)
         
         public bool is_pedestrian;    //Binary flag set if object is likely to be a pedestrian
 
@@ -724,8 +719,6 @@ namespace VTC.Kernel
         public StateEstimate PropagateStateNoMeasurement(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, double compensation_gain)
         {
             StateEstimate updatedState = new StateEstimate();
-            //updatedState.coordinates.x = this.coordinates.x + timestep * this.vx;
-            //updatedState.coordinates.y = this.coordinates.y + timestep * this.vy;
             updatedState.turn = this.turn;
             updatedState.is_pedestrian = this.is_pedestrian;
             updatedState.missed_detections = this.missed_detections + 1;
@@ -777,8 +770,6 @@ namespace VTC.Kernel
         public StateEstimate PropagateState(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, Measurements measurements)
         {
             StateEstimate updatedState = new StateEstimate();
-            //updatedState.coordinates.x = this.coordinates.x + timestep * this.vx;
-            //updatedState.coordinates.y = this.coordinates.y + timestep * this.vy;
             updatedState.turn = this.turn;
             updatedState.path_length = this.path_length + Math.Sqrt(Math.Pow((timestep * this.vx), 2) + Math.Pow((timestep * this.vy), 2));
 
@@ -856,34 +847,14 @@ namespace VTC.Kernel
         public double blue;
     }
 
-    enum Turn { Left, Right, Straight, Unknown};
+    public enum Turn { Left, Right, Straight, Unknown};
 
     public struct Vehicle
     {
-        public const double covx_init = 2;
-        public const double covy_init = 2;
-        public const double vx_init = 0;
-        public const double vy_init = 0;
-        public const double cov_vx_init = 300;
-        public const double cov_vy_init = 300;
-
-        public const double r_init = 0;
-        public const double g_init = 0;
-        public const double b_init = 0;
-        public const double covr_init = 0;
-        public const double covg_init = 0;
-        public const double covb_init = 0;
-
         public List<StateEstimate> state_history;
 
         public Vehicle(StateEstimate initial_state)
-        {
-            initial_state.cov_vx = cov_vx_init;
-            initial_state.cov_vy = cov_vy_init;
-            initial_state.cov_x = covx_init;
-            initial_state.cov_y = covy_init;
-            
-            initial_state.turn = (int)Turn.Unknown;
+        {   
             state_history = new List<StateEstimate>();
             state_history.Add(initial_state);
         }

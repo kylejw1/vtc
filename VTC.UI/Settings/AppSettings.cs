@@ -36,12 +36,14 @@ namespace VTC.Settings
 
         public double Alpha { get; private set; }
         public int ColorThreshold { get; private set; }
+        public int MoGUpdateDownsampling { get; private set; }
 
         public double NoiseMass { get; private set; }
         public int MaxObjectCount { get; private set; }
         public double PerCarMinimum { get; set; }
         public int CarRadius { get; set; }
-
+        public int MinObjectSize { get; set; }
+        public double Timestep { get; set; }
 
         public int MissThreshold { get; private set; }
         public int MaxHypothesisTreeDepth { get; private set; }
@@ -54,9 +56,24 @@ namespace VTC.Settings
         public double Pd { get; private set; }
         public double Px { get; private set; }
 
+        public double Q_position { get; private set; }  
+        public double Q_color { get; private set; }   
+        public double R_position { get; private set; }   
+        public double R_color { get; private set; }   
+
+        public double VehicleInitialCovX { get; private set; } 
+        public double VehicleInitialCovY { get; private set; }
+        public double VehicleInitialCovVX { get; private set; }
+        public double VehicleInitialCovVY { get; private set; }
+        public double VehicleInitialCovR { get; private set; }
+        public double VehicleInitialCovG { get; private set; }
+        public double VehicleInitialCovB { get; private set; }
+
+        public double CompensationGain { get; private set; }   
+
         public int ClassifierSubframeWidth { get; private set; }
         public int ClassifierSubframeHeight { get; private set; }
-
+        public int VelocityFieldResolution { get; private set; }
         public String[] Classes { get; private set; }
 
         public string RegionConfigPath { get; private set; }
@@ -84,11 +101,14 @@ namespace VTC.Settings
 
             Alpha = Convert.ToDouble(ConfigurationManager.AppSettings["Alpha"], CultureInfo.InvariantCulture);
             ColorThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["ColorThreshold"], CultureInfo.InvariantCulture);
+            MoGUpdateDownsampling = Convert.ToInt16(ConfigurationManager.AppSettings["MoGUpdateDownsampling"]);
 
             CarRadius = Convert.ToInt32(ConfigurationManager.AppSettings[CarRadiusKey]);
+            MinObjectSize = Convert.ToInt32(ConfigurationManager.AppSettings["MinObjectSize"]);
             PerCarMinimum = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarMinKey], CultureInfo.InvariantCulture);
             MaxObjectCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);
             NoiseMass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"], CultureInfo.InvariantCulture);
+            Timestep = Convert.ToDouble(ConfigurationManager.AppSettings["Timestep"], CultureInfo.InvariantCulture);
 
             MissThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["MissThreshold"]);
             MaxHypothesisTreeDepth = Convert.ToInt32(ConfigurationManager.AppSettings["MaxHypTreeDepth"]);
@@ -109,16 +129,31 @@ namespace VTC.Settings
             Classes = classKeyStrings.Where(this_key => this_key.Contains("class")).Select(element => element.Substring(6,element.Length-6)).ToArray();
             ClassifierSubframeWidth = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeWidth"]);
             ClassifierSubframeHeight = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeHeight"]);
-            
+
+            VelocityFieldResolution = Convert.ToInt16(ConfigurationManager.AppSettings["VelocityFieldResolution"]);
 
             RegionConfigPath = ConfigurationManager.AppSettings["RegionConfig"];
 
             _config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
+            Q_position = Convert.ToDouble(ConfigurationManager.AppSettings["Q_position"], CultureInfo.InvariantCulture);
+            Q_color = Convert.ToDouble(ConfigurationManager.AppSettings["Q_color"], CultureInfo.InvariantCulture);
+            R_position = Convert.ToDouble(ConfigurationManager.AppSettings["R_position"], CultureInfo.InvariantCulture);
+            R_color = Convert.ToDouble(ConfigurationManager.AppSettings["R_color"], CultureInfo.InvariantCulture);
+
+            VehicleInitialCovX = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovX"]);
+            VehicleInitialCovY = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovY"]);
+            VehicleInitialCovVX = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovVX"]);
+            VehicleInitialCovVY = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovVY"]);
+            VehicleInitialCovR = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovR"]);
+            VehicleInitialCovG = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovG"]);
+            VehicleInitialCovB = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovB"]);
+
+            CompensationGain = Convert.ToDouble(ConfigurationManager.AppSettings["CompensationGain"], CultureInfo.InvariantCulture);        
+
             // some unused settings from TrafficCounter. Keeping it just in case.
             double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
-            double q = Convert.ToDouble(ConfigurationManager.AppSettings["Q"], CultureInfo.InvariantCulture);                           //Process noise matrix multiplier
-            double r = Convert.ToDouble(ConfigurationManager.AppSettings["R"], CultureInfo.InvariantCulture);                           //Measurement noise matrix multiplier
+            
         }
 
         /// <summary>

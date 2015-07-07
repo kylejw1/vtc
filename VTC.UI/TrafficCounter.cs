@@ -92,8 +92,6 @@ namespace VTC
 
       //************* Multiple hypothesis tracking parameters ***************  
       Vista _vista = null;
-       
-       //private MultipleHypothesisTracker MHT = null;
 
        /// <summary>
        /// Constructor.
@@ -118,7 +116,6 @@ namespace VTC
            {
                InitializeCameraSelection(appArgument);
            }
-
 
            //Disable eventhandler for the changing combobox index.
            CameraComboBox.SelectedIndexChanged -= CameraComboBox_SelectedIndexChanged;
@@ -157,7 +154,7 @@ namespace VTC
                var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
                _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
                _velocityFieldDisplay.Update(image);
-               Image<Gray, byte> pimage = new Image<Gray, byte>(50, 50);
+               Image<Gray, byte> pimage = new Image<Gray, byte>(_settings.VelocityFieldResolution, _settings.VelocityFieldResolution);
                pimage = _vista.VelocityProjection();
                _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());    
            }
@@ -425,8 +422,7 @@ namespace VTC
 
               // Save R,G,B samples
               StoreRGBSample(frameForProcessing);
-
-              System.Threading.Thread.Sleep(33);
+              System.Threading.Thread.Sleep((int)_settings.Timestep * 1000);
               TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
               timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 

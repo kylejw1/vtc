@@ -164,7 +164,7 @@ namespace VTC.Kernel.Vistas
             LastDetectionCount = 0;
             RawMass = 0;
 
-            var vf = new VelocityField(50, 50, Width, Height); 
+            var vf = new VelocityField(Settings.VelocityFieldResolution, Settings.VelocityFieldResolution, Width, Height); 
 
             _thresholdColor = new Gray(Settings.ColorThreshold);
             MHT = new MultipleHypothesisTracker(settings, vf);
@@ -205,7 +205,6 @@ namespace VTC.Kernel.Vistas
         }
 
         private int numProcessedFrames = 0;
-        private int backgroundFrameDownsampling = 50;
         public void Update(Image<Bgr, Byte> newFrame)
         {
             numProcessedFrames++;
@@ -217,8 +216,6 @@ namespace VTC.Kernel.Vistas
             }
             else
             {
-
-                
                 if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
                     Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
 
@@ -229,12 +226,8 @@ namespace VTC.Kernel.Vistas
 
                 UpdateBackground(newFrame);
 
-                if (numProcessedFrames%backgroundFrameDownsampling == 0)
-                {
-                    //UpdateBackgroundMoG(newFrame);
+                if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0)
                     UpdateBackgroundMoGIncremental(newFrame);
-                }
-                
 
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
@@ -264,38 +257,11 @@ namespace VTC.Kernel.Vistas
             }
         }
 
-        //Calculate background using Mixture of Gaussians
-        private const int MaxSamples = 100;
-        public Queue<Image<Bgr, float>> FrameSamples = new Queue<Image<Bgr, float>>(MaxSamples);
-        //private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
-        //{
-        //    Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
-        //    FrameSamples.Enqueue(newImageSample);
-
-        //    int numSamples = FrameSamples.Count();
-        //    if (numSamples == MaxSamples)
-        //    {
-        //        for (int i = 0; i < newImageSample.Width; i++)
-        //            for (int j = 0; j < newImageSample.Height; j++)
-        //            {
-        //                var samplePoints = FrameSamples.Select(x => new int[3] { Convert.ToInt32(x.Data[j, i, 0]), Convert.ToInt32(x.Data[j, i, 1]), Convert.ToInt32(x.Data[j, i, 2]) }).ToArray();
-        //                MixtureModel mm = new MixtureModel(samplePoints);
-        //                mm.Train();
-        //                BackgroundUpdateMoG.Data[j, i, 0] = (float)mm.Means[0][0];
-        //                BackgroundUpdateMoG.Data[j, i, 1] = (float)mm.Means[0][1];
-        //                BackgroundUpdateMoG.Data[j, i, 2] = (float)mm.Means[0][2];
-        //            }
-
-        //        FrameSamples.Clear();
-        //    }
-        //}
-
         private void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
         {
             MoGBackgroundSingleton.TryUpdatingBackgroundAsync(frame);
         }
-        
-
+       
         public void InitializeBackground(Image<Bgr, Byte> frame)
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
@@ -303,7 +269,6 @@ namespace VTC.Kernel.Vistas
                 Color_Background.RunningAvg(BackgroundUpdate, 1.0);
             }
         }
-
 
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
@@ -427,9 +392,9 @@ namespace VTC.Kernel.Vistas
                 BlobAreaComparer areaComparer = new BlobAreaComparer();
                 SortedList<CvBlob, int> blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
                 foreach (Emgu.CV.Cvb.CvBlob targetBlob in resultingImgBlobs.Values)
-                    if(targetBlob.Area > 50)
+                    if (targetBlob.Area > Settings.MinObjectSize)
                         blobsWithArea.Add(targetBlob, targetBlob.Area);
-
+                
                 numWebcamBlobsFound = blobsWithArea.Count();
 
                 coordinates = new Measurements[numWebcamBlobsFound];

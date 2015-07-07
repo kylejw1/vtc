@@ -54,6 +54,7 @@ namespace VTC.Kernel
 
             StateHypothesis initialHypothesis = new StateHypothesis(_settings.MissThreshold);
             HypothesisTree = new HypothesisTree(initialHypothesis);
+            HypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
             VelocityField = velocityField;
         }
@@ -96,6 +97,7 @@ namespace VTC.Kernel
                     childNode.AddChild(child_hypothesis);
                     HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[0].nodeData);
                     child_hypothesis_tree.parent = childNode;
+                    child_hypothesis_tree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
                     child_hypothesis.probability = Math.Pow((1 - _settings.Pd), numExistingTargets);
                     //Update states for vehicles without measurements
@@ -103,7 +105,7 @@ namespace VTC.Kernel
                     {
                         //Updating state for missed measurement
                         StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
-                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.compensation_gain);
+                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
                         child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
                     }
                 }
@@ -195,6 +197,7 @@ namespace VTC.Kernel
                 hypothesisParent.AddChild(child_hypothesis);
                 HypothesisTree child_hypothesis_tree = new HypothesisTree(hypothesisParent.children[i].nodeData);
                 child_hypothesis_tree.parent = hypothesisParent;
+                child_hypothesis_tree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
                 child_hypothesis.probability = OptAssign.assignmentCost(costs, assignment);
                 //Update states for vehicles without measurements
@@ -205,7 +208,7 @@ namespace VTC.Kernel
                     {
                         //Updating state for missed measurement
                         StateEstimate last_state = hypothesisParent.nodeData.vehicles[j].state_history.Last();
-                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.compensation_gain);
+                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
                         child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
                     }
                 }
@@ -218,7 +221,7 @@ namespace VTC.Kernel
                     {
                         // Find predicted velocity
                         var velocity = VelocityField.GetAvgVelocity((int)coords[j].x, (int)coords[j].y);
-
+                        
                         //Creating new vehicle
                         numTargetsCreated++;
                         child_hypothesis.AddVehicle(
@@ -228,14 +231,22 @@ namespace VTC.Kernel
                             velocity.v_y,
                             Convert.ToInt16(coords[j].red),
                             Convert.ToInt16(coords[j].green),
-                            Convert.ToInt16(coords[j].blue));
+                            Convert.ToInt16(coords[j].blue), 
+                            Turn.Unknown,
+                            _settings.VehicleInitialCovX,
+                            _settings.VehicleInitialCovY,
+                            _settings.VehicleInitialCovVX,
+                            _settings.VehicleInitialCovVY,
+                            _settings.VehicleInitialCovR,
+                            _settings.VehicleInitialCovG,
+                            _settings.VehicleInitialCovB);
 
                     }
                     else if (assignment[j] >= numDetections && assignment[j] < numDetections + numExistingTargets) //Update states for vehicles with measurements
                     {
                         //Updating vehicle with measurement
                         StateEstimate last_state = hypothesisParent.nodeData.vehicles[assignment[j] - numDetections].state_history.Last();
-                        StateEstimate estimated_state = last_state.PropagateState(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, coords[j]);
+                        StateEstimate estimated_state = last_state.PropagateState(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, coords[j]);
                         child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - numDetections, estimated_state, true);
                     }
 
@@ -293,11 +304,11 @@ namespace VTC.Kernel
             int num_detections = coordinates.Length;
             ambiguity_matrix = new DenseMatrix(num_detections, numExistingTargets + 2);
             Normal norm = new Normal();
-
+            
             for (int i = 0; i < numExistingTargets; i++)
             {
                 //Get this car's estimated next position using Kalman predictor
-                StateEstimate no_measurement_estimate = target_state_estimates[i].PropagateStateNoMeasurement(0.033, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.compensation_gain);
+                StateEstimate no_measurement_estimate = target_state_estimates[i].PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
 
                 DenseMatrix P_bar = new DenseMatrix(7, 7);
                 P_bar[0, 0] = no_measurement_estimate.cov_x;
