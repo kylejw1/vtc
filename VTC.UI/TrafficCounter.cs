@@ -132,9 +132,8 @@ namespace VTC
           //Initialize parameters.
           LoadParameters();
 
-          System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
-           t.Interval = 1000;
-           t.Tick += TOnTick;
+           System.Windows.Forms.Timer t = new System.Windows.Forms.Timer {Interval = 1000};
+           t.Tick += OnTick;
            t.Start();
            //Clear sample files
            ClearRGBSamplesFile();
@@ -147,14 +146,14 @@ namespace VTC
       }
 
 
-       private void TOnTick(object sender, EventArgs eventArgs)
+       private void OnTick(object sender, EventArgs eventArgs)
        {
            if (_vista != null)
            {
-               var image = new Emgu.CV.Image<Bgr, Byte>(800, 600);
-               _vista.DrawVelocityField(image, new Bgr(System.Drawing.Color.White), 1);
+               var image = new Image<Bgr, Byte>(800, 600);
+               _vista.DrawVelocityField(image, new Bgr(Color.White), 1);
                _velocityFieldDisplay.Update(image);
-               Image<Gray, byte> pimage = new Image<Gray, byte>(_settings.VelocityFieldResolution, _settings.VelocityFieldResolution);
+               Image<Gray, byte> pimage;
                pimage = _vista.VelocityProjection();
                _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());    
            }
@@ -422,7 +421,7 @@ namespace VTC
 
               // Save R,G,B samples
               StoreRGBSample(frameForProcessing);
-              System.Threading.Thread.Sleep((int)_settings.Timestep * 1000);
+              Thread.Sleep((int)_settings.Timestep * 1000);
               TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
               timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
@@ -433,16 +432,16 @@ namespace VTC
        private void ClearRGBSamplesFile()
        {
            string path = @"RGB.txt";
-            using (StreamWriter sw = File.CreateText(path))
-            {
-            }
+           using (File.CreateText(path))
+           {
+           }
        }
 
        private void StoreRGBSample(Image<Bgr, byte> frame)
        {
            if (frame != null && saveRGBSamplesCheckBox.Checked)
            {
-               Bgr pixel = frame[RGBSamplePoint.Y, RGBSamplePoint.X];
+               Bgr pixel = frame[_rgbSamplePoint.Y, _rgbSamplePoint.X];
                double r = pixel.Red;
                double g = pixel.Green;
                double b = pixel.Blue;
@@ -490,7 +489,7 @@ namespace VTC
           bool success = false;
           try
           {
-              StateEstimate[] stateEstimates = _vista.CurrentVehicles.Select(v => v.state_history.Last()).ToArray();
+              StateEstimate[] stateEstimates = _vista.CurrentVehicles.Select(v => v.StateHistory.Last()).ToArray();
               string postString;
               string postUrl = HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
               HttpPostReportItem.SendStatePOST(postUrl, postString);
@@ -518,13 +517,8 @@ namespace VTC
           }
       }
 
-       
 
-       private void imageBox1_MouseDown(object sender, MouseEventArgs e)
-      {
-      }
-
-      private void btnConfigureRegions_Click(object sender, EventArgs e)
+       private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
           RegionEditor r = new RegionEditor(_vista.Color_Background, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)
@@ -575,7 +569,7 @@ namespace VTC
 
       }
 
-       private Point RGBSamplePoint;
+       private Point _rgbSamplePoint;
        private readonly bool _unitTestsMode;
 
        private void updateSamplePoint_Click(object sender, EventArgs e)
@@ -583,8 +577,8 @@ namespace VTC
            string text = rgbCoordinateTextbox.Text;
            string first = text.Split(',')[0];
            string second = text.Split(',')[1];
-           RGBSamplePoint.X = Convert.ToInt32(first);
-           RGBSamplePoint.Y = Convert.ToInt32(second);
+           _rgbSamplePoint.X = Convert.ToInt32(first);
+           _rgbSamplePoint.Y = Convert.ToInt32(second);
        }
 
        private void MoGcheckBox_CheckedChanged(object sender, EventArgs e)

@@ -68,8 +68,8 @@ namespace VTC.Kernel.Vistas
         {
             foreach (var d in deleted)
             {
-                var startState = d.state_history.First();
-                var startPoint = new Point((int)startState.x, (int)startState.y);
+                var startState = d.StateHistory.First();
+                var startPoint = new Point((int)startState.X, (int)startState.Y);
 
                 var startRegion = this.RegionConfiguration.Regions.FirstOrDefault(r => 
                     {
@@ -80,8 +80,8 @@ namespace VTC.Kernel.Vistas
 
                 if (null == startRegion.Key) continue;
 
-                var endState = d.state_history.Last();
-                var endPoint = new Point((int)endState.x, (int)endState.y);
+                var endState = d.StateHistory.Last();
+                var endPoint = new Point((int)endState.X, (int)endState.Y);
 
                 var endRegion = this.RegionConfiguration.Regions.FirstOrDefault(r =>
                 {

@@ -15,7 +15,7 @@ namespace VTC.Kernel
     public class MultipleHypothesisTracker
     {
         private readonly IMultipleHypothesisSettings _settings;
-        private HypothesisTree HypothesisTree = null;
+        private HypothesisTree _hypothesisTree = null;
         public VelocityField VelocityField { get; private set; }
 
         public int ValidationRegionDeviation
@@ -27,10 +27,10 @@ namespace VTC.Kernel
         {
             get
             {
-                if (null == HypothesisTree || null == HypothesisTree.nodeData)
+                if (null == _hypothesisTree || null == _hypothesisTree.NodeData)
                     return null;
 
-                return HypothesisTree.nodeData.vehicles;
+                return _hypothesisTree.NodeData.Vehicles;
             }
         }
 
@@ -38,10 +38,10 @@ namespace VTC.Kernel
         {
             get
             {
-                if (null == HypothesisTree || null == HypothesisTree.nodeData)
+                if (null == _hypothesisTree || null == _hypothesisTree.NodeData)
                     return null;
 
-                return HypothesisTree.nodeData.deleted_vehicles;
+                return _hypothesisTree.NodeData.DeletedVehicles;
             }
         }
 
@@ -53,8 +53,8 @@ namespace VTC.Kernel
             _settings = settings;
 
             StateHypothesis initialHypothesis = new StateHypothesis(_settings.MissThreshold);
-            HypothesisTree = new HypothesisTree(initialHypothesis);
-            HypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
+            _hypothesisTree = new HypothesisTree(initialHypothesis);
+            _hypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
             VelocityField = velocityField;
         }
@@ -69,19 +69,19 @@ namespace VTC.Kernel
             int numDetections = detections.Length;
 
             //Maintain hypothesis tree
-            if (HypothesisTree.children.Count > 0)
+            if (_hypothesisTree.Children.Count > 0)
             {
-                if (HypothesisTree.TreeDepth() > _settings.MaxHypothesisTreeDepth)
+                if (_hypothesisTree.TreeDepth() > _settings.MaxHypothesisTreeDepth)
                 {
-                    HypothesisTree.Prune(1);
-                    HypothesisTree = HypothesisTree.GetChild(0);
+                    _hypothesisTree.Prune(1);
+                    _hypothesisTree = _hypothesisTree.GetChild(0);
                 }
 
                 //To do: save deleted
                 //hypothesis_tree.SaveDeleted(file path, length threshold);
             }
 
-            List<Node<StateHypothesis>> childNodeList = HypothesisTree.GetLeafNodes();
+            List<Node<StateHypothesis>> childNodeList = _hypothesisTree.GetLeafNodes();
             foreach (Node<StateHypothesis> childNode in childNodeList) //For each lowest-level hypothesis node
             {
                 // Update child node
@@ -92,21 +92,23 @@ namespace VTC.Kernel
                 }
                 else
                 {
-                    int numExistingTargets = childNode.nodeData.vehicles.Count;
-                    StateHypothesis child_hypothesis = new StateHypothesis(_settings.MissThreshold);
-                    childNode.AddChild(child_hypothesis);
-                    HypothesisTree child_hypothesis_tree = new HypothesisTree(childNode.children[0].nodeData);
-                    child_hypothesis_tree.parent = childNode;
-                    child_hypothesis_tree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
+                    int numExistingTargets = childNode.NodeData.Vehicles.Count;
+                    StateHypothesis childHypothesis = new StateHypothesis(_settings.MissThreshold);
+                    childNode.AddChild(childHypothesis);
+                    HypothesisTree childHypothesisTree = new HypothesisTree(childNode.Children[0].NodeData)
+                    {
+                        Parent = childNode
+                    };
+                    childHypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
-                    child_hypothesis.probability = Math.Pow((1 - _settings.Pd), numExistingTargets);
+                    childHypothesis.Probability = Math.Pow((1 - _settings.Pd), numExistingTargets);
                     //Update states for vehicles without measurements
                     for (int j = 0; j < numExistingTargets; j++)
                     {
                         //Updating state for missed measurement
-                        StateEstimate last_state = childNode.nodeData.vehicles[j].state_history.Last();
-                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
-                        child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
+                        StateEstimate lastState = childNode.NodeData.Vehicles[j].StateHistory.Last();
+                        StateEstimate noMeasurementUpdate = lastState.PropagateStateNoMeasurement(_settings.Timestep, _hypothesisTree.H, _hypothesisTree.R, _hypothesisTree.F, _hypothesisTree.Q, _hypothesisTree.CompensationGain);
+                        childHypothesisTree.UpdateVehicleFromPrevious(j, noMeasurementUpdate, false);
                     }
                 }
 
@@ -117,9 +119,9 @@ namespace VTC.Kernel
             var pointVelocityDic = new Dictionary<Point, VelocityField.Velocity>();
             foreach (var v in CurrentVehicles)
             {
-                var lastState = v.state_history.Last();
-                var coords = new Point((int)lastState.x, (int)lastState.y);
-                var velocity = new VelocityField.Velocity(lastState.vx, lastState.vy);
+                var lastState = v.StateHistory.Last();
+                var coords = new Point((int)lastState.X, (int)lastState.Y);
+                var velocity = new VelocityField.Velocity(lastState.Vx, lastState.Vy);
 
                 pointVelocityDic[coords] = velocity;
             }
@@ -137,35 +139,35 @@ namespace VTC.Kernel
         {
             //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
 
-            int numExistingTargets = hypothesisNode.nodeData.vehicles.Count;
+            int numExistingTargets = hypothesisNode.NodeData.Vehicles.Count;
             int numDetections = detections.Length;
 
             //Got detections
-            DenseMatrix false_assignment_matrix = new DenseMatrix(numDetections, numDetections, Double.MinValue);
-            double[] false_assignment_diagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaF), numDetections).ToArray();
-            false_assignment_matrix.SetDiagonal(false_assignment_diagonal); //Represents a false positive
+            DenseMatrix falseAssignmentMatrix = DenseMatrix.Create(numDetections, numDetections, (x, y) => double.MinValue);
+            double[] falseAssignmentDiagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaF), numDetections).ToArray();
+            falseAssignmentMatrix.SetDiagonal(falseAssignmentDiagonal); //Represents a false positive
 
-            DenseMatrix new_target_matrix = new DenseMatrix(numDetections, numDetections, Double.MinValue);
-            double[] new_target_diagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaN), numDetections).ToArray();
-            new_target_matrix.SetDiagonal(new_target_diagonal); //Represents a new object to track
+            DenseMatrix newTargetMatrix = DenseMatrix.Create(numDetections, numDetections, (x, y) => double.MinValue);
+            double[] newTargetDiagonal = Enumerable.Repeat(Math.Log10(_settings.LambdaN), numDetections).ToArray();
+            newTargetMatrix.SetDiagonal(newTargetDiagonal); //Represents a new object to track
 
-            StateEstimate[] target_state_estimates = hypothesisNode.nodeData.GetStateEstimates();
+            StateEstimate[] targetStateEstimates = hypothesisNode.NodeData.GetStateEstimates();
 
             //Generate a matrix where each row signifies a detection and each column signifies an existing target
             //The value in each cell is the probability of the row's measurement occuring for the column's object
-            DenseMatrix ambiguity_matrix = GenerateAmbiguityMatrix(detections, numExistingTargets, target_state_estimates);
+            DenseMatrix ambiguityMatrix = GenerateAmbiguityMatrix(detections, numExistingTargets, targetStateEstimates);
 
             //Generating expanded hypothesis
             //Hypothesis matrix needs to have a unique column for each detection being treated as a false positive or new object
-            DenseMatrix hypothesis_expanded = GetExpandedHypothesis(
+            DenseMatrix hypothesisExpanded = GetExpandedHypothesis(
                 numDetections, 
                 numExistingTargets, 
-                ambiguity_matrix, 
-                false_assignment_matrix, 
-                new_target_matrix
+                ambiguityMatrix, 
+                falseAssignmentMatrix, 
+                newTargetMatrix
                 );
 
-            GenerateChildHypotheses(detections, numDetections, hypothesisNode, numExistingTargets, hypothesis_expanded);
+            GenerateChildHypotheses(detections, numDetections, hypothesisNode, numExistingTargets, hypothesisExpanded);
         }
 
         /// <summary>
@@ -176,30 +178,32 @@ namespace VTC.Kernel
         /// <param name="numDetections">Nomber of targets present in the new measurements</param>
         /// <param name="hypothesisParent">Hypothesis node to add child hypotheses to</param>
         /// <param name="numExistingTargets">Number of currently detected targets</param>
-        /// <param name="hypothesis_expanded">Hypothesis matrix</param>
-        private void GenerateChildHypotheses(Measurements[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesis_expanded)
+        /// <param name="hypothesisExpanded">Hypothesis matrix</param>
+        private void GenerateChildHypotheses(Measurements[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesisExpanded)
         {
             //Calculate K-best assignment using Murty's algorithm
-            double[,] costs = hypothesis_expanded.ToArray();
+            double[,] costs = hypothesisExpanded.ToArray();
             //Console.WriteLine("Finding k-best assignment");
             for (int i = 0; i < costs.GetLength(0); i++)
                 for (int j = 0; j < costs.GetLength(1); j++)
                     costs[i, j] = -costs[i, j];
 
-            List<int[]> k_best = OptAssign.FindKBestAssignments(costs, _settings.KHypotheses);
+            List<int[]> kBest = OptAssign.FindKBestAssignments(costs, _settings.KHypotheses);
             int numTargetsCreated = 0;
 
             //Generate child hypotheses from k-best assignments
-            for (int i = 0; i < k_best.Count; i++)
+            for (int i = 0; i < kBest.Count; i++)
             {
-                int[] assignment = k_best[i];
-                StateHypothesis child_hypothesis = new StateHypothesis(_settings.MissThreshold);
-                hypothesisParent.AddChild(child_hypothesis);
-                HypothesisTree child_hypothesis_tree = new HypothesisTree(hypothesisParent.children[i].nodeData);
-                child_hypothesis_tree.parent = hypothesisParent;
-                child_hypothesis_tree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
+                int[] assignment = kBest[i];
+                StateHypothesis childHypothesis = new StateHypothesis(_settings.MissThreshold);
+                hypothesisParent.AddChild(childHypothesis);
+                HypothesisTree childHypothesisTree = new HypothesisTree(hypothesisParent.Children[i].NodeData)
+                {
+                    Parent = hypothesisParent
+                };
+                childHypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
-                child_hypothesis.probability = OptAssign.assignmentCost(costs, assignment);
+                childHypothesis.Probability = OptAssign.assignmentCost(costs, assignment);
                 //Update states for vehicles without measurements
                 for (int j = 0; j < numExistingTargets; j++)
                 {
@@ -207,9 +211,9 @@ namespace VTC.Kernel
                     if (!(assignment.Contains(j + numDetections)))
                     {
                         //Updating state for missed measurement
-                        StateEstimate last_state = hypothesisParent.nodeData.vehicles[j].state_history.Last();
-                        StateEstimate no_measurement_update = last_state.PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
-                        child_hypothesis_tree.UpdateVehicleFromPrevious(j, no_measurement_update, false);
+                        StateEstimate lastState = hypothesisParent.NodeData.Vehicles[j].StateHistory.Last();
+                        StateEstimate noMeasurementUpdate = lastState.PropagateStateNoMeasurement(_settings.Timestep, _hypothesisTree.H, _hypothesisTree.R, _hypothesisTree.F, _hypothesisTree.Q, _hypothesisTree.CompensationGain);
+                        childHypothesisTree.UpdateVehicleFromPrevious(j, noMeasurementUpdate, false);
                     }
                 }
 
@@ -220,18 +224,18 @@ namespace VTC.Kernel
                     if (assignment[j] >= numExistingTargets + numDetections && numExistingTargets + numTargetsCreated < _settings.MaxTargets) //Add new vehicle
                     {
                         // Find predicted velocity
-                        var velocity = VelocityField.GetAvgVelocity((int)coords[j].x, (int)coords[j].y);
+                        var velocity = VelocityField.GetAvgVelocity((int)coords[j].X, (int)coords[j].Y);
                         
                         //Creating new vehicle
                         numTargetsCreated++;
-                        child_hypothesis.AddVehicle(
-                            Convert.ToInt16(coords[j].x), 
-                            Convert.ToInt16(coords[j].y), 
+                        childHypothesis.AddVehicle(
+                            Convert.ToInt16(coords[j].X), 
+                            Convert.ToInt16(coords[j].Y), 
                             velocity.v_x, 
                             velocity.v_y,
-                            Convert.ToInt16(coords[j].red),
-                            Convert.ToInt16(coords[j].green),
-                            Convert.ToInt16(coords[j].blue), 
+                            Convert.ToInt16(coords[j].Red),
+                            Convert.ToInt16(coords[j].Green),
+                            Convert.ToInt16(coords[j].Blue), 
                             Turn.Unknown,
                             _settings.VehicleInitialCovX,
                             _settings.VehicleInitialCovY,
@@ -245,9 +249,9 @@ namespace VTC.Kernel
                     else if (assignment[j] >= numDetections && assignment[j] < numDetections + numExistingTargets) //Update states for vehicles with measurements
                     {
                         //Updating vehicle with measurement
-                        StateEstimate last_state = hypothesisParent.nodeData.vehicles[assignment[j] - numDetections].state_history.Last();
-                        StateEstimate estimated_state = last_state.PropagateState(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, coords[j]);
-                        child_hypothesis_tree.UpdateVehicleFromPrevious(assignment[j] - numDetections, estimated_state, true);
+                        StateEstimate lastState = hypothesisParent.NodeData.Vehicles[assignment[j] - numDetections].StateHistory.Last();
+                        StateEstimate estimatedState = lastState.PropagateState(_settings.Timestep, _hypothesisTree.H, _hypothesisTree.R, _hypothesisTree.F, _hypothesisTree.Q, coords[j]);
+                        childHypothesisTree.UpdateVehicleFromPrevious(assignment[j] - numDetections, estimatedState, true);
                     }
 
                 }
@@ -259,33 +263,33 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="numDetections">Number of targets detected in current measurements</param>
         /// <param name="numExistingTargets">Number of currently detected targets</param>
-        /// <param name="ambiguity_matrix">Ambiguity matrix containing probability that a given measurement belongs to a given target</param>
-        /// <param name="false_assignment_matrix">Probability matrix if false assignment</param>
-        /// <param name="new_target_matrix">Probability matrix indicating likelihood that a measurement is from a new target</param>
+        /// <param name="ambiguityMatrix">Ambiguity matrix containing probability that a given measurement belongs to a given target</param>
+        /// <param name="falseAssignmentMatrix">Probability matrix if false assignment</param>
+        /// <param name="newTargetMatrix">Probability matrix indicating likelihood that a measurement is from a new target</param>
         /// <returns></returns>
-        private static DenseMatrix GetExpandedHypothesis(int numDetections, int numExistingTargets, DenseMatrix ambiguity_matrix, DenseMatrix false_assignment_matrix, DenseMatrix new_target_matrix)
+        private static DenseMatrix GetExpandedHypothesis(int numDetections, int numExistingTargets, DenseMatrix ambiguityMatrix, DenseMatrix falseAssignmentMatrix, DenseMatrix newTargetMatrix)
         {
-            DenseMatrix hypothesis_expanded;
+            DenseMatrix hypothesisExpanded;
             if (numExistingTargets > 0)
             {
                 //Expanded hypothesis: targets exist
-                DenseMatrix target_assignment_matrix = (DenseMatrix)ambiguity_matrix.SubMatrix(0, numDetections, 1, numExistingTargets);
+                DenseMatrix targetAssignmentMatrix = (DenseMatrix)ambiguityMatrix.SubMatrix(0, numDetections, 1, numExistingTargets);
 
-                hypothesis_expanded = new DenseMatrix(numDetections, 2 * numDetections + numExistingTargets);
+                hypothesisExpanded = new DenseMatrix(numDetections, 2 * numDetections + numExistingTargets);
 
-                hypothesis_expanded.SetSubMatrix(0, numDetections, 0, numDetections, false_assignment_matrix);
-                hypothesis_expanded.SetSubMatrix(0, numDetections, numDetections, numExistingTargets, target_assignment_matrix);
-                hypothesis_expanded.SetSubMatrix(0, numDetections, numDetections + numExistingTargets, numDetections, new_target_matrix);
+                hypothesisExpanded.SetSubMatrix(0, numDetections, 0, numDetections, falseAssignmentMatrix);
+                hypothesisExpanded.SetSubMatrix(0, numDetections, numDetections, numExistingTargets, targetAssignmentMatrix);
+                hypothesisExpanded.SetSubMatrix(0, numDetections, numDetections + numExistingTargets, numDetections, newTargetMatrix);
 
             }
             else
             {
                 //Expanded hypothesis: no targets
-                hypothesis_expanded = new DenseMatrix(numDetections, 2 * numDetections);
-                hypothesis_expanded.SetSubMatrix(0, numDetections, 0, numDetections, false_assignment_matrix);
-                hypothesis_expanded.SetSubMatrix(0, numDetections, numDetections, numDetections, new_target_matrix);
+                hypothesisExpanded = new DenseMatrix(numDetections, 2 * numDetections);
+                hypothesisExpanded.SetSubMatrix(0, numDetections, 0, numDetections, falseAssignmentMatrix);
+                hypothesisExpanded.SetSubMatrix(0, numDetections, numDetections, numDetections, newTargetMatrix);
             }
-            return hypothesis_expanded;
+            return hypothesisExpanded;
         }
 
         /// <summary>
@@ -294,65 +298,64 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="coordinates">New measurements</param>
         /// <param name="numExistingTargets">Number of currently detected targets</param>
-        /// <param name="target_state_estimates">Latest state estimates for each known target</param>
+        /// <param name="targetStateEstimates">Latest state estimates for each known target</param>
         /// <returns></returns>
-        private DenseMatrix GenerateAmbiguityMatrix(Measurements[] coordinates, int numExistingTargets, StateEstimate[] target_state_estimates)
+        private DenseMatrix GenerateAmbiguityMatrix(Measurements[] coordinates, int numExistingTargets, StateEstimate[] targetStateEstimates)
         {
             // TODO:  Can't we get numExistingTargets from target_state_estimates Length?
 
-            DenseMatrix ambiguity_matrix;
-            int num_detections = coordinates.Length;
-            ambiguity_matrix = new DenseMatrix(num_detections, numExistingTargets + 2);
+            int numDetections = coordinates.Length;
+            var ambiguityMatrix = new DenseMatrix(numDetections, numExistingTargets + 2);
             Normal norm = new Normal();
             
             for (int i = 0; i < numExistingTargets; i++)
             {
                 //Get this car's estimated next position using Kalman predictor
-                StateEstimate no_measurement_estimate = target_state_estimates[i].PropagateStateNoMeasurement(_settings.Timestep, HypothesisTree.H, HypothesisTree.R, HypothesisTree.F, HypothesisTree.Q, HypothesisTree.CompensationGain);
+                StateEstimate noMeasurementEstimate = targetStateEstimates[i].PropagateStateNoMeasurement(_settings.Timestep, _hypothesisTree.H, _hypothesisTree.R, _hypothesisTree.F, _hypothesisTree.Q, _hypothesisTree.CompensationGain);
 
-                DenseMatrix P_bar = new DenseMatrix(7, 7);
-                P_bar[0, 0] = no_measurement_estimate.cov_x;
-                P_bar[1, 1] = no_measurement_estimate.cov_vx;
-                P_bar[2, 2] = no_measurement_estimate.cov_y;
-                P_bar[3, 3] = no_measurement_estimate.cov_vy;
-                P_bar[4, 4] = no_measurement_estimate.cov_red;
-                P_bar[5, 5] = no_measurement_estimate.cov_green;
-                P_bar[6, 6] = no_measurement_estimate.cov_blue;
+                DenseMatrix pBar = new DenseMatrix(7, 7);
+                pBar[0, 0] = noMeasurementEstimate.CovX;
+                pBar[1, 1] = noMeasurementEstimate.CovVx;
+                pBar[2, 2] = noMeasurementEstimate.CovY;
+                pBar[3, 3] = noMeasurementEstimate.CovVy;
+                pBar[4, 4] = noMeasurementEstimate.CovRed;
+                pBar[5, 5] = noMeasurementEstimate.CovGreen;
+                pBar[6, 6] = noMeasurementEstimate.CovBlue;
 
-                DenseMatrix H_trans = (DenseMatrix)HypothesisTree.H.Transpose();
-                DenseMatrix B = HypothesisTree.H * P_bar * H_trans + HypothesisTree.R;
-                DenseMatrix B_inverse = (DenseMatrix)B.Inverse();
+                DenseMatrix hTrans = (DenseMatrix)_hypothesisTree.H.Transpose();
+                DenseMatrix b = _hypothesisTree.H * pBar * hTrans + _hypothesisTree.R;
+                DenseMatrix bInverse = (DenseMatrix)b.Inverse();
 
-                for (int j = 0; j < num_detections; j++)
+                for (int j = 0; j < numDetections; j++)
                 {
-                    DenseMatrix z_meas = new DenseMatrix(5, 1);
-                    z_meas[0, 0] = coordinates[j].x;
-                    z_meas[1, 0] = coordinates[j].y;
-                    z_meas[2, 0] = coordinates[j].red;
-                    z_meas[3, 0] = coordinates[j].green;
-                    z_meas[4, 0] = coordinates[j].blue;
+                    DenseMatrix zMeas = new DenseMatrix(5, 1);
+                    zMeas[0, 0] = coordinates[j].X;
+                    zMeas[1, 0] = coordinates[j].Y;
+                    zMeas[2, 0] = coordinates[j].Red;
+                    zMeas[3, 0] = coordinates[j].Green;
+                    zMeas[4, 0] = coordinates[j].Blue;
 
-                    DenseMatrix z_est = new DenseMatrix(5, 1);
-                    z_est[0, 0] = no_measurement_estimate.x;
-                    z_est[1, 0] = no_measurement_estimate.y;
-                    z_est[2, 0] = no_measurement_estimate.red;
-                    z_est[3, 0] = no_measurement_estimate.green;
-                    z_est[4, 0] = no_measurement_estimate.blue;
+                    DenseMatrix zEst = new DenseMatrix(5, 1);
+                    zEst[0, 0] = noMeasurementEstimate.X;
+                    zEst[1, 0] = noMeasurementEstimate.Y;
+                    zEst[2, 0] = noMeasurementEstimate.Red;
+                    zEst[3, 0] = noMeasurementEstimate.Green;
+                    zEst[4, 0] = noMeasurementEstimate.Blue;
 
-                    DenseMatrix residual = StateEstimate.residual(z_est, z_meas);
-                    DenseMatrix residual_transpose = (DenseMatrix)residual.Transpose();
-                    DenseMatrix mahalanobis = residual_transpose * B_inverse * residual;
-                    double mahalanobis_distance = Math.Sqrt(mahalanobis[0, 0]);
+                    DenseMatrix residual = StateEstimate.Residual(zEst, zMeas);
+                    DenseMatrix residualTranspose = (DenseMatrix)residual.Transpose();
+                    DenseMatrix mahalanobis = residualTranspose * bInverse * residual;
+                    double mahalanobisDistance = Math.Sqrt(mahalanobis[0, 0]);
 
-                    if (mahalanobis_distance > ValidationRegionDeviation)
-                        ambiguity_matrix[j, i + 1] = Double.MinValue;
+                    if (mahalanobisDistance > ValidationRegionDeviation)
+                        ambiguityMatrix[j, i + 1] = Double.MinValue;
                     else
                     {
-                        ambiguity_matrix[j, i + 1] = Math.Log10(_settings.Pd * norm.Density(mahalanobis_distance) / (1 - _settings.Pd));
+                        ambiguityMatrix[j, i + 1] = Math.Log10(_settings.Pd * norm.Density(mahalanobisDistance) / (1 - _settings.Pd));
                     }
                 }
             }
-            return ambiguity_matrix;
+            return ambiguityMatrix;
         }
     }
 }

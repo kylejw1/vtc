@@ -34,7 +34,7 @@ namespace VTC.ExportTrainingSet
             _vehicles = new List<Vehicle>();
             foreach(Vehicle v in currentVehicles)
             {
-                Vehicle new_v = new Vehicle(v.state_history.Last<StateEstimate>());
+                Vehicle new_v = new Vehicle(v.StateHistory.Last<StateEstimate>());
                 _vehicles.Add(v);
             }
 
@@ -209,8 +209,8 @@ namespace VTC.ExportTrainingSet
                     bool vehicleIsNearby = false;
                     foreach (Vehicle v in _vehicles)
                     {
-                        int vehicleX = (int)v.state_history.Last<StateEstimate>().x;
-                        int vehicleY = (int)v.state_history.Last<StateEstimate>().y;
+                        int vehicleX = (int)v.StateHistory.Last<StateEstimate>().X;
+                        int vehicleY = (int)v.StateHistory.Last<StateEstimate>().Y;
                         if (i < vehicleX + samplePadding && i > vehicleX - samplePadding && j < vehicleY + samplePadding && j > vehicleY - samplePadding)
                         {
                             vehicleIsNearby = true;
@@ -236,8 +236,8 @@ namespace VTC.ExportTrainingSet
         {
             foreach (Vehicle v in _vehicles)
             {
-                int vehicleX = (int)v.state_history.Last<StateEstimate>().x;
-                int vehicleY = (int)v.state_history.Last<StateEstimate>().y;
+                int vehicleX = (int)v.StateHistory.Last<StateEstimate>().X;
+                int vehicleY = (int)v.StateHistory.Last<StateEstimate>().Y;
                 if (vehicleX > _settings.ClassifierSubframeWidth && vehicleX < _frame.Width - _settings.ClassifierSubframeWidth && vehicleY > _settings.ClassifierSubframeHeight && vehicleY < _frame.Height - _settings.ClassifierSubframeHeight)
                 {
                     Image<Bgr, float> subimage = extractSubImage(_frame, vehicleX, vehicleY);

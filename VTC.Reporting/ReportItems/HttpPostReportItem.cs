@@ -47,10 +47,10 @@ namespace VTC.Reporting.ReportItems
             Dictionary<string, string> postValues = new Dictionary<string, string>();
             for (int vehicleCount = 0; vehicleCount < stateEstimates.Length; vehicleCount++)
             {
-                String x = stateEstimates[vehicleCount].x.ToString(CultureInfo.InvariantCulture);
-                String y = stateEstimates[vehicleCount].y.ToString(CultureInfo.InvariantCulture);
-                String vx = stateEstimates[vehicleCount].vx.ToString(CultureInfo.InvariantCulture);
-                String vy = stateEstimates[vehicleCount].vy.ToString(CultureInfo.InvariantCulture);
+                String x = stateEstimates[vehicleCount].X.ToString(CultureInfo.InvariantCulture);
+                String y = stateEstimates[vehicleCount].Y.ToString(CultureInfo.InvariantCulture);
+                String vx = stateEstimates[vehicleCount].Vx.ToString(CultureInfo.InvariantCulture);
+                String vy = stateEstimates[vehicleCount].Vy.ToString(CultureInfo.InvariantCulture);
                 const string zero = "0";
                 postValues.Add("state_sample[states_attributes][" + vehicleCount + "][x]", x);
                 postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vx]", vx);

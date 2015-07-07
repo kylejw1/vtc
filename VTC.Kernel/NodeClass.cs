@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 //using Excel = Microsoft.Office.Interop.Excel;
@@ -18,32 +19,32 @@ using MathNet.Numerics.LinearAlgebra.Double;
 namespace VTC.Kernel
 {
 
-    public enum MeasurementSource { false_positive, existing_vehicle, new_vehicle }; 
+    public enum MeasurementSource { FalsePositive, ExistingVehicle, NewVehicle }; 
 
     public class Node<T>
     {
-        public Node<T> parent;
-        public List<Node<T>> children;
+        public Node<T> Parent;
+        public List<Node<T>> Children;
 
-        public T nodeData; 
+        public T NodeData; 
 
         public Node(T value) : this()
         {
-            nodeData = value;
+            NodeData = value;
         }
 
         public Node()
         {
-            children = new List<Node<T>>();
+            Children = new List<Node<T>>();
         }
 
         public Node<T> GetRoot()
         {            
             
             Func<Node<T>, Node<T>> getParent = null;
-            getParent = (x) =>
+            getParent = x =>
             {
-                if (x.parent != null) { return getParent(x.parent); } else { return this; }
+                if (x.Parent != null) { return getParent(x.Parent); } else { return this; }
             };
 
             return getParent(this);
@@ -51,18 +52,17 @@ namespace VTC.Kernel
 
         public virtual void AddChild(T value)
         {
-            Node<T> newchild = new Node<T>(value);
-            newchild.parent = this;
-            if (children != null)
-                this.children.Add(newchild);
+            Node<T> newchild = new Node<T>(value) {Parent = this};
+            if (Children != null)
+                Children.Add(newchild);
         }
 
         //Recursive function used in GetChain to iterate upwards through tree pushing each new node to the front of a list 
         private List<Node<T>> AddBack(List<Node<T>> x)
         {
-        if (x[0].parent != null)
+        if (x[0].Parent != null)
                 {
-                    x.Add(x[0].parent); //If parent node exists, add to start of the SortedList 
+                    x.Add(x[0].Parent); //If parent node exists, add to start of the SortedList 
                     AddBack(x); //Continue process with parent node
                 }
         return x;
@@ -74,8 +74,7 @@ namespace VTC.Kernel
         /// <returns></returns>
         public List<Node<T>> PathFromRoot() 
         {
-            List<Node<T>> pathList = new List<Node<T>>();
-            pathList.Add(this);
+            List<Node<T>> pathList = new List<Node<T>> {this};
             return AddBack(pathList);
         }
 
@@ -85,9 +84,9 @@ namespace VTC.Kernel
         public List<Node<T>> ToList()
         {
             List<Node<T>> list = new List<Node<T>>();
-            Node<T> root = this.GetRoot();
+            Node<T> root = GetRoot();
             Action<Node<T>> traverse = null;
-            traverse = (x) => { list.Add(x); x.children.ForEach(traverse); };
+            traverse = x => { list.Add(x); x.Children.ForEach(traverse); };
             traverse(root);
             return list;
         }
@@ -97,36 +96,31 @@ namespace VTC.Kernel
         /// </summary>
         public List<Node<T>> GetLeafNodes()
         {
-            List<Node<T>> list = new List<Node<T>>();
-            Node<T> root = this.GetRoot();
-            Action<Node<T>> traverse_leafnodes = null;
-            traverse_leafnodes = (x) => {
-               if (x.children == null || x.children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
+            var list = new List<Node<T>>();
+            var root = GetRoot();
+            Action<Node<T>> traverseLeafnodes = null;
+            traverseLeafnodes = (x) => {
+               if (x.Children == null || x.Children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
                    list.Add(x); 
                else
-                x.children.ForEach(traverse_leafnodes); 
+                x.Children.ForEach(traverseLeafnodes); 
             };
-            traverse_leafnodes(root);
+            traverseLeafnodes(root);
             return list;
         }
 
         //Get number of nodes from root to leaf nodes, following "first child" path. This assumes that all branches are of equal depth. 
         public int TreeDepth()
         {
-            int depth = TraverseDepth(this);
+            var depth = TraverseDepth(this);
             return depth;
         }
 
-        private int TraverseDepth(Node<T> inputNode)
-        { int depth = 0;
-        if (inputNode.children.Count > 0)
-            foreach (Node<T> thisChild in inputNode.children)
-            {
-                int thisChildDepth = TraverseDepth(thisChild);
-                if (thisChildDepth > depth)
-                    depth = thisChildDepth;
-
-            }
+        private static int TraverseDepth(Node<T> inputNode)
+        { 
+            var depth = 0;
+            if (inputNode.Children.Count > 0)
+                depth = inputNode.Children.Select(TraverseDepth).Concat(new[] {depth}).Max();
 
             return depth+1;
         }
@@ -134,42 +128,42 @@ namespace VTC.Kernel
         //Get this node's depth
         public int NodeDepth()
         {
-            int node_depth = 1;
-            Node<T> current_node = this;
-                    while (current_node.parent != null)
+            var nodeDepth = 1;
+            var currentNode = this;
+                    while (currentNode.Parent != null)
                 {
-                    current_node = current_node.parent;
-                    node_depth++;
+                    currentNode = currentNode.Parent;
+                    nodeDepth++;
                 }
-            return node_depth;
+            return nodeDepth;
         }
 
         //Return array populated with # of nodes at each depth 
         public int[] NodeCountByDepth()
         {
-            int tree_depth = this.TreeDepth();
-            int[] depth_array = new int[tree_depth];
-            List<Node<T>> node_list = this.ToList();
-            foreach (Node<T> this_node in node_list)
-                depth_array[this_node.NodeDepth() - 1]++;
+            var treeDepth = TreeDepth();
+            var depthArray = new int[treeDepth];
+            var nodeList = ToList();
+            foreach (var thisNode in nodeList)
+                depthArray[thisNode.NodeDepth() - 1]++;
 
-            return depth_array;
+            return depthArray;
         }
 
-        public int numChildren()
+        public int NumChildren()
         {
-            int num_children = 0;
+            var numChildren = 0;
             Action<Node<T>> traverse = null;
             traverse = (x) =>
             {
-                num_children++;
-                if (x.children == null || x.children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
+                numChildren++;
+                if (x.Children == null || x.Children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
                     return;
                 else
-                    x.children.ForEach(traverse);
+                    x.Children.ForEach(traverse);
             };
             traverse(this);
-            return num_children-1;
+            return numChildren-1;
         }
 
     }
@@ -181,68 +175,68 @@ namespace VTC.Kernel
     /// </summary>
     public class StateHypothesis
     {
-        public double probability;
+        public double Probability;
 
-        public bool[,] assignment_matrix;
+        public bool[,] AssignmentMatrix;
 
-        public List<Vehicle> deleted_vehicles;
+        public List<Vehicle> DeletedVehicles;
 
-        public List<Vehicle> vehicles;
+        public List<Vehicle> Vehicles;
 
-        public List<Vehicle> new_vehicles;
+        public List<Vehicle> NewVehicles;
 
-        public int miss_detection_threshold;
+        public int MissDetectionThreshold;
 
-        public StateHypothesis(int miss_threshold)
+        public StateHypothesis(int missThreshold)
         {
-            probability = 1;
-            assignment_matrix = new bool[0,0];
-            vehicles = new List<Vehicle>();
-            deleted_vehicles = new List<Vehicle>();
-            new_vehicles = new List<Vehicle>();
-            miss_detection_threshold = miss_threshold;
+            Probability = 1;
+            AssignmentMatrix = new bool[0,0];
+            Vehicles = new List<Vehicle>();
+            DeletedVehicles = new List<Vehicle>();
+            NewVehicles = new List<Vehicle>();
+            MissDetectionThreshold = missThreshold;
         }
 
-        public StateHypothesis(double initial_probablity, int num_vehicles, int num_measurements,int miss_threshold)
+        public StateHypothesis(double initialProbablity, int numVehicles, int numMeasurements,int missThreshold)
         {
-            probability = initial_probablity;
-            assignment_matrix = new bool[num_measurements, num_vehicles + 2];
-            deleted_vehicles = new List<Vehicle>();
-            vehicles = new List<Vehicle>(num_vehicles);
-            miss_detection_threshold = miss_threshold;
+            Probability = initialProbablity;
+            AssignmentMatrix = new bool[numMeasurements, numVehicles + 2];
+            DeletedVehicles = new List<Vehicle>();
+            Vehicles = new List<Vehicle>(numVehicles);
+            MissDetectionThreshold = missThreshold;
         }
 
         public StateEstimate[] GetStateEstimates()
         {
-            StateEstimate[] vehicleStateEstimates = new StateEstimate[vehicles.Count];
-            for (int i = 0; i < vehicles.Count; i++)
-                vehicleStateEstimates[i] = vehicles[i].state_history[vehicles[i].state_history.Count - 1];
+            StateEstimate[] vehicleStateEstimates = new StateEstimate[Vehicles.Count];
+            for (int i = 0; i < Vehicles.Count; i++)
+                vehicleStateEstimates[i] = Vehicles[i].StateHistory[Vehicles[i].StateHistory.Count - 1];
             
             return vehicleStateEstimates;
         }
 
         public StateEstimate[,] GetDeletedStateEstimates()
         {
-            StateEstimate[,] deletedVehicleStateEstimates = new StateEstimate[deleted_vehicles.Count,2];
-            for (int i = 0; i < deleted_vehicles.Count; i++)
+            StateEstimate[,] deletedVehicleStateEstimates = new StateEstimate[DeletedVehicles.Count,2];
+            for (int i = 0; i < DeletedVehicles.Count; i++)
             {
                 try
                 {
-                    deletedVehicleStateEstimates[i, 0] = deleted_vehicles[i].state_history[0];
+                    deletedVehicleStateEstimates[i, 0] = DeletedVehicles[i].StateHistory[0];
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    throw new System.ArgumentException("Initial state history missing");
+                    throw new ArgumentException("Initial state history missing");
                 }
 
                 try
                 {
-                    deletedVehicleStateEstimates[i, 1] = deleted_vehicles[i].state_history[deleted_vehicles[i].state_history.Count - 1];
+                    deletedVehicleStateEstimates[i, 1] = DeletedVehicles[i].StateHistory[DeletedVehicles[i].StateHistory.Count - 1];
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    string error_string = "Final state history missing. History length: " + deleted_vehicles[i].state_history.Count.ToString();
-                    throw new System.ArgumentException(error_string);
+                    var errorString = "Final state history missing. History length: " + DeletedVehicles[i].StateHistory.Count;
+                    throw new ArgumentException(errorString);
                 }
             }
 
@@ -251,37 +245,39 @@ namespace VTC.Kernel
 
         public StateEstimate[] GetNewStateEstimates()
         {
-            StateEstimate[] newVehicleStateEstimates = new StateEstimate[new_vehicles.Count];
-            for (int i = 0; i < new_vehicles.Count; i++)
-                newVehicleStateEstimates[i] = new_vehicles[i].state_history[new_vehicles[i].state_history.Count-1];
+            var newVehicleStateEstimates = new StateEstimate[NewVehicles.Count];
+            for (var i = 0; i < NewVehicles.Count; i++)
+                newVehicleStateEstimates[i] = NewVehicles[i].StateHistory[NewVehicles[i].StateHistory.Count-1];
 
             return newVehicleStateEstimates;
         }
 
-        public void AddVehicle(int x, int y, double vx, double vy, int red, int green, int blue, Turn turn, double covx, double covy, double cov_vx, double cov_vy, double cov_r, double cov_g, double cov_b)
+        public void AddVehicle(int x, int y, double vx, double vy, int red, int green, int blue, Turn turn, double covx, double covy, double covVx, double covVy, double covR, double covG, double covB)
         {
-            StateEstimate initial_state = new StateEstimate();
-            initial_state.x = x;
-            initial_state.y = y;
-            initial_state.red = red;
-            initial_state.green = green;
-            initial_state.blue = blue;
+            var initialState = new StateEstimate
+            {
+                X = x,
+                Y = y,
+                Red = red,
+                Green = green,
+                Blue = blue,
+                Vx = vx,
+                Vy = vy,
+                IsPedestrian = false,
+                Turn = turn,
+                CovX = covx,
+                CovY = covy,
+                CovVx = covVx,
+                CovVy = covVy,
+                CovRed = covR,
+                CovGreen = covG,
+                CovBlue = covB
+            };
 
-            initial_state.vx = vx;
-            initial_state.vy = vy;
-            initial_state.is_pedestrian = false;
-            initial_state.turn = turn;
-            initial_state.cov_x = covx;
-            initial_state.cov_y = covy;
-            initial_state.cov_vx = cov_vx;
-            initial_state.cov_vy = cov_vy;
-            initial_state.cov_red = cov_r;
-            initial_state.cov_green = cov_g;
-            initial_state.cov_blue = cov_b;
 
-            Vehicle newVehicle = new Vehicle(initial_state);
-            vehicles.Add(newVehicle);
-            new_vehicles.Add(newVehicle);
+            var newVehicle = new Vehicle(initialState);
+            Vehicles.Add(newVehicle);
+            NewVehicles.Add(newVehicle);
         }
     }
 
@@ -297,8 +293,7 @@ namespace VTC.Kernel
         public DenseMatrix Q; //Covariance
         public DenseMatrix R; //
 
-        //TODO: Pull these values from settings file instead of hard-coding
-        public double CompensationGain = 30; //Gain applied to process noise when a measurement is missed
+        public double CompensationGain; //Gain applied to process noise when a measurement is missed
 
         public HypothesisTree(StateHypothesis value) : base(value)
         {
@@ -316,7 +311,7 @@ namespace VTC.Kernel
         //  G_new = G_old
         //  B_new = B_old
         // ************************************************ //
-        public void PopulateSystemDynamicsMatrices(double q_position, double q_color, double r_position, double r_color, double dt, double compensation_gain)
+        public void PopulateSystemDynamicsMatrices(double qPosition, double qColor, double rPosition, double rColor, double dt, double compensationGain)
         {
             H = new DenseMatrix(5, 7); // Measurement equation: x,y,R,G,B are observed (not velocities)
             H[0, 0] = 1;
@@ -337,26 +332,26 @@ namespace VTC.Kernel
             F[6, 6] = 1;
 
             Q = new DenseMatrix(7, 7); //Process covariance
-            Q[0, 0] = (dt * dt * dt * dt / 4) * q_position;  
-            Q[0, 1] = (dt * dt * dt / 3) * q_position;
-            Q[1, 0] = (dt * dt * dt / 3) * q_position;
-            Q[1, 1] = (dt * dt / 2) * q_position;
-            Q[2, 2] = (dt * dt * dt * dt / 4) * q_position;
-            Q[2, 3] = (dt * dt * dt / 3) * q_position;
-            Q[3, 2] = (dt * dt * dt / 3) * q_position;
-            Q[3, 3] = (dt * dt / 2) * q_position;
-            Q[4, 4] = q_color; 
-            Q[5, 5] = q_color;
-            Q[6, 6] = q_color;
+            Q[0, 0] = (dt * dt * dt * dt / 4) * qPosition;  
+            Q[0, 1] = (dt * dt * dt / 3) * qPosition;
+            Q[1, 0] = (dt * dt * dt / 3) * qPosition;
+            Q[1, 1] = (dt * dt / 2) * qPosition;
+            Q[2, 2] = (dt * dt * dt * dt / 4) * qPosition;
+            Q[2, 3] = (dt * dt * dt / 3) * qPosition;
+            Q[3, 2] = (dt * dt * dt / 3) * qPosition;
+            Q[3, 3] = (dt * dt / 2) * qPosition;
+            Q[4, 4] = qColor; 
+            Q[5, 5] = qColor;
+            Q[6, 6] = qColor;
 
             R = new DenseMatrix(5, 5); //Measurement covariance
-            R[0, 0] = r_position;
-            R[1, 1] = r_position;
-            R[2, 2] = r_color;
-            R[3, 3] = r_color;
-            R[4, 4] = r_color;
+            R[0, 0] = rPosition;
+            R[1, 1] = rPosition;
+            R[2, 2] = rColor;
+            R[3, 3] = rColor;
+            R[4, 4] = rColor;
 
-            CompensationGain = compensation_gain;
+            CompensationGain = compensationGain;
         }
 
         /// <summary>
@@ -365,32 +360,32 @@ namespace VTC.Kernel
         /// <param name="value">New child's StateHypothesis</param>
         public override void AddChild(StateHypothesis value)
         {
-            HypothesisTree newchild = new HypothesisTree(value);
-            newchild.parent = this;
-            if (children != null)
-                this.children.Add(newchild);
+            var newchild = new HypothesisTree(value) {Parent = this};
+            if (Children != null)
+                Children.Add(newchild);
         }
 
         /// <summary>
         /// Copies & updates state history of a vehicle from parent node referenced by integer
         /// </summary>
         /// <param name="address">Index of vehicle to be updated in parent StateHypothesis</param>
-        /// <param name="current_state">New state of vehicle to be updated</param>
-        public void UpdateVehicleFromPrevious(int address, StateEstimate current_state, bool with_measurement)
+        /// <param name="currentState">New state of vehicle to be updated</param>
+        /// <param name="withMeasurement">True if the new state comes from a measurement update; false if the new state comes from a pure prediction. </param>
+        public void UpdateVehicleFromPrevious(int address, StateEstimate currentState, bool withMeasurement)
         {
-            StateHypothesis parent_hypothesis = this.parent.nodeData;
-            Vehicle last_frame_vehicle = parent_hypothesis.vehicles[address];
-            current_state.is_pedestrian = last_frame_vehicle.state_history[last_frame_vehicle.state_history.Count - 1].is_pedestrian;
-            Vehicle updated_vehicle = new Vehicle(last_frame_vehicle.state_history, current_state);
-            if (!with_measurement)
-                current_state.missed_detections++;
+            var parentHypothesis = Parent.NodeData;
+            var lastFrameVehicle = parentHypothesis.Vehicles[address];
+            currentState.IsPedestrian = lastFrameVehicle.StateHistory[lastFrameVehicle.StateHistory.Count - 1].IsPedestrian;
+            var updatedVehicle = new Vehicle(lastFrameVehicle.StateHistory, currentState);
+            if (!withMeasurement)
+                currentState.MissedDetections++;
             else
-                current_state.missed_detections = 0; 
+                currentState.MissedDetections = 0; 
 
-            if (current_state.missed_detections < this.nodeData.miss_detection_threshold)
-                nodeData.vehicles.Add(updated_vehicle);
+            if (currentState.MissedDetections < NodeData.MissDetectionThreshold)
+                NodeData.Vehicles.Add(updatedVehicle);
             else
-                nodeData.deleted_vehicles.Add(updated_vehicle);
+                NodeData.DeletedVehicles.Add(updatedVehicle);
         }
 
 
@@ -402,8 +397,8 @@ namespace VTC.Kernel
         /// <returns>1 if p(a)>p(b), 0 otherwise</returns>
         private static int ProbCompare(Node<StateHypothesis> x, Node<StateHypothesis> y)
         {
-            HypothesisTree a = (HypothesisTree)x;
-            HypothesisTree b = (HypothesisTree)y;
+            var a = (HypothesisTree)x;
+            var b = (HypothesisTree)y;
 
             if (a.ChildProbability() < b.ChildProbability())
                 return 1;
@@ -414,17 +409,14 @@ namespace VTC.Kernel
         /// <summary>
         /// Remove lowest probability child nodes until k nodes remain
         /// </summary>
-        /// <param name="num_remaining">Final number of nodes after pruning</param>
-        public void Prune(int num_remaining)
+        /// <param name="numRemaining">Final number of nodes after pruning</param>
+        public void Prune(int numRemaining)
         {
-            if (children.Count > 0)
-            {
-                this.children.Sort(ProbCompare);
+            if (Children.Count <= 0) return;
+            Children.Sort(ProbCompare);
 
-                while (this.children.Count > num_remaining)
-                    this.children.RemoveAt(children.Count - 1);
-            }
-        
+            while (Children.Count > numRemaining)
+                Children.RemoveAt(Children.Count - 1);
         }
 
         public double ChildProbability()
@@ -435,33 +427,28 @@ namespace VTC.Kernel
 
         private double TraverseChildProbabilities(Node<StateHypothesis> inputNode)
         {
-            double prob = double.MaxValue;
-            if (inputNode.children.Count > 0)
-                foreach (Node<StateHypothesis> thisChild in inputNode.children)
-                {
-                    double thisChildDepth = TraverseChildProbabilities(thisChild);
-                    if (thisChildDepth < prob)
-                        prob = thisChildDepth;
-                }
+            var prob = double.MaxValue;
+            if (inputNode.Children.Count > 0)
+                prob = inputNode.Children.Select(TraverseChildProbabilities).Concat(new[] {prob}).Min();
             else
-                return this.nodeData.probability;
+                return NodeData.Probability;
 
-            return prob + this.nodeData.probability;
+            return prob + NodeData.Probability;
         }
 
         public HypothesisTree GetChild(int index)
         {
-            HypothesisTree child = (HypothesisTree) this.children[index];
-            child.Q = this.Q;
-            child.R = this.R;
-            child.P = this.P;
-            child.H = this.H;
-            child.F = this.F;
+            var child = (HypothesisTree) Children[index];
+            child.Q = Q;
+            child.R = R;
+            child.P = P;
+            child.H = H;
+            child.F = F;
             
-            foreach (Node<StateHypothesis> thisChild in children)
-            thisChild.parent = null;
+            foreach (var thisChild in Children)
+            thisChild.Parent = null;
 
-            this.children = null;
+            Children = null;
             
             return child;
         }
@@ -670,15 +657,14 @@ namespace VTC.Kernel
 
         private string GetExcelColumnName(int columnNumber)
         {
-            int dividend = columnNumber;
-            string columnName = String.Empty;
-            int modulo;
+            var dividend = columnNumber;
+            var columnName = string.Empty;
 
             while (dividend > 0)
             {
-                modulo = (dividend - 1) % 26;
-                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
-                dividend = (int)((dividend - modulo) / 26);
+                var modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo) + columnName;
+                dividend = (dividend - modulo) / 26;
             }
 
             return columnName;
@@ -691,148 +677,154 @@ namespace VTC.Kernel
     public struct StateEstimate
     {
         //public Measurements measurements;
-        public double x;
-        public double y;
-        public double cov_x;          //Location covariances
-        public double cov_y;
+        public double X;
+        public double Y;
+        public double CovX;          //Location covariances
+        public double CovY;
 
-        public double vx;             //Velocity estimates
-        public double vy;
-        public double cov_vx;         //Velocity covariances
-        public double cov_vy;
+        public double Vx;             //Velocity estimates
+        public double Vy;
+        public double CovVx;         //Velocity covariances
+        public double CovVy;
 
-        public double red;
-        public double green;
-        public double blue;
+        public double Red;
+        public double Green;
+        public double Blue;
 
-        public double cov_red;
-        public double cov_green;
-        public double cov_blue;
+        public double CovRed;
+        public double CovGreen;
+        public double CovBlue;
 
-        public double path_length;    //Total path length travelled so far
-        public Turn turn;              //enum Turn to indicate turn decision (left, right or straight)
+        public double PathLength;    //Total path length travelled so far
+        public Turn Turn;              //enum Turn to indicate turn decision (left, right or straight)
         
-        public bool is_pedestrian;    //Binary flag set if object is likely to be a pedestrian
+        public bool IsPedestrian;    //Binary flag set if object is likely to be a pedestrian
 
-        public int missed_detections; //Total number of times this object has not been detected during its lifetime
+        public int MissedDetections; //Total number of times this object has not been detected during its lifetime
 
-        public StateEstimate PropagateStateNoMeasurement(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, double compensation_gain)
+        public StateEstimate PropagateStateNoMeasurement(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, double compensationGain)
         {
-            StateEstimate updatedState = new StateEstimate();
-            updatedState.turn = this.turn;
-            updatedState.is_pedestrian = this.is_pedestrian;
-            updatedState.missed_detections = this.missed_detections + 1;
-            updatedState.path_length = this.path_length + Math.Sqrt(Math.Pow((timestep * this.vx), 2) + Math.Pow((timestep * this.vy), 2));
+            var updatedState = new StateEstimate
+            {
+                Turn = Turn,
+                IsPedestrian = IsPedestrian,
+                MissedDetections = MissedDetections + 1,
+                PathLength =
+                    PathLength + Math.Sqrt(Math.Pow((timestep*Vx), 2) + Math.Pow((timestep*Vy), 2))
+            };
 
-            DenseMatrix z_est = new DenseMatrix(7, 1); //4-Row state vector: x, vx, y, vy
-            z_est[0, 0] = this.x;
-            z_est[1, 0] = this.vx;
-            z_est[2, 0] = this.y;
-            z_est[3, 0] = this.vy;
-            z_est[4, 0] = this.red;
-            z_est[5, 0] = this.green;
-            z_est[6, 0] = this.blue;
+            var zEst = new DenseMatrix(7, 1); //4-Row state vector: x, vx, y, vy
+            zEst[0, 0] = X;
+            zEst[1, 0] = Vx;
+            zEst[2, 0] = Y;
+            zEst[3, 0] = Vy;
+            zEst[4, 0] = Red;
+            zEst[5, 0] = Green;
+            zEst[6, 0] = Blue;
 
-            DenseMatrix P_bar = new DenseMatrix(7, 7);
-            P_bar[0, 0] = this.cov_x;
-            P_bar[1, 1] = this.cov_vx;
-            P_bar[2, 2] = this.cov_y;
-            P_bar[3, 3] = this.cov_vy;
-            P_bar[4, 4] = this.cov_red;
-            P_bar[5, 5] = this.cov_green;
-            P_bar[6, 6] = this.cov_blue;
+            var pBar = new DenseMatrix(7, 7);
+            pBar[0, 0] = CovX;
+            pBar[1, 1] = CovVx;
+            pBar[2, 2] = CovY;
+            pBar[3, 3] = CovVy;
+            pBar[4, 4] = CovRed;
+            pBar[5, 5] = CovGreen;
+            pBar[6, 6] = CovBlue;
 
             //DenseMatrix B = H * P_bar * H;
-            DenseMatrix z_next = F * z_est;
-            DenseMatrix F_transpose =(DenseMatrix) F.Transpose();
-            DenseMatrix P_next = (F * P_bar * F_transpose) + compensation_gain * Q;
+            var zNext = F * zEst;
+            var fTranspose =(DenseMatrix) F.Transpose();
+            var pNext = (F * pBar * fTranspose) + compensationGain * Q;
 
             //Move values from matrix form into object properties
-            updatedState.x = z_next[0, 0];
-            updatedState.y = z_next[2, 0];
-            updatedState.vx = z_next[1, 0];
-            updatedState.vy = z_next[3, 0];
-            updatedState.red = z_next[4, 0];
-            updatedState.green = z_next[5, 0];
-            updatedState.blue = z_next[6, 0];
+            updatedState.X = zNext[0, 0];
+            updatedState.Y = zNext[2, 0];
+            updatedState.Vx = zNext[1, 0];
+            updatedState.Vy = zNext[3, 0];
+            updatedState.Red = zNext[4, 0];
+            updatedState.Green = zNext[5, 0];
+            updatedState.Blue = zNext[6, 0];
 
-            updatedState.cov_x  = P_next[0, 0];
-            updatedState.cov_vx = P_next[1, 1];
-            updatedState.cov_y  = P_next[2, 2];
-            updatedState.cov_vy = P_next[3, 3];
-            updatedState.cov_red = P_next[4, 4];
-            updatedState.cov_green = P_next[5, 5];
-            updatedState.cov_blue = P_next[6, 6];
+            updatedState.CovX  = pNext[0, 0];
+            updatedState.CovVx = pNext[1, 1];
+            updatedState.CovY  = pNext[2, 2];
+            updatedState.CovVy = pNext[3, 3];
+            updatedState.CovRed = pNext[4, 4];
+            updatedState.CovGreen = pNext[5, 5];
+            updatedState.CovBlue = pNext[6, 6];
 
             return updatedState;
         }
 
         public StateEstimate PropagateState(double timestep, DenseMatrix H, DenseMatrix R, DenseMatrix F, DenseMatrix Q, Measurements measurements)
         {
-            StateEstimate updatedState = new StateEstimate();
-            updatedState.turn = this.turn;
-            updatedState.path_length = this.path_length + Math.Sqrt(Math.Pow((timestep * this.vx), 2) + Math.Pow((timestep * this.vy), 2));
+            var updatedState = new StateEstimate
+            {
+                Turn = Turn,
+                PathLength =
+                    PathLength + Math.Sqrt(Math.Pow((timestep*Vx), 2) + Math.Pow((timestep*Vy), 2))
+            };
 
-            DenseMatrix z_est = new DenseMatrix(7, 1); //7-Row state vector: x, vx, y, vy, r, g, b
-            z_est[0, 0] = this.x;
-            z_est[1, 0] = this.vx;
-            z_est[2, 0] = this.y;
-            z_est[3, 0] = this.vy;
-            z_est[4, 0] = this.red;
-            z_est[5, 0] = this.green;
-            z_est[6, 0] = this.blue;
+            var zEst = new DenseMatrix(7, 1); //7-Row state vector: x, vx, y, vy, r, g, b
+            zEst[0, 0] = X;
+            zEst[1, 0] = Vx;
+            zEst[2, 0] = Y;
+            zEst[3, 0] = Vy;
+            zEst[4, 0] = Red;
+            zEst[5, 0] = Green;
+            zEst[6, 0] = Blue;
 
-            DenseMatrix z_meas = new DenseMatrix(5, 1); //5-Row measurement vector: x,y,r,g,b
-            z_meas[0, 0] = measurements.x;
-            z_meas[1, 0] = measurements.y;
-            z_meas[2, 0] = measurements.red;
-            z_meas[3, 0] = measurements.green;
-            z_meas[4, 0] = measurements.blue;
+            var zMeas = new DenseMatrix(5, 1); //5-Row measurement vector: x,y,r,g,b
+            zMeas[0, 0] = measurements.X;
+            zMeas[1, 0] = measurements.Y;
+            zMeas[2, 0] = measurements.Red;
+            zMeas[3, 0] = measurements.Green;
+            zMeas[4, 0] = measurements.Blue;
 
-            DenseMatrix P_bar = new DenseMatrix(7, 7);
-            P_bar[0, 0] = this.cov_x;
-            P_bar[1, 1] = this.cov_vx;
-            P_bar[2, 2] = this.cov_y;
-            P_bar[3, 3] = this.cov_vy;
-            P_bar[4, 4] = this.cov_red;
-            P_bar[5, 5] = this.cov_green;
-            P_bar[6, 6] = this.cov_blue;
+            var pBar = new DenseMatrix(7, 7);
+            pBar[0, 0] = CovX;
+            pBar[1, 1] = CovVx;
+            pBar[2, 2] = CovY;
+            pBar[3, 3] = CovVy;
+            pBar[4, 4] = CovRed;
+            pBar[5, 5] = CovGreen;
+            pBar[6, 6] = CovBlue;
 
             //DenseMatrix B = H * P_bar * H;
-            DenseMatrix z_next = F * z_est;
-            DenseMatrix F_transpose = (DenseMatrix)F.Transpose();
-            DenseMatrix P_next = (F * P_bar * F_transpose) + Q;
-            DenseMatrix y_residual = z_meas - H * z_next;
-            DenseMatrix H_transpose = (DenseMatrix)H.Transpose();
-            DenseMatrix S = H * P_next * H_transpose + R;
-            DenseMatrix S_inv =(DenseMatrix) S.Inverse();
-            DenseMatrix K = P_next * H_transpose *S_inv;
-            DenseMatrix z_post = z_next + K * y_residual;
-            DenseMatrix P_post = (DenseMatrix.Identity(7) - K * H) * P_next;
+            var zNext = F * zEst;
+            var fTranspose = (DenseMatrix)F.Transpose();
+            var pNext = (F * pBar * fTranspose) + Q;
+            var yResidual = zMeas - H * zNext;
+            var hTranspose = (DenseMatrix)H.Transpose();
+            var s = H * pNext * hTranspose + R;
+            var sInv =(DenseMatrix) s.Inverse();
+            var k = pNext * hTranspose *sInv;
+            var zPost = zNext + k * yResidual;
+            var pPost = (DenseMatrix.Identity(7) - k * H) * pNext;
 
             //Move values from matrix form into object properties
-            updatedState.cov_x = P_post[0, 0];
-            updatedState.cov_vx = P_post[1, 1];
-            updatedState.cov_y = P_post[2, 2];
-            updatedState.cov_vy = P_post[3, 3];
-            updatedState.cov_red = P_post[4, 4];
-            updatedState.cov_green = P_post[5, 5];
-            updatedState.cov_blue = P_post[6, 6];
+            updatedState.CovX = pPost[0, 0];
+            updatedState.CovVx = pPost[1, 1];
+            updatedState.CovY = pPost[2, 2];
+            updatedState.CovVy = pPost[3, 3];
+            updatedState.CovRed = pPost[4, 4];
+            updatedState.CovGreen = pPost[5, 5];
+            updatedState.CovBlue = pPost[6, 6];
 
-            updatedState.x = z_post[0, 0];
-            updatedState.vx = z_post[1, 0];
-            updatedState.y = z_post[2, 0];
-            updatedState.vy = z_post[3, 0];
-            updatedState.red = z_post[4, 0];
-            updatedState.green = z_post[5, 0];
-            updatedState.blue = z_post[6, 0];
+            updatedState.X = zPost[0, 0];
+            updatedState.Vx = zPost[1, 0];
+            updatedState.Y = zPost[2, 0];
+            updatedState.Vy = zPost[3, 0];
+            updatedState.Red = zPost[4, 0];
+            updatedState.Green = zPost[5, 0];
+            updatedState.Blue = zPost[6, 0];
 
             return updatedState;
         }
 
-        public static DenseMatrix residual(DenseMatrix z_est, DenseMatrix z_meas)
+        public static DenseMatrix Residual(DenseMatrix zEst, DenseMatrix zMeas)
         {
-            DenseMatrix residual = z_meas - z_est;
+            var residual = zMeas - zEst;
             return residual;
         }
 
@@ -840,29 +832,27 @@ namespace VTC.Kernel
 
     public struct Measurements
     {
-        public double x;
-        public double y;
-        public double red;
-        public double green;
-        public double blue;
+        public double X;
+        public double Y;
+        public double Red;
+        public double Green;
+        public double Blue;
     }
 
     public enum Turn { Left, Right, Straight, Unknown};
 
     public struct Vehicle
     {
-        public List<StateEstimate> state_history;
+        public List<StateEstimate> StateHistory;
 
-        public Vehicle(StateEstimate initial_state)
-        {   
-            state_history = new List<StateEstimate>();
-            state_history.Add(initial_state);
+        public Vehicle(StateEstimate initialState)
+        {
+            StateHistory = new List<StateEstimate> {initialState};
         }
 
-        public Vehicle(List<StateEstimate> state_history_old, StateEstimate current_state)
+        public Vehicle(IEnumerable<StateEstimate> stateHistoryOld, StateEstimate currentState)
         {
-            state_history = new List<StateEstimate>(state_history_old);
-            state_history.Add(current_state);
+            StateHistory = new List<StateEstimate>(stateHistoryOld) {currentState};
         }
     }
 

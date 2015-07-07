@@ -29,7 +29,7 @@ namespace OptAssignTest
                     {
                         Assert.AreEqual(script.Cars.Count, vista.CurrentVehicles.Count, "Car still should be detected");
 
-                        Assert.IsTrue(vista.CurrentVehicles[0].state_history.Last().missed_detections > 0,
+                        Assert.IsTrue(vista.CurrentVehicles[0].StateHistory.Last().MissedDetections > 0,
                             "Car visibility loss should be detected.");
                     }
 
@@ -64,7 +64,7 @@ namespace OptAssignTest
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car still should be detected.");
 
-                        Assert.IsTrue(vehicles[0].state_history.Last().missed_detections > 0, "Car visibility loss should be detected.");
+                        Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections > 0, "Car visibility loss should be detected.");
                     }
 
                     // car should reappear, and should be recognized as already tracked
@@ -72,8 +72,8 @@ namespace OptAssignTest
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected");
 
-                        Assert.IsTrue(vehicles[0].state_history.Count > frameWithReappearence, "It should be the same car as before.");
-                        Assert.IsTrue(vehicles[0].state_history.Last().missed_detections == 0, "Car visibility reappearence should be detected.");
+                        Assert.IsTrue(vehicles[0].StateHistory.Count > frameWithReappearence, "It should be the same car as before.");
+                        Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections == 0, "Car visibility reappearence should be detected.");
                     }
                 });
         }
@@ -102,7 +102,7 @@ namespace OptAssignTest
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car still should be detected.");
 
-                        Assert.IsTrue(vehicles[0].state_history.Last().missed_detections > 0, "Car visibility loss should be detected.");
+                        Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections > 0, "Car visibility loss should be detected.");
                     }
 
                     // car should reappear, and should be recognized as already tracked
@@ -110,7 +110,7 @@ namespace OptAssignTest
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected");
 
-                        Assert.IsTrue(vehicles[0].state_history.Count < frameWhenDetectionLost, "It should be detected as a new car.");
+                        Assert.IsTrue(vehicles[0].StateHistory.Count < frameWhenDetectionLost, "It should be detected as a new car.");
                         
                         // ER: TODO: not working by some reason
                         //Assert.IsTrue(vehicles[0].state_history.Last().missed_detections == 0, "No missed detection expected.");

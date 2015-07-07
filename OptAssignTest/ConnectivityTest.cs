@@ -59,7 +59,7 @@ namespace OptAssignTest
                 StateEstimate result;
                 result = GetSingleState();
 
-                while (result.x != i)
+                while (result.X != i)
                 {
                     result = GetSingleState();
                     if (failedChecks++ > maxFailedChecks)
@@ -83,8 +83,8 @@ namespace OptAssignTest
             Vista vista = new IntersectionVista(testSettings, 640, 480);
             List<StateEstimate> stateHistory = new List<StateEstimate>();
             StateEstimate[] stateEstimates = new StateEstimate[1];
-            stateEstimates[0].x = x;
-            stateEstimates[0].y = y;
+            stateEstimates[0].X = x;
+            stateEstimates[0].Y = y;
             string postString;
 
             string postUrl = HttpPostReportItem.PostStateString(stateEstimates, "4",
@@ -131,8 +131,8 @@ namespace OptAssignTest
                         //    throw (new Exception("Json response is null"));
 
                         //JsonStateEstimates loopbackJsonStateEstimates = (JsonStateEstimates)serializer.ReadObject(objStream);
-                        stateEstimate.x = Convert.ToDouble(x_string);
-                        stateEstimate.y = Convert.ToDouble(y_string);
+                        stateEstimate.X = Convert.ToDouble(x_string);
+                        stateEstimate.Y = Convert.ToDouble(y_string);
 
                         objStream.Close();
                     }

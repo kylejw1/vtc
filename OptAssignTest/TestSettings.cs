@@ -23,6 +23,21 @@ namespace OptAssignTest
             get { return 10; }
         }
 
+        public int MinObjectSize
+        {
+            get { return 50; }
+        }
+
+        public int MoGUpdateDownsampling
+        {
+            get { return 50; }
+        }
+
+        public int VelocityFieldResolution
+        {
+            get { return 50; }
+        }
+
         public int KHypotheses
         {
             get { return 2; }
@@ -133,6 +148,72 @@ namespace OptAssignTest
         public double FrameHeight
         {
             get { return 200; }
+        }
+
+        public double CompensationGain
+        {
+            get { return 30; }
+        }
+
+        public double Q_color
+        {
+            get { return 20; }
+        }
+
+        public double Q_position
+        {
+            get { return 200; }
+        }
+
+        public double R_color
+        {
+            get { return 5; }
+        }
+
+        public double R_position
+        {
+            get { return 50; }
+        }
+
+        public double Timestep
+        {
+            get { return 0.033; }
+        }
+
+
+        public double VehicleInitialCovX
+        {
+            get { return 2; }
+        }
+
+        public double VehicleInitialCovVX
+        {
+            get { return 300; }
+        }
+
+        public double VehicleInitialCovY
+        {
+            get { return 2; }
+        }
+
+        public double VehicleInitialCovVY
+        {
+            get { return 300; }
+        }
+
+        public double VehicleInitialCovR
+        {
+            get { return 50; }
+        }
+
+        public double VehicleInitialCovG
+        {
+            get { return 50; }
+        }
+
+        public double VehicleInitialCovB
+        {
+            get { return 50; }
         }
     }
 }

@@ -315,7 +315,7 @@ namespace VTC.Kernel.Vistas
 					var x = maxLocation[0];
 					var y = maxLocation[1];
 					var colour = GetBlobColour(frame, x, y, 3.0);
-					var coords = new Measurements() { x = x, y = y, red = colour.Red, green = colour.Green, blue = colour.Blue };
+					var coords = new Measurements() { X = x, Y = y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
 					coordinates[detection_count] = coords;
 
                     //Do this last so that it doesn't interfere with color sampling
@@ -406,11 +406,11 @@ namespace VTC.Kernel.Vistas
                     var colour = GetBlobColour(frame, x, y, 3.0);
                     var coords = new Measurements()
                     {
-                        x = x,
-                        y = y,
-                        red = colour.Red,
-                        green = colour.Green,
-                        blue = colour.Blue
+                        X = x,
+                        Y = y,
+                        Red = colour.Red,
+                        Green = colour.Green,
+                        Blue = colour.Blue
                     };
                     coordinates[i] = coords;
                     //Do this last so that it doesn't interfere with color sampling
@@ -446,24 +446,24 @@ namespace VTC.Kernel.Vistas
             vehicles.ForEach(delegate(Vehicle vehicle)
             {
 
-                var lastState = vehicle.state_history.Last();
+                var lastState = vehicle.StateHistory.Last();
 
-                float x = (float)lastState.x;
-                float y = (float)lastState.y;
+                float x = (float)lastState.X;
+                float y = (float)lastState.Y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
 
-                float radius = validation_region_deviation * ((float)Math.Sqrt(Math.Pow(lastState.cov_x, 2) + (float)Math.Pow(lastState.cov_y, 2)));
+                float radius = validation_region_deviation * ((float)Math.Sqrt(Math.Pow(lastState.CovX, 2) + (float)Math.Pow(lastState.CovY, 2)));
                 if (radius < 2.0)
                     radius = (float)2.0;
 
-                float vx_render = (float)(velocity_render_multiplier * lastState.vx);
-                float vy_render = (float)(velocity_render_multiplier * lastState.vy);
+                float vx_render = (float)(velocity_render_multiplier * lastState.Vx);
+                float vy_render = (float)(velocity_render_multiplier * lastState.Vy);
 
 
                 if (render_clean)
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.state_history.Last().blue, vehicle.state_history.Last().green, vehicle.state_history.Last().red), 2);
+                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.StateHistory.Last().Blue, vehicle.StateHistory.Last().Green, vehicle.StateHistory.Last().Red), 2);
                     frame.Draw(new CircleF(new PointF(x, y), 2), _stateColorGreen, 1);
                 }
                 else
