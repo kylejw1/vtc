@@ -37,6 +37,8 @@ namespace VTC
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
 
+       private bool _suspendProcessing = false;
+
       private readonly DateTime _applicationStartTime;
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
@@ -44,7 +46,6 @@ namespace VTC
 
         // unit tests has own settings, so need to store "pairs" (capture, settings)
       private CaptureContext[] _testCaptureContexts;
-
 
        /// <summary>
        /// Active camera.
@@ -393,39 +394,41 @@ namespace VTC
 
       void ProcessFrame(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
-          {
-              
-              //Workaround - dispose and restart capture if camera starts returning null. 
-              //TODO: Investigate - why is this necessary?
-              if (frame == null)
+              using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
               {
-                  SelectedCamera.Destroy();
-                  SelectedCamera.Init(_settings);
-                  
-                Debug.WriteLine("Restarting camera: " + DateTime.Now);
-                return;
-              }
+                  //Workaround - dispose and restart capture if camera starts returning null. 
+                  //TODO: Investigate - why is this necessary?
+                  if (frame == null)
+                  {
+                      SelectedCamera.Destroy();
+                      SelectedCamera.Init(_settings);
 
-              Image<Bgr, Byte> frameForProcessing = frame.Clone(); // Necessary so that frame.Data becomes accessible
+                      Debug.WriteLine("Restarting camera: " + DateTime.Now);
+                      return;
+                  }
 
-              // Send the new image frame to the vista for processing
-              _vista.Update(frameForProcessing);
+                  Image<Bgr, Byte> frameForProcessing = frame.Clone(); // Necessary so that frame.Data becomes accessible
 
-              // Update image boxes
-              UpdateImageBoxes(frameForProcessing);
+                  // Send the new image frame to the vista for processing
+                  _vista.Update(frameForProcessing);
 
-              // Update statistics
-              trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
-              tbVistaStats.Text = _vista.GetStatString();
+                  // Update image boxes
+                  UpdateImageBoxes(frameForProcessing);
 
-              // Save R,G,B samples
-              StoreRGBSample(frameForProcessing);
-              Thread.Sleep((int)_settings.Timestep * 1000);
-              TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
-              timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+                  // Update statistics
+                  trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
+                  tbVistaStats.Text = _vista.GetStatString();
 
-          }
+                  // Save R,G,B samples
+                  StoreRGBSample(frameForProcessing);
+                  Thread.Sleep((int)_settings.Timestep * 1000);
+                  TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
+                  timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+
+                  if (delayProcessingCheckbox.Checked)
+                      Thread.Sleep(500);
+
+              }   
       }
 
 
@@ -492,7 +495,7 @@ namespace VTC
               StateEstimate[] stateEstimates = _vista.CurrentVehicles.Select(v => v.StateHistory.Last()).ToArray();
               string postString;
               string postUrl = HttpPostReportItem.PostStateString(stateEstimates, _settings.IntersectionID, _settings.ServerUrl, out postString);
-              HttpPostReportItem.SendStatePOST(postUrl, postString);
+              HttpPostReportItem.SendStatePost(postUrl, postString);
               success = true;
           }
           catch (Exception ex)
@@ -556,17 +559,18 @@ namespace VTC
 
       private void exportTrainingImagesButton_Click(object sender, EventArgs e)
       {
-          using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
-          {
-              if (frame != null)
+          _suspendProcessing = true;
+              using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
               {
-                  
-                  //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr,float>());
-                  ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, _vista.Training_Image.Convert<Bgr,float>(), _vista.CurrentVehicles);
-                  eT.Show();
+                  if (frame != null)
+                  {
+                      //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr,float>());
+                      //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, _vista.Training_Image.Convert<Bgr,float>(), _vista.CurrentVehicles);
+                      ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
+                      eT.Show();
+                  }
               }
-          }
-
+          _suspendProcessing = false;
       }
 
        private Point _rgbSamplePoint;

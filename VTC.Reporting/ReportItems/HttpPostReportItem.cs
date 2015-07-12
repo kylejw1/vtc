@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Web;
 using VTC.Kernel;
@@ -11,12 +11,9 @@ namespace VTC.Reporting.ReportItems
     public class HttpPostReportItem
     {
 
-        public static void SendStatePOST(string postUrl, string postString)
+        public static void SendStatePost(string postUrl, string postString)
         {
-
-            
-
-                HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(postUrl);
+                var objRequest = (HttpWebRequest)WebRequest.Create(postUrl);
                 objRequest.KeepAlive = true;
                 objRequest.Pipelined = true;
                 objRequest.Timeout = 2000;
@@ -30,27 +27,24 @@ namespace VTC.Reporting.ReportItems
                 ServicePointManager.Expect100Continue = false;
 
                 //// post data is sent as a stream
-                using(StreamWriter myWriter = new StreamWriter(objRequest.GetRequestStream()))
+                using(var myWriter = new StreamWriter(objRequest.GetRequestStream()))
                 {
                     myWriter.Write(postString);
                     myWriter.Close();
                 }
                 objRequest.GetResponse().Close();
-                objRequest.Abort();
-
-                
-            
+                objRequest.Abort();   
         }
 
-        public static string PostStateString(StateEstimate[] stateEstimates, string IntersectionID, string ServerUrl, out string postString)
+        public static string PostStateString(StateEstimate[] stateEstimates, string intersectionId, string serverUrl, out string postString)
         {
-            Dictionary<string, string> postValues = new Dictionary<string, string>();
-            for (int vehicleCount = 0; vehicleCount < stateEstimates.Length; vehicleCount++)
+            var postValues = new Dictionary<string, string>();
+            for (var vehicleCount = 0; vehicleCount < stateEstimates.Length; vehicleCount++)
             {
-                String x = stateEstimates[vehicleCount].X.ToString(CultureInfo.InvariantCulture);
-                String y = stateEstimates[vehicleCount].Y.ToString(CultureInfo.InvariantCulture);
-                String vx = stateEstimates[vehicleCount].Vx.ToString(CultureInfo.InvariantCulture);
-                String vy = stateEstimates[vehicleCount].Vy.ToString(CultureInfo.InvariantCulture);
+                var x = stateEstimates[vehicleCount].X.ToString(CultureInfo.InvariantCulture);
+                var y = stateEstimates[vehicleCount].Y.ToString(CultureInfo.InvariantCulture);
+                var vx = stateEstimates[vehicleCount].Vx.ToString(CultureInfo.InvariantCulture);
+                var vy = stateEstimates[vehicleCount].Vy.ToString(CultureInfo.InvariantCulture);
                 const string zero = "0";
                 postValues.Add("state_sample[states_attributes][" + vehicleCount + "][x]", x);
                 postValues.Add("state_sample[states_attributes][" + vehicleCount + "][vx]", vx);
@@ -62,18 +56,14 @@ namespace VTC.Reporting.ReportItems
             if (stateEstimates.Length == 0)
                 postValues.Add("state_sample[states_attributes][]", "");
 
-            postValues.Add("intersection_id", IntersectionID);
+            postValues.Add("intersection_id", intersectionId);
 
 
-            postString = "";
-            foreach (KeyValuePair<string, string> postValue in postValues)
-            {
-                postString += postValue.Key + "=" + HttpUtility.UrlEncode(postValue.Value) + "&";
-            }
+            postString = postValues.Aggregate("", (current, postValue) => current + (postValue.Key + "=" + HttpUtility.UrlEncode(postValue.Value) + "&"));
             postString = postString.TrimEnd('&');
 
             //Upload state to server
-            string postUrl = "http://" + ServerUrl + "/state_samples";
+            var postUrl = "http://" + serverUrl + "/state_samples";
             return postUrl;
         }
     }

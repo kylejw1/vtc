@@ -58,6 +58,7 @@ namespace VTC
             this.trackCountBox = new System.Windows.Forms.TextBox();
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
             this.MoGcheckBox = new System.Windows.Forms.CheckBox();
+            this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -289,11 +290,22 @@ namespace VTC
             this.MoGcheckBox.UseVisualStyleBackColor = true;
             this.MoGcheckBox.CheckedChanged += new System.EventHandler(this.MoGcheckBox_CheckedChanged);
             // 
+            // delayProcessingCheckbox
+            // 
+            this.delayProcessingCheckbox.AutoSize = true;
+            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 352);
+            this.delayProcessingCheckbox.Name = "delayProcessingCheckbox";
+            this.delayProcessingCheckbox.Size = new System.Drawing.Size(107, 17);
+            this.delayProcessingCheckbox.TabIndex = 71;
+            this.delayProcessingCheckbox.Text = "Delay processing";
+            this.delayProcessingCheckbox.UseVisualStyleBackColor = true;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(554, 390);
+            this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
             this.Controls.Add(this.updateSamplePoint);
             this.Controls.Add(this.saveRGBSamplesCheckBox);
@@ -356,6 +368,7 @@ namespace VTC
       private TextBox trackCountBox;
       private CheckBox pushStateCheckbox;
       private CheckBox MoGcheckBox;
+      private CheckBox delayProcessingCheckbox;
 
 
    }

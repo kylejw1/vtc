@@ -2,6 +2,12 @@ namespace VTC.Kernel.Settings
 {
     public interface IMultipleHypothesisSettings
     {
+
+        /// <summary>
+        /// Minimum object size for blob detection. 
+        /// </summary>
+        int MinObjectSize { get; }
+
         /// <summary>
         /// Number of misses to consider an object gone.
         /// </summary>

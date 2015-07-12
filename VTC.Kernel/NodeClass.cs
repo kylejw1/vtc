@@ -99,7 +99,7 @@ namespace VTC.Kernel
             var list = new List<Node<T>>();
             var root = GetRoot();
             Action<Node<T>> traverseLeafnodes = null;
-            traverseLeafnodes = (x) => {
+            traverseLeafnodes = x => {
                if (x.Children == null || x.Children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
                    list.Add(x); 
                else
@@ -154,13 +154,12 @@ namespace VTC.Kernel
         {
             var numChildren = 0;
             Action<Node<T>> traverse = null;
-            traverse = (x) =>
+            traverse = x =>
             {
                 numChildren++;
                 if (x.Children == null || x.Children.Count == 0) //Not sure why checking against null doesn't work here, maybe IsNull is not implemented. Why isn't this problem encountered in other places?
                     return;
-                else
-                    x.Children.ForEach(traverse);
+                x.Children.ForEach(traverse);
             };
             traverse(this);
             return numChildren-1;
@@ -402,8 +401,7 @@ namespace VTC.Kernel
 
             if (a.ChildProbability() < b.ChildProbability())
                 return 1;
-            else
-                return 0;
+            return 0;
         }
         
         /// <summary>
@@ -421,7 +419,7 @@ namespace VTC.Kernel
 
         public double ChildProbability()
         {
-            double prob = TraverseChildProbabilities(this);
+            var prob = TraverseChildProbabilities(this);
             return prob;
         }
 

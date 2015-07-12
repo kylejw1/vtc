@@ -89,7 +89,7 @@ namespace OptAssignTest
 
             string postUrl = HttpPostReportItem.PostStateString(stateEstimates, "4",
                 "dev.traffic-camera.com", out postString);
-            HttpPostReportItem.SendStatePOST(postUrl, postString);
+            HttpPostReportItem.SendStatePost(postUrl, postString);
         }
 
         private static StateEstimate GetSingleState()

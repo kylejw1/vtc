@@ -35,13 +35,15 @@
             this.autoExportButton = new System.Windows.Forms.Button();
             this.autoExportPositives = new System.Windows.Forms.Button();
             this.exportMonoTrainingSamples = new System.Windows.Forms.CheckBox();
+            this.scaleBlobsCheckbox = new System.Windows.Forms.CheckBox();
+            this.maskImageCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // objectClassGroupBox
             // 
-            this.objectClassGroupBox.Location = new System.Drawing.Point(12, 210);
+            this.objectClassGroupBox.Location = new System.Drawing.Point(12, 250);
             this.objectClassGroupBox.Name = "objectClassGroupBox";
-            this.objectClassGroupBox.Size = new System.Drawing.Size(180, 282);
+            this.objectClassGroupBox.Size = new System.Drawing.Size(180, 242);
             this.objectClassGroupBox.TabIndex = 7;
             this.objectClassGroupBox.TabStop = false;
             this.objectClassGroupBox.Text = "Object Classification";
@@ -108,11 +110,33 @@
             this.exportMonoTrainingSamples.Text = "Convert to mono";
             this.exportMonoTrainingSamples.UseVisualStyleBackColor = true;
             // 
+            // scaleBlobsCheckbox
+            // 
+            this.scaleBlobsCheckbox.AutoSize = true;
+            this.scaleBlobsCheckbox.Location = new System.Drawing.Point(12, 158);
+            this.scaleBlobsCheckbox.Name = "scaleBlobsCheckbox";
+            this.scaleBlobsCheckbox.Size = new System.Drawing.Size(81, 17);
+            this.scaleBlobsCheckbox.TabIndex = 14;
+            this.scaleBlobsCheckbox.Text = "Scale blobs";
+            this.scaleBlobsCheckbox.UseVisualStyleBackColor = true;
+            // 
+            // maskImageCheckbox
+            // 
+            this.maskImageCheckbox.AutoSize = true;
+            this.maskImageCheckbox.Location = new System.Drawing.Point(12, 181);
+            this.maskImageCheckbox.Name = "maskImageCheckbox";
+            this.maskImageCheckbox.Size = new System.Drawing.Size(83, 17);
+            this.maskImageCheckbox.TabIndex = 15;
+            this.maskImageCheckbox.Text = "Mask image";
+            this.maskImageCheckbox.UseVisualStyleBackColor = true;
+            // 
             // ExportTrainingSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(926, 643);
+            this.Controls.Add(this.maskImageCheckbox);
+            this.Controls.Add(this.scaleBlobsCheckbox);
             this.Controls.Add(this.exportMonoTrainingSamples);
             this.Controls.Add(this.autoExportPositives);
             this.Controls.Add(this.autoExportButton);
@@ -137,6 +161,8 @@
         private System.Windows.Forms.Button autoExportButton;
         private System.Windows.Forms.Button autoExportPositives;
         private System.Windows.Forms.CheckBox exportMonoTrainingSamples;
+        private System.Windows.Forms.CheckBox scaleBlobsCheckbox;
+        private System.Windows.Forms.CheckBox maskImageCheckbox;
 
     }
 }

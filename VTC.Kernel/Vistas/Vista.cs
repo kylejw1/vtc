@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-
+using VTC.Kernel;
 using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Cvb;
@@ -24,14 +23,13 @@ namespace VTC.Kernel.Vistas
 
         #region Static colors
 
-        private static readonly Bgr _whiteColor = new Bgr(Color.White);
-        private static readonly Gray _tempMovementGray = new Gray(0);
-        private static readonly Bgr _blobCenterColor = new Bgr(255.0, 255.0, 255.0);
-        private static readonly Bgr _greenColor = new Bgr(Color.Green);
-        private static readonly Bgr _stateColorGreen = new Bgr(0.0, 255.0, 0.0);
-        private static readonly Bgr _stateColorRed = new Bgr(0.0, 0.0, 255.0);
+        private static readonly Bgr WhiteColor = new Bgr(Color.White);
+        private static readonly Gray TempMovementGray = new Gray(0);
+        private static readonly Bgr GreenColor = new Bgr(Color.Green);
+        private static readonly Bgr StateColorGreen = new Bgr(0.0, 255.0, 0.0);
+        private static readonly Bgr StateColorRed = new Bgr(0.0, 0.0, 255.0);
         private readonly Gray _thresholdColor;
-        private static readonly Gray _ceilingColor = new Gray(255);
+        private static readonly Gray CeilingColor = new Gray(255);
 
         #endregion
 
@@ -39,20 +37,22 @@ namespace VTC.Kernel.Vistas
         protected abstract void UpdateChildClassStats(List<Vehicle> deleted);
 
         //************* Main image variables ***************
-        private Image<Bgr, Byte> Frame; //current Frame from camera
-        private Image<Bgr, float> Color_Difference; //Difference between the two frames
-        private Image<Bgr, float> ROI_image; //Area occupied by traffic
-        private readonly int Width;
-        private readonly int Height;
-        
-        public Image<Gray, Byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
-        public Image<Gray, Byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
-        public Image<Bgr, float> Color_Background { get; private set; } //Average Background being formed
-        public Image<Bgr, Byte> Training_Image { get; private set; } //Image to be exported for training set
+        public Image<Bgr, Byte> _frame; //current Frame from camera
+        private Image<Bgr, float> _roiImage; //Area occupied by traffic
+        private readonly int _width;
+        private readonly int _height;
 
-        public Image<Bgr, Byte>[] MeanImages; // Mixture of Gaussian parameters
-        public Image<Gray, Byte>[] VarianceImages; 
-        public Image<Gray, Byte>[] WeightImages;
+        public Measurements[] MeasurementsArray;
+        public SortedList<CvBlob, int> BlobsWithArea;
+        
+        public Image<Gray, byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
+        public Image<Gray, byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
+        public Image<Bgr, float> Color_Background { get; private set; } //Average Background being formed
+        public Image<Bgr, byte> Training_Image { get; private set; } //Image to be exported for training set
+
+        public Image<Bgr, byte>[] MeanImages; // Mixture of Gaussian parameters
+        public Image<Gray, byte>[] VarianceImages; 
+        public Image<Gray, byte>[] WeightImages;
 
         public MoGBackground MoGBackgroundSingleton; 
 
@@ -86,7 +86,6 @@ namespace VTC.Kernel.Vistas
 
         private double PerCar
         {
-            get { return _perCar; }
             set
             {
                 _perCar = Math.Max(value, Settings.PerCarMinimum);
@@ -120,13 +119,13 @@ namespace VTC.Kernel.Vistas
 
                 _regionConfiguration = value;
 
-                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, _whiteColor);
+                _roiImage = RegionConfiguration.RoiMask.GetMask(_width, _height, WhiteColor);
 
                 ResetStats();
             }
         }
 
-        private EventConfig.EventConfig _eventConfiguration = null;
+        private EventConfig.EventConfig _eventConfiguration;
 
         public EventConfig.EventConfig EventConfiguration
         {
@@ -140,7 +139,7 @@ namespace VTC.Kernel.Vistas
 
                 _eventConfiguration = value;
 
-                ROI_image = RegionConfiguration.RoiMask.GetMask(Width, Height, _whiteColor);
+                _roiImage = RegionConfiguration.RoiMask.GetMask(_width, _height, WhiteColor);
             }
         }
 
@@ -152,8 +151,8 @@ namespace VTC.Kernel.Vistas
         protected Vista(ISettings settings, int width, int height)
         {
             Settings = settings;
-            Width = width;
-            Height = height;
+            _width = width;
+            _height = height;
 
             RegionConfiguration = RegionConfig.RegionConfig.Load(settings.RegionConfigPath);
             if (null == RegionConfiguration)
@@ -164,7 +163,7 @@ namespace VTC.Kernel.Vistas
             LastDetectionCount = 0;
             RawMass = 0;
 
-            var vf = new VelocityField(Settings.VelocityFieldResolution, Settings.VelocityFieldResolution, Width, Height); 
+            var vf = new VelocityField(Settings.VelocityFieldResolution, Settings.VelocityFieldResolution, _width, _height); 
 
             _thresholdColor = new Gray(Settings.ColorThreshold);
             MHT = new MultipleHypothesisTracker(settings, vf);
@@ -172,8 +171,8 @@ namespace VTC.Kernel.Vistas
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
 
-            MoGBackgroundSingleton = new MoGBackground(Width, Height);
-            
+            MoGBackgroundSingleton = new MoGBackground(_width, _height);
+            BlobsWithArea = new SortedList<CvBlob, int>();
         }
 
         public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
@@ -208,7 +207,7 @@ namespace VTC.Kernel.Vistas
         public void Update(Image<Bgr, Byte> newFrame)
         {
             numProcessedFrames++;
-            Frame = newFrame;
+            _frame = newFrame;
 
             if (Color_Background == null) //we need at least one frame to initialize the background
             {
@@ -232,8 +231,8 @@ namespace VTC.Kernel.Vistas
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
                 //var measurements = FindBlobCenters(newFrame, count);
-                var measurements = FindClosedBlobCenters(newFrame);
-                MHT.Update(measurements);
+                MeasurementsArray = FindClosedBlobCenters(newFrame);
+                MHT.Update(MeasurementsArray);
 
                 // First update base class stats
                 UpdateVistaStats(MHT.DeletedVehicles);
@@ -273,7 +272,7 @@ namespace VTC.Kernel.Vistas
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
             Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
-            Image<Bgr, float> maskedDifference = colorDifference.And(ROI_image);  
+            Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
             Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
 
             movementMask._Erode(1);
@@ -281,7 +280,7 @@ namespace VTC.Kernel.Vistas
             movementMask._Erode(1);
             movementMask._Dilate(1);
             movementMask._SmoothGaussian(5, 5, 1, 1);
-            movementMask._ThresholdBinary(_thresholdColor, _ceilingColor);
+            movementMask._ThresholdBinary(_thresholdColor, CeilingColor);
 
             return movementMask;
         }
@@ -310,7 +309,7 @@ namespace VTC.Kernel.Vistas
                     Point[] maxLocations;
                     tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
                     int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), Settings.CarRadius), _tempMovementGray, 0);
+                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), Settings.CarRadius), TempMovementGray, 0);
 					
 					var x = maxLocation[0];
 					var y = maxLocation[1];
@@ -382,39 +381,32 @@ namespace VTC.Kernel.Vistas
                     }
                 }
 
-                Emgu.CV.Cvb.CvBlobs resultingImgBlobs = new Emgu.CV.Cvb.CvBlobs();
-                Emgu.CV.Cvb.CvBlobDetector bDetect = new Emgu.CV.Cvb.CvBlobDetector();
-                bDetect.Detect(tempMovement_Mask, resultingImgBlobs);
-                int numWebcamBlobsFound = resultingImgBlobs.Count;
-                if (numWebcamBlobsFound > Settings.MaxObjectCount)
-                    numWebcamBlobsFound = Settings.MaxObjectCount;
+                var bf = new BlobFinder();
+                BlobsWithArea = bf.FindBlobs(tempMovement_Mask, Settings.MinObjectSize);
 
-                BlobAreaComparer areaComparer = new BlobAreaComparer();
-                SortedList<CvBlob, int> blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
-                foreach (Emgu.CV.Cvb.CvBlob targetBlob in resultingImgBlobs.Values)
-                    if (targetBlob.Area > Settings.MinObjectSize)
-                        blobsWithArea.Add(targetBlob, targetBlob.Area);
-                
-                numWebcamBlobsFound = blobsWithArea.Count();
+                int numWebcamBlobsFound = BlobsWithArea.Count();
 
                 coordinates = new Measurements[numWebcamBlobsFound];
                 for(int i=0; i<numWebcamBlobsFound; i++)
                 {
-                    CvBlob targetBlob = blobsWithArea.ElementAt(i).Key;
-                    double x = targetBlob.Centroid.X;
-                    double y = targetBlob.Centroid.Y;
-                    var colour = GetBlobColour(frame, x, y, 3.0);
-                    var coords = new Measurements()
+                    if (i < Settings.MaxTargets)
                     {
-                        X = x,
-                        Y = y,
-                        Red = colour.Red,
-                        Green = colour.Green,
-                        Blue = colour.Blue
-                    };
-                    coordinates[i] = coords;
-                    //Do this last so that it doesn't interfere with color sampling
-                    frame.Draw(new CircleF(new PointF((float) x, (float) y), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                        CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
+                        double x = targetBlob.Centroid.X;
+                        double y = targetBlob.Centroid.Y;
+                        var colour = GetBlobColour(frame, x, y, 3.0);
+                        var coords = new Measurements()
+                        {
+                            X = x,
+                            Y = y,
+                            Red = colour.Red,
+                            Green = colour.Green,
+                            Blue = colour.Blue
+                        };
+                        coordinates[i] = coords;
+                        //Do this last so that it doesn't interfere with color sampling
+                        frame.Draw(new CircleF(new PointF((float)x, (float)y), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                    }
                 } 
             }
             return coordinates;
@@ -424,8 +416,8 @@ namespace VTC.Kernel.Vistas
         {
             if (drawMaskPolygons)
             {
-                Image<Bgr, float> Overlay = new Image<Bgr, float>(Width, Height, _greenColor);
-                Overlay = Overlay.And(ROI_image);
+                Image<Bgr, float> Overlay = new Image<Bgr, float>(_width, _height, GreenColor);
+                Overlay = Overlay.And(_roiImage);
                 Overlay.Acc(Color_Background);
 
                 return Overlay;
@@ -439,7 +431,7 @@ namespace VTC.Kernel.Vistas
 
         public Image<Bgr, byte> GetCurrentStateImage()
         {
-            var frame = Frame.Clone();
+            var frame = _frame.Clone();
 
             var vehicles = MHT.CurrentVehicles;
 
@@ -464,12 +456,12 @@ namespace VTC.Kernel.Vistas
                 if (render_clean)
                 {
                     frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.StateHistory.Last().Blue, vehicle.StateHistory.Last().Green, vehicle.StateHistory.Last().Red), 2);
-                    frame.Draw(new CircleF(new PointF(x, y), 2), _stateColorGreen, 1);
+                    frame.Draw(new CircleF(new PointF(x, y), 2), StateColorGreen, 1);
                 }
                 else
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), radius), _stateColorGreen, 1);
-                    frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), _stateColorRed, 1);
+                    frame.Draw(new CircleF(new PointF(x, y), radius), StateColorGreen, 1);
+                    frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), StateColorRed, 1);
                 }
 
             }

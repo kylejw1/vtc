@@ -63,6 +63,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="BlobFinder.cs" />
     <Compile Include="EventConfig\EventConfig.cs" />
     <Compile Include="Extensions\LineSegment2DExtensions.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
