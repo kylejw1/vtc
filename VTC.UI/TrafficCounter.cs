@@ -37,12 +37,12 @@ namespace VTC
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
 
-       private bool _suspendProcessing = false;
-
       private readonly DateTime _applicationStartTime;
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
       private ICaptureSource _selectedCamera;
+
+       private string _appArgument; //For debugging only, delete this later
 
         // unit tests has own settings, so need to store "pairs" (capture, settings)
       private CaptureContext[] _testCaptureContexts;
@@ -100,7 +100,8 @@ namespace VTC
        /// <param name="settings">Application settings.</param>
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, string appArgument = null)
-      {
+       {
+           _appArgument = appArgument;
           InitializeComponent();
 
            _settings = settings;
@@ -400,8 +401,8 @@ namespace VTC
                   //TODO: Investigate - why is this necessary?
                   if (frame == null)
                   {
-                      SelectedCamera.Destroy();
-                      SelectedCamera.Init(_settings);
+                      
+                      SelectedCamera = new VideoFileCapture(_appArgument);
 
                       Debug.WriteLine("Restarting camera: " + DateTime.Now);
                       return;
@@ -559,7 +560,6 @@ namespace VTC
 
       private void exportTrainingImagesButton_Click(object sender, EventArgs e)
       {
-          _suspendProcessing = true;
               using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
               {
                   if (frame != null)
@@ -570,7 +570,6 @@ namespace VTC
                       eT.Show();
                   }
               }
-          _suspendProcessing = false;
       }
 
        private Point _rgbSamplePoint;
@@ -588,6 +587,20 @@ namespace VTC
        private void MoGcheckBox_CheckedChanged(object sender, EventArgs e)
        {
            _vista.EnableMoG = MoGcheckBox.Checked;
+       }
+
+       private void exportDatasetTimer_Tick(object sender, EventArgs e)
+       {
+           if(exportDatasetsCheckbox.Checked)
+           {
+               using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
+               {
+                   ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings,
+                       frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
+                   eT.autoExportScaledPositives();
+               }
+           }
+           
        }
    }
 }

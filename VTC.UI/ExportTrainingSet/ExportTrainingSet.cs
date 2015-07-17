@@ -164,7 +164,7 @@ namespace VTC.ExportTrainingSet
             int subimageHeight = _settings.ClassifierSubframeHeight;
 
             Image<Bgr, float> subimageUnscaled = _frame.GetSubRect(blob.BoundingBox);
-            Image<Bgr, float> subimage = subimageUnscaled.Resize(subimageWidth, subimageHeight, INTER.CV_INTER_AREA);
+            Image<Bgr, float> subimage = subimageUnscaled.Resize(subimageWidth, subimageHeight, Inter.Area);
 
             return subimage;
         }
@@ -257,6 +257,17 @@ namespace VTC.ExportTrainingSet
         private void autoExportPositives_Click(object sender, EventArgs e)
         {
             ExportPositives();
+        }
+
+        public void autoExportScaledPositives()
+        {
+            var bf = new BlobFinder();
+            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+            foreach (var blobWithArea in blobsWithSizes)
+            {
+                Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
+                saveExampleImage(subimage, "Car"); //TODO: Maybe this shouldn't be hardcoded
+            }   
         }
 
         private void ExportPositives()

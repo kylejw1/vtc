@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -11,12 +12,20 @@ namespace DNNClassifier
     /// Single-layer Continuous Restricted Boltzmann Machine implementation
     /// Accepts fixed-length vectors of generic type
     /// </summary>
+    [Serializable]
     public class RBM
     {
         public double[][] Weights;
         public double L;
         public double N;
 
+        public double[][] TrainingSet;
+        public int NumberOfCycles;
+
+        [NonSerialized] private Thread _trainingThread = null;
+        [NonSerialized] private bool stopTraining = false;
+
+        private Random r;
         /// <summary>
         /// Single-layer Continuous Restricted Boltzmann Machine
         /// </summary>
@@ -26,9 +35,11 @@ namespace DNNClassifier
         /// <param name="noiseMagnitude">Noise magnitude in reconstruction</param>
         public RBM(int dataLength, int numHiddenUnits, double learningRate, double noiseMagnitude)
         {
+            r = new Random();
             L = learningRate;
             N = noiseMagnitude;
             InitWeights(dataLength, numHiddenUnits);
+            
         }
 
         public void Train(double[][] trainingSet, int numberOfCycles)
@@ -41,16 +52,44 @@ namespace DNNClassifier
             }
         }
 
+        public void TrainWorker()
+        {
+            var i = 0;
+            while(true)
+            {
+                var index = (i++) % TrainingSet.Length;
+                var input = TrainingSet[index];
+                UpdateWeights(input);
+
+                if(stopTraining)
+                    _trainingThread.Abort();
+            }
+        }
+
+        public void TrainMultithreaded(double[][] trainingSet, int numberOfCycles)
+        {
+            TrainingSet = trainingSet;
+            NumberOfCycles = numberOfCycles;
+
+            stopTraining = false;
+            _trainingThread = new Thread(new ThreadStart(TrainWorker));
+            _trainingThread.Start();
+        }
+
+        public void StopTrainMultithreaded()
+        {
+            stopTraining = true;
+        }
+
         public void InitWeights(int dataLength, int numHiddenUnits)
         {
-            var r = new Random();
             Weights = new double[numHiddenUnits][];
             for (var i = 0; i < numHiddenUnits; i++)
             {
                 Weights[i] = new double[dataLength];
                 for (var j = 0; j < dataLength; j++)
                 {
-                    Weights[i][j] = r.NextDouble();
+                    Weights[i][j] = r.NextDouble()/10;
                 }
             }
         }
@@ -74,12 +113,23 @@ namespace DNNClassifier
 
         public bool[] ComputeActivations(double[] input)
         {
-            var r = new Random();
             var activations = new bool[Weights.Length];
             for (var i = 0; i < Weights.Length; i++)
             {
                 var p = Sigma(ActivationEnergy(input, i));
                 activations[i] = (r.NextDouble() < p);
+                activations[i] = (r.NextDouble() > 0.5) && activations[i];
+            }
+            return activations;
+        }
+
+        public double[] ComputeActivationsExact(double[] input)
+        {
+            var activations = new double[Weights.Length];
+            for (var i = 0; i < Weights.Length; i++)
+            {
+                var p = Sigma(ActivationEnergy(input, i));
+                activations[i] = p;
             }
             return activations;
         }
@@ -100,15 +150,26 @@ namespace DNNClassifier
             return agreement;
         }
 
+        public double[] ReconstructExact(double[] activations)
+        {
+            var reconstruction = new double[Weights[0].Length];
+            for (var i = 0; i < reconstruction.Length; i++)
+            {
+                var sum = activations.Select((t, j) => t*Weights[j][i] ).Sum();
+                var p = Sigma(sum);
+                reconstruction[i] = p;
+            }
+            return reconstruction;
+        }
+
         public double[] Reconstruct(bool[] activations)
         {
-            var r = new Random();
             var reconstruction = new double[Weights[0].Length];
             for (var i = 0; i < reconstruction.Length; i++)
             {
                 var sum = activations.Select((t, j) => t ? Weights[j][i] : 0).Sum();
                 var p = Sigma(sum);
-                reconstruction[i] = p + N*(r.NextDouble() - 0.5);
+                reconstruction[i] = p + N * (r.NextDouble() - 0.5);
             }
             return reconstruction;
         }
@@ -118,7 +179,8 @@ namespace DNNClassifier
             var activations = ComputeActivations(input);
             var ePositive = ComputeAgreement(input, activations);
             var reconstruction = Reconstruct(activations);
-            var eNegative = ComputeAgreement(reconstruction, activations);
+            var ractivations = ComputeActivations(reconstruction);
+            var eNegative = ComputeAgreement(reconstruction, ractivations);
 
             for(var i=0; i<Weights.Length; i++)
                 for (var j = 0; j < Weights[i].Length; j++)
