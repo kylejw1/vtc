@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -53,7 +54,17 @@ namespace VTC.CaptureSource
         /// <returns></returns>
         public Image<Bgr, Byte> QueryFrame()
         {
-            return _cameraCapture.QueryFrame();
+            var frame = _cameraCapture.QueryFrame();
+            if (frame == null)
+            {
+
+                _cameraCapture.Stop();
+                _cameraCapture.Start();
+
+                Debug.WriteLine("Restarting camera: " + DateTime.Now);
+                return null;
+            }
+            return _cameraCapture.QueryFrame().ToImage<Bgr,byte>();
         }
 
         /// <summary>
@@ -63,9 +74,9 @@ namespace VTC.CaptureSource
         public void Init(ISettings settings)
         {
             _cameraCapture = GetCapture();
-
-            _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, settings.FrameHeight);
-            _cameraCapture.SetCaptureProperty(CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, settings.FrameWidth);
+            
+            _cameraCapture.SetCaptureProperty(CapProp.FrameHeight, settings.FrameHeight);
+            _cameraCapture.SetCaptureProperty(CapProp.FrameWidth, settings.FrameWidth);
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 
 namespace VTC.Kernel.RegionConfig
@@ -51,16 +52,24 @@ namespace VTC.Kernel.RegionConfig
             MCvScalar lo = new MCvScalar(1, 1, 1);
             MCvScalar up = new MCvScalar(1, 1, 1);
 
+            
             // Know it is safe to fill at 0,0 because we created a 1 pixel buffer around all coordinates
-            CvInvoke.cvFloodFill(image.Ptr,
-                new Point(0, 0),
-                new MCvScalar(0, 0, 0),
-                lo,
-                up,
-                out comp,
-                Emgu.CV.CvEnum.CONNECTIVITY.FOUR_CONNECTED,
-                Emgu.CV.CvEnum.FLOODFILL_FLAG.DEFAULT,
-                new IntPtr());
+            //CvInvoke.cvFloodFill(image.Ptr,
+            //    new Point(0, 0),
+            //    new MCvScalar(0, 0, 0),
+            //    lo,
+            //    up,
+            //    out comp,
+            //    Emgu.CV.CvEnum.CONNECTIVITY.FOUR_CONNECTED,
+            //    Emgu.CV.CvEnum.FLOODFILL_FLAG.DEFAULT,
+            //    new IntPtr());
+            IInputOutputArray iioArray = image;
+            var rect = new Rectangle();
+            var ioArray = image.GetInputOutputArray();
+            var mask = new Image<Gray, byte>(new Size(image.Width + 2, image.Height + 2));
+            IInputOutputArray iioMask = mask;
+            CvInvoke.FloodFill(iioArray, mask, new Point(0, 0), new MCvScalar(0, 0, 0), out rect, lo, up,
+                Connectivity.FourConnected, FloodFillType.Default);
 
             return image;
         }

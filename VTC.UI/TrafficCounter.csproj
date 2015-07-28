@@ -85,17 +85,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Thirdparty\DirectShowLibNET\DirectShowLib-2005.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.CV, Version=2.9.0.1922, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+    <Reference Include="Emgu.CV, Version=3.0.0.2157, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.dll</HintPath>
+      <HintPath>..\bin\Emgu.CV.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.CV.UI, Version=2.9.0.1922, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+    <Reference Include="Emgu.CV.UI, Version=3.0.0.2157, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.CV.UI.dll</HintPath>
+      <HintPath>..\bin\Emgu.CV.UI.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.Util, Version=2.9.0.1922, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+    <Reference Include="Emgu.Util, Version=3.0.0.2157, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\bin\Emgu.Util.dll</HintPath>
+      <HintPath>..\bin\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\Thirdparty\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll</HintPath>

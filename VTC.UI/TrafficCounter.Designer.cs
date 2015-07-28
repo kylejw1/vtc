@@ -59,6 +59,8 @@ namespace VTC
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
             this.MoGcheckBox = new System.Windows.Forms.CheckBox();
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
+            this.exportDatasetTimer = new System.Windows.Forms.Timer(this.components);
+            this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -300,11 +302,28 @@ namespace VTC
             this.delayProcessingCheckbox.Text = "Delay processing";
             this.delayProcessingCheckbox.UseVisualStyleBackColor = true;
             // 
+            // exportDatasetTimer
+            // 
+            this.exportDatasetTimer.Enabled = true;
+            this.exportDatasetTimer.Interval = 10000;
+            this.exportDatasetTimer.Tick += new System.EventHandler(this.exportDatasetTimer_Tick);
+            // 
+            // exportDatasetsCheckbox
+            // 
+            this.exportDatasetsCheckbox.AutoSize = true;
+            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 154);
+            this.exportDatasetsCheckbox.Name = "exportDatasetsCheckbox";
+            this.exportDatasetsCheckbox.Size = new System.Drawing.Size(154, 17);
+            this.exportDatasetsCheckbox.TabIndex = 72;
+            this.exportDatasetsCheckbox.Text = "Export datasets periodically";
+            this.exportDatasetsCheckbox.UseVisualStyleBackColor = true;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(554, 390);
+            this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
             this.Controls.Add(this.updateSamplePoint);
@@ -369,6 +388,8 @@ namespace VTC
       private CheckBox pushStateCheckbox;
       private CheckBox MoGcheckBox;
       private CheckBox delayProcessingCheckbox;
+      private Timer exportDatasetTimer;
+      private CheckBox exportDatasetsCheckbox;
 
 
    }

@@ -252,7 +252,7 @@ namespace VTC.Kernel.Vistas
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
-                Color_Background.RunningAvg(BackgroundUpdate, Settings.Alpha);
+                Color_Background.AccumulateWeighted(BackgroundUpdate, Settings.Alpha);
             }
         }
 
@@ -265,7 +265,7 @@ namespace VTC.Kernel.Vistas
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
-                Color_Background.RunningAvg(BackgroundUpdate, 1.0);
+                Color_Background.AccumulateWeighted(BackgroundUpdate, 1.0);
             }
         }
 
@@ -330,59 +330,68 @@ namespace VTC.Kernel.Vistas
 
             using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
             {
-                Contour<Point> outlines = tempMovement_Mask.FindContours();
-                for (Contour<Point> c = outlines; c != null; c = c.HNext)
-                {
-                    Contour<Point> c_approx = c.ApproxPoly(2);
-                    Point[] points = c_approx.Select(s => new Point(s.X, s.Y)).ToArray();
-                    //frame.DrawPolyline(points, true, new Bgr(0, 0, 255), 1);
-                    double contourArea = c_approx.GetConvexHull(Emgu.CV.CvEnum.ORIENTATION.CV_CLOCKWISE).Area;
+                
+                //Contour<Point> outlines = tempMovement_Mask.FindContours();
+                //for (Contour<Point> c = outlines; c != null; c = c.HNext)
+                //{
+                //    Contour<Point> c_approx = c.ApproxPoly(2);
+                //    Point[] points = c_approx.Select(s => new Point(s.X, s.Y)).ToArray();
+                //    //frame.DrawPolyline(points, true, new Bgr(0, 0, 255), 1);
+                //    double contourArea = c_approx.GetConvexHull(Emgu.CV.CvEnum.ORIENTATION.CV_CLOCKWISE).Area;
 
-                    List<Point> innerAngles = new List<Point>();
-                    for (int offset = 0; offset < c_approx.Count(); offset++)
-                    {
-                        Point first = c_approx[0 + offset];
+                //    List<Point> innerAngles = new List<Point>();
+                //    for (int offset = 0; offset < c_approx.Count(); offset++)
+                //    {
+                //        Point first = c_approx[0 + offset];
 
-                        Point second;
-                        if (1 + offset < c_approx.Count())
-                            second = c_approx[1 + offset];
-                        else
-                            second = c_approx[1 + offset - c_approx.Count()];
+                //        Point second;
+                //        if (1 + offset < c_approx.Count())
+                //            second = c_approx[1 + offset];
+                //        else
+                //            second = c_approx[1 + offset - c_approx.Count()];
 
-                        Point third;
-                        if (2 + offset < c_approx.Count())
-                            third = c_approx[2 + offset];
-                        else
-                            third = c_approx[2 + offset - c_approx.Count()];
+                //        Point third;
+                //        if (2 + offset < c_approx.Count())
+                //            third = c_approx[2 + offset];
+                //        else
+                //            third = c_approx[2 + offset - c_approx.Count()];
 
-                        System.Windows.Vector vector1 = new System.Windows.Vector(first.X - second.X, first.Y - second.Y);
-                        System.Windows.Vector vector2 = new System.Windows.Vector(third.X - second.X, third.Y - second.Y);
-                        double angle = System.Windows.Vector.AngleBetween(vector1, vector2);
-                        Point centerpoint = new Point((first.X + second.X + third.X) / 3, (first.Y + second.Y + third.Y) / 3);
-                        bool isConcave = (tempMovement_Mask.Data[centerpoint.Y, centerpoint.X, 0] == 0);
-                        if (Math.Abs(angle) < 160 && isConcave && contourArea > 25)
-                        { 
-                            innerAngles.Add(second);
+                //        System.Windows.Vector vector1 = new System.Windows.Vector(first.X - second.X, first.Y - second.Y);
+                //        System.Windows.Vector vector2 = new System.Windows.Vector(third.X - second.X, third.Y - second.Y);
+                //        double angle = System.Windows.Vector.AngleBetween(vector1, vector2);
+                //        Point centerpoint = new Point((first.X + second.X + third.X) / 3, (first.Y + second.Y + third.Y) / 3);
+                //        bool isConcave = (tempMovement_Mask.Data[centerpoint.Y, centerpoint.X, 0] == 0);
+                //        if (Math.Abs(angle) < 160 && isConcave && contourArea > 25)
+                //        { 
+                //            innerAngles.Add(second);
 
-                            //For drawing inner-corner pints
-                            //frame.Draw(new CircleF(new PointF(second.X, second.Y), 1), new Bgr(255.0, 0, 0), 1);
-                        }
-                    }
+                //            //For drawing inner-corner pints
+                //            //frame.Draw(new CircleF(new PointF(second.X, second.Y), 1), new Bgr(255.0, 0, 0), 1);
+                //        }
+                //    }
 
-                    if (innerAngles.Count() >= 2)
-                    {
-                        double length = Math.Sqrt(Math.Pow((innerAngles[0].X - innerAngles[1].X), 2) + Math.Pow((innerAngles[0].Y - innerAngles[1].Y), 2));
-                        if (length < 10)
-                        { 
-                            //For drawing splitting line
-                            //frame.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Bgr(40, 40, 40), 2);
-                            tempMovement_Mask.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Gray(0), 2); 
-                        }
-                    }
-                }
+                //    if (innerAngles.Count() >= 2)
+                //    {
+                //        double length = Math.Sqrt(Math.Pow((innerAngles[0].X - innerAngles[1].X), 2) + Math.Pow((innerAngles[0].Y - innerAngles[1].Y), 2));
+                //        if (length < 10)
+                //        { 
+                //            //For drawing splitting line
+                //            //frame.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Bgr(40, 40, 40), 2);
+                //            tempMovement_Mask.DrawPolyline(innerAngles.GetRange(0,2).ToArray(), false, new Gray(0), 2); 
+                //        }
+                //    }
+                //}
 
-                var bf = new BlobFinder();
-                BlobsWithArea = bf.FindBlobs(tempMovement_Mask, Settings.MinObjectSize);
+                //var bf = new BlobFinder();
+                //BlobsWithArea = bf.FindBlobs(tempMovement_Mask, Settings.MinObjectSize);
+                var resultingImgBlobs = new CvBlobs();
+                var bDetect = new CvBlobDetector();
+                bDetect.Detect(tempMovement_Mask, resultingImgBlobs);
+
+                var areaComparer = new BlobAreaComparer();
+                BlobsWithArea = new SortedList<CvBlob, int>(areaComparer);
+                foreach (var targetBlob in resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area > Settings.MinObjectSize))
+                    BlobsWithArea.Add(targetBlob, targetBlob.Area);
 
                 int numWebcamBlobsFound = BlobsWithArea.Count();
 
@@ -418,7 +427,7 @@ namespace VTC.Kernel.Vistas
             {
                 Image<Bgr, float> Overlay = new Image<Bgr, float>(_width, _height, GreenColor);
                 Overlay = Overlay.And(_roiImage);
-                Overlay.Acc(Color_Background);
+                Overlay.Accumulate(Color_Background);
 
                 return Overlay;
             }
