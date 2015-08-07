@@ -64,7 +64,7 @@ namespace VTC.CaptureSource
                 Debug.WriteLine("Restarting camera: " + DateTime.Now);
                 return null;
             }
-            return _cameraCapture.QueryFrame().ToImage<Bgr,byte>();
+            return frame.ToImage<Bgr,byte>();
         }
 
         /// <summary>
