@@ -46,16 +46,19 @@
             this.reconstructionErrorPicturebox = new System.Windows.Forms.PictureBox();
             this.reconstructionErrorTextbox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.inputImageBox = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionPicturebox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionDataGridview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionErrorPicturebox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputImageBox)).BeginInit();
             this.SuspendLayout();
             // 
             // templatesPathTextbox
             // 
             this.templatesPathTextbox.Location = new System.Drawing.Point(12, 12);
             this.templatesPathTextbox.Name = "templatesPathTextbox";
-            this.templatesPathTextbox.Size = new System.Drawing.Size(430, 20);
+            this.templatesPathTextbox.Size = new System.Drawing.Size(558, 20);
             this.templatesPathTextbox.TabIndex = 0;
             this.templatesPathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\templ" +
     "ates";
@@ -63,7 +66,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(448, 15);
+            this.label1.Location = new System.Drawing.Point(587, 15);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(80, 13);
             this.label1.TabIndex = 1;
@@ -71,9 +74,9 @@
             // 
             // loadTemplatesButton
             // 
-            this.loadTemplatesButton.Location = new System.Drawing.Point(568, 5);
+            this.loadTemplatesButton.Location = new System.Drawing.Point(737, 12);
             this.loadTemplatesButton.Name = "loadTemplatesButton";
-            this.loadTemplatesButton.Size = new System.Drawing.Size(135, 23);
+            this.loadTemplatesButton.Size = new System.Drawing.Size(136, 23);
             this.loadTemplatesButton.TabIndex = 2;
             this.loadTemplatesButton.Text = "Load Templates";
             this.loadTemplatesButton.UseVisualStyleBackColor = true;
@@ -99,9 +102,9 @@
             // 
             // findBestReconstructionButton
             // 
-            this.findBestReconstructionButton.Location = new System.Drawing.Point(568, 34);
+            this.findBestReconstructionButton.Location = new System.Drawing.Point(737, 41);
             this.findBestReconstructionButton.Name = "findBestReconstructionButton";
-            this.findBestReconstructionButton.Size = new System.Drawing.Size(135, 23);
+            this.findBestReconstructionButton.Size = new System.Drawing.Size(136, 23);
             this.findBestReconstructionButton.TabIndex = 5;
             this.findBestReconstructionButton.Text = "Find best reconstruction";
             this.findBestReconstructionButton.UseVisualStyleBackColor = true;
@@ -109,9 +112,9 @@
             // 
             // generateReconstructionButton
             // 
-            this.generateReconstructionButton.Location = new System.Drawing.Point(568, 63);
+            this.generateReconstructionButton.Location = new System.Drawing.Point(737, 70);
             this.generateReconstructionButton.Name = "generateReconstructionButton";
-            this.generateReconstructionButton.Size = new System.Drawing.Size(135, 23);
+            this.generateReconstructionButton.Size = new System.Drawing.Size(136, 23);
             this.generateReconstructionButton.TabIndex = 6;
             this.generateReconstructionButton.Text = "Generate reconstruction";
             this.generateReconstructionButton.UseVisualStyleBackColor = true;
@@ -157,7 +160,7 @@
             // 
             this.inputImagePathTextbox.Location = new System.Drawing.Point(12, 37);
             this.inputImagePathTextbox.Name = "inputImagePathTextbox";
-            this.inputImagePathTextbox.Size = new System.Drawing.Size(430, 20);
+            this.inputImagePathTextbox.Size = new System.Drawing.Size(558, 20);
             this.inputImagePathTextbox.TabIndex = 9;
             this.inputImagePathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\templ" +
     "ateInput";
@@ -165,7 +168,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(448, 40);
+            this.label4.Location = new System.Drawing.Point(587, 40);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 13);
             this.label4.TabIndex = 10;
@@ -185,13 +188,13 @@
             this.reconstructionErrorPicturebox.BackColor = System.Drawing.Color.Black;
             this.reconstructionErrorPicturebox.Location = new System.Drawing.Point(9, 353);
             this.reconstructionErrorPicturebox.Name = "reconstructionErrorPicturebox";
-            this.reconstructionErrorPicturebox.Size = new System.Drawing.Size(640, 480);
+            this.reconstructionErrorPicturebox.Size = new System.Drawing.Size(320, 240);
             this.reconstructionErrorPicturebox.TabIndex = 11;
             this.reconstructionErrorPicturebox.TabStop = false;
             // 
             // reconstructionErrorTextbox
             // 
-            this.reconstructionErrorTextbox.Location = new System.Drawing.Point(443, 327);
+            this.reconstructionErrorTextbox.Location = new System.Drawing.Point(123, 612);
             this.reconstructionErrorTextbox.Name = "reconstructionErrorTextbox";
             this.reconstructionErrorTextbox.Size = new System.Drawing.Size(206, 20);
             this.reconstructionErrorTextbox.TabIndex = 13;
@@ -199,17 +202,37 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(524, 311);
+            this.label6.Location = new System.Drawing.Point(204, 596);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(125, 13);
             this.label6.TabIndex = 14;
             this.label6.Text = "Reconstruction error sum";
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(353, 68);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(62, 13);
+            this.label7.TabIndex = 16;
+            this.label7.Text = "Input image";
+            // 
+            // inputImageBox
+            // 
+            this.inputImageBox.BackColor = System.Drawing.Color.Black;
+            this.inputImageBox.Location = new System.Drawing.Point(353, 84);
+            this.inputImageBox.Name = "inputImageBox";
+            this.inputImageBox.Size = new System.Drawing.Size(320, 240);
+            this.inputImageBox.TabIndex = 15;
+            this.inputImageBox.TabStop = false;
+            // 
             // TemplateMatcherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1136, 899);
+            this.ClientSize = new System.Drawing.Size(1136, 642);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.inputImageBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.reconstructionErrorTextbox);
             this.Controls.Add(this.label5);
@@ -231,6 +254,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionPicturebox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionDataGridview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionErrorPicturebox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputImageBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -256,6 +280,8 @@
         private System.Windows.Forms.PictureBox reconstructionErrorPicturebox;
         private System.Windows.Forms.TextBox reconstructionErrorTextbox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.PictureBox inputImageBox;
     }
 }
 

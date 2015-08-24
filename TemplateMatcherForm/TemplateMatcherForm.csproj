@@ -83,6 +83,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TemplateMatcher\TemplateMatcher.csproj">
+      <Project>{51ec8975-4d6e-4fe6-9de9-0ba4a8f0dc4e}</Project>
+      <Name>TemplateMatcher</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

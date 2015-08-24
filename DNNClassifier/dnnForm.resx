@@ -118,12 +118,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <metadata name="renderTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>13, 17</value>
+    <value>186, 17</value>
   </metadata>
+  <data name="textBox1.Text" xml:space="preserve">
+    <value>**Instructions**
+
+Point "Training images path" to a folder containing 30x30 png images of traffic objects. All other paths should contain empty folders. 
+
+If running for the first time, follow the leftmost stack of buttons to create and train an RBN and NN. In future runs, previously exported RBM and NN weights can be reused. 
+
+
+
+</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>28</value>
-  </metadata>
-  <metadata name="renderTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>186, 17</value>
   </metadata>
 </root>

@@ -50,37 +50,40 @@ namespace DNNClassifier
 
         private void ExportWeightVisualizations()
         {
-            var dc = new RBMDataConverter();
-            var exportPath = visualizationPathTextbox.Text;
-
-            var maxWeight = 0.0;
-            var minWeight = 0.0;
-            var maxAfter = 255.0;
-            var minAfter = 0.0;
-
-            for (int i = 1; i < _rbm.Weights.Length; i++)
-                for (int j = 1; j < _rbm.Weights[i].Length; j++)
-                    if (_rbm.Weights[i][j] > maxWeight)
-                        maxWeight = _rbm.Weights[i][j];
-
-            for (int i = 1; i < _rbm.Weights.Length; i++)
-                for (int j = 1; j < _rbm.Weights[i].Length; j++)
-                    if (_rbm.Weights[i][j] < minWeight)
-                        minWeight = _rbm.Weights[i][j];
-
-            var transformedWeights = new double[_rbm.Weights.Length][];
-            for (var i = 0; i < _rbm.Weights.Length; i++)
+            if (exportImagesCheckbox.Checked)
             {
-                var newWeightsArray = new double[_rbm.Weights[0].Length];
-                for (int j = 0; j < _rbm.Weights[i].Length; j++)
-                    newWeightsArray[j] = (_rbm.Weights[i][j] - minWeight) * (maxAfter - minAfter) / (maxWeight - minWeight);
+                var dc = new RBMDataConverter();
+                var exportPath = visualizationPathTextbox.Text;
 
-                transformedWeights[i] = newWeightsArray;
-            }
+                var maxWeight = 0.0;
+                var minWeight = 0.0;
+                var maxAfter = 255.0;
+                var minAfter = 0.0;
 
-            for (var i = 0; i < _rbm.Weights.Length; i++)
-            {
-                dc.SaveRawDataToImage(transformedWeights[i], exportPath + "\\" + i + ".bmp", 30, 30);
+                for (int i = 1; i < _rbm.Weights.Length; i++)
+                    for (int j = 1; j < _rbm.Weights[i].Length; j++)
+                        if (_rbm.Weights[i][j] > maxWeight)
+                            maxWeight = _rbm.Weights[i][j];
+
+                for (int i = 1; i < _rbm.Weights.Length; i++)
+                    for (int j = 1; j < _rbm.Weights[i].Length; j++)
+                        if (_rbm.Weights[i][j] < minWeight)
+                            minWeight = _rbm.Weights[i][j];
+
+                var transformedWeights = new double[_rbm.Weights.Length][];
+                for (var i = 0; i < _rbm.Weights.Length; i++)
+                {
+                    var newWeightsArray = new double[_rbm.Weights[0].Length];
+                    for (int j = 0; j < _rbm.Weights[i].Length; j++)
+                        newWeightsArray[j] = (_rbm.Weights[i][j] - minWeight) * (maxAfter - minAfter) / (maxWeight - minWeight);
+
+                    transformedWeights[i] = newWeightsArray;
+                }
+
+                for (var i = 0; i < _rbm.Weights.Length; i++)
+                {
+                    dc.SaveRawDataToImage(transformedWeights[i], exportPath + "\\" + i + ".bmp", 30, 30);
+                }
             }
         }
 
@@ -92,15 +95,18 @@ namespace DNNClassifier
 
         private void showReconstructions()
         {
-            var exportPath = reconstructionPathTextbox.Text;
-            var dc = new RBMDataConverter();
-            var trainingData = dc.TrainingSetFromPath(trainingPathTextbox.Text);
-            for (var i = 0; i < trainingData.Length; i++)
+            if (exportImagesCheckbox.Checked)
             {
-                var activations = _rbm.ComputeActivationsExact(trainingData[i]);
-                var reconstruction = _rbm.ReconstructExact(activations);
-                dc.SaveDataToImage(reconstruction, exportPath + "\\" + i + ".bmp", 30, 30);
-            } 
+                var exportPath = reconstructionPathTextbox.Text;
+                var dc = new RBMDataConverter();
+                var trainingData = dc.TrainingSetFromPath(trainingPathTextbox.Text);
+                for (var i = 0; i < trainingData.Length; i++)
+                {
+                    var activations = _rbm.ComputeActivationsExact(trainingData[i]);
+                    var reconstruction = _rbm.ReconstructExact(activations);
+                    dc.SaveDataToImage(reconstruction, exportPath + "\\" + i + ".bmp", 30, 30);
+                }     
+            }
         }
 
         private void reconstructSingleButton_Click(object sender, EventArgs e)
@@ -111,12 +117,15 @@ namespace DNNClassifier
             var activations = _rbm.ComputeActivationsExact(trainingData[0]);
             var reconstruction = _rbm.ReconstructExact(activations);
             dc.SaveDataToImage(reconstruction, exportPath, 30, 30);
-            double[] output = _nn.Evaluate(activations);
 
-            string[] classes = ClassNames();
-            double maxClassifierOutput = output.Max();
-            int maxIndex = output.ToList().IndexOf(maxClassifierOutput);
-            classifierOutputTextbox.Text = classes[maxIndex];
+            if (_nn != null)
+            {
+                double[] output = _nn.Evaluate(activations);
+                string[] classes = ClassNames();
+                double maxClassifierOutput = output.Max();
+                int maxIndex = output.ToList().IndexOf(maxClassifierOutput);
+                classifierOutputTextbox.Text = classes[maxIndex];    
+            }
         }
 
         private void startTrainingButton_Click(object sender, EventArgs e)
@@ -150,27 +159,43 @@ namespace DNNClassifier
 
         private void exportWeightsButton_Click(object sender, EventArgs e)
         {
-            exportWeights();
+            exportRBMWeights();
         }
 
-        private void exportWeights()
+        private void exportRBMWeights()
         {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(exportWeightsTextbox.Text, FileMode.Create, FileAccess.Write, FileShare.None);
+            Stream stream = new FileStream(exportRBMWeightsTextbox.Text, FileMode.Create, FileAccess.Write, FileShare.None);
             formatter.Serialize(stream, _rbm);
+            stream.Close();
+        }
+
+        private void exportNNWeights()
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(NNWeightsPathTextbox.Text, FileMode.Create, FileAccess.Write, FileShare.None);
+            formatter.Serialize(stream, _nn);
             stream.Close();
         }
 
         private void importWeightsButton_Click(object sender, EventArgs e)
         {
-            importWeights();
+            importRBMWeights();
         }
 
-        private void importWeights()
+        private void importRBMWeights()
         {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(exportWeightsTextbox.Text, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Stream stream = new FileStream(exportRBMWeightsTextbox.Text, FileMode.Open, FileAccess.Read, FileShare.Read);
             _rbm = (RBM) formatter.Deserialize(stream);
+            stream.Close();
+        }
+
+        private void importNNWeights()
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(NNWeightsPathTextbox.Text, FileMode.Open, FileAccess.Read, FileShare.Read);
+            _nn = (NN)formatter.Deserialize(stream);
             stream.Close();
         }
 
@@ -278,6 +303,16 @@ namespace DNNClassifier
             _nn.Train(_nn.Inputs, _nn.Targets, Convert.ToInt32(trainingCyclesTextbox.Text));
             double error = _nn.AverageError(_nn.Inputs, _nn.Targets);
             classifierErrorTextbox.Text = error.ToString();
+        }
+
+        private void exportNNButton_Click(object sender, EventArgs e)
+        {
+            exportNNWeights();
+        }
+
+        private void importNNButton_Click(object sender, EventArgs e)
+        {
+            importNNWeights();
         }
 
     }

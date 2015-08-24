@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DNNClassifier
 {
+    [Serializable]
     public class NN
     {
         public double[][] Weights;
