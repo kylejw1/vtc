@@ -13,7 +13,7 @@ Realtime video-based object tracking software. Written in C# using Emgu CV. Requ
 Get sources to some dir (say - `c:\projects\vtc`). Further referenced as `REPODIR`.
 
 ##EmguCV
-It's assumed that `emgucv-windows-universal-cuda 2.9.0.1922` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal-cuda 2.9.0.1922\` dir).
+It's assumed that `emgucv-windows-universal 3.0.0.2157` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal 3.0.0.2157\` dir).
 * Solution projects are using the path, so no need to fix it.
 * Run **setup.bat** (as Administrator) to create links to huge x86/x64 dirs of EmguCV library.
 ** (not sure) maybe it's necessary to build solution before the step above, so `bin` folder got created.
