@@ -17,6 +17,7 @@ It's assumed that `emgucv-windows-universal 3.0.0.2157` version of EmguCV is ins
 * Solution projects are using the path, so no need to fix it.
 * Run **setup.bat** (as Administrator) to create links to huge x86/x64 dirs of EmguCV library.
 ** (not sure) maybe it's necessary to build solution before the step above, so `bin` folder got created.
+[http://sourceforge.net/projects/emgucv/](http://sourceforge.net/projects/emgucv/ "EmguCV download page")
 
 ##Manifest
 * It's necessary to remove manifest to run project on dev machine.
