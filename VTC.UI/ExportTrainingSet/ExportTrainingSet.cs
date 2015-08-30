@@ -248,7 +248,7 @@ namespace VTC.ExportTrainingSet
                     if (!vehicleIsNearby)
                     {
                         Image<Bgr, float> subimage = extractSubImage(i, j);
-                        saveExampleImage(subimage, "Other"); //TODO: Maybe this shouldn't be hardcoded
+                        saveExampleImage(subimage, "Other"); //TODO: Make path a configuration item
                     }
 
                 }
@@ -274,7 +274,7 @@ namespace VTC.ExportTrainingSet
                     Console.WriteLine("Bad blob!");
 
                 Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
-                saveExampleImage(subimage, "Car"); //TODO: Maybe this shouldn't be hardcoded
+                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
             }   
         }
 
@@ -287,7 +287,7 @@ namespace VTC.ExportTrainingSet
                 foreach (var blobWithArea in blobsWithSizes)
                 {
                     Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
-                    saveExampleImage(subimage, "Car"); //TODO: Maybe this shouldn't be hardcoded
+                    saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
                 }    
             }
             else
@@ -299,7 +299,7 @@ namespace VTC.ExportTrainingSet
                     if (vehicleX > _settings.ClassifierSubframeWidth && vehicleX < _frame.Width - _settings.ClassifierSubframeWidth && vehicleY > _settings.ClassifierSubframeHeight && vehicleY < _frame.Height - _settings.ClassifierSubframeHeight)
                     {
                         Image<Bgr, float> subimage = extractSubImage(vehicleX, vehicleY);
-                        saveExampleImage(subimage, "Car"); //TODO: Maybe this shouldn't be hardcoded
+                        saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
                     }
                 }    
             }

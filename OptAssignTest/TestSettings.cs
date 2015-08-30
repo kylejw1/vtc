@@ -10,7 +10,7 @@ namespace OptAssignTest
     {
         public int MissThreshold
         {
-            get { return 30; }
+            get { return 60; }
         }
 
         public int MaxHypothesisTreeDepth
@@ -25,7 +25,7 @@ namespace OptAssignTest
 
         public int MinObjectSize
         {
-            get { return 50; }
+            get { return 10; }
         }
 
         public int MoGUpdateDownsampling
@@ -157,7 +157,7 @@ namespace OptAssignTest
 
         public double Q_color
         {
-            get { return 20; }
+            get { return 50000; }
         }
 
         public double Q_position
@@ -167,7 +167,7 @@ namespace OptAssignTest
 
         public double R_color
         {
-            get { return 5; }
+            get { return 50000; }
         }
 
         public double R_position

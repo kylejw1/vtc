@@ -43,6 +43,18 @@ namespace DNNClassifier
             return trainingSets;
         }
 
+        public double[][] TrainingSetFromSingleImage(string imagePath)
+        {
+            var paths = new String[1];
+            paths[0] = imagePath;
+
+            var trainingSets = new double[1][];
+            for (var i = 0; i < paths.Length; i++)
+                trainingSets[i] = ImagePathToInput(paths[i]);
+
+            return trainingSets;
+        }
+
         public void SaveDataToImage(double[] output, string imagePath, int height, int width)
         {
             var index = 1; //Skip the first data point, it's the bias

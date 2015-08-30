@@ -8,7 +8,7 @@ namespace DNNClassifierTests
     public class DnnUnitTest
     {
         [TestMethod]
-        public void SolvesTrivialExample()
+        public void RBMReconstructsTrivialExample()
         {
             var rbm = new RBM(5, 2, 0.01, 0.1);
             double[][] examples = new double[2][];
@@ -47,5 +47,36 @@ namespace DNNClassifierTests
             Assert.IsTrue(output0[0] > 0.9 && output0[0] < 1.1);
             Assert.IsTrue(output1[0] < 0.1 && output1[0] > -0.1);
         }
+
+        [TestMethod()]
+        public void RBMExportImportWeights()
+        {
+            Assert.Fail("Not implemented.");
+        }
+
+        [TestMethod()]
+        public void NNExportImportWeights()
+        {
+            Assert.Fail("Not implemented.");
+        }
+
+        [TestMethod()]
+        public void SigmoidFunctionsYieldCorrectRange()
+        {
+            Assert.Fail("Not implemented.");
+        }
+
+        [TestMethod()]
+        public void RBMCorrectDimensionality()
+        {
+            Assert.Fail("Not implemented.");
+        }
+
+        [TestMethod()]
+        public void NNCorrectDimensionality()
+        {
+            Assert.Fail("Not implemented.");
+        }
+
     }
 }

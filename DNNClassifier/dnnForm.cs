@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -15,31 +16,43 @@ using System.Windows.Forms;
 
 namespace DNNClassifier
 {
-    public partial class dnnForm : Form
+    public partial class DnnForm : Form
     {
         private RBM _rbm;
         private NN _nn;
 
         private Thread _trainingThread;
 
-        public dnnForm()
+        public DnnForm()
         {
             InitializeComponent();
+            DragEnter += Form_DragEnter;
+            DragDrop += singleImageTextbox_DragDrop;
+        }
+
+        /// <summary>
+        /// Check if the Dataformat of the data can be accepted
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Form_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
         private void trainRBMButton_Click(object sender, EventArgs e)
         {
-            trainRBM();
+            TrainRbm();
         }
 
-        private void trainRBM()
+        private void TrainRbm()
         {
             if(_rbm == null)
-                CreateRBM();
+                throw new MemberAccessException("Cannot train, RBM does not exist. Create RBM first.");
 
             var dc = new RBMDataConverter();
             var trainingData = dc.TrainingSetFromPath(trainingPathTextbox.Text);
-            _rbm.TrainMultithreaded(trainingData, Convert.ToInt32(trainingCyclesTextbox.Text));
+            _rbm.TrainMultithreaded(trainingData);
         }
             
 
@@ -90,10 +103,10 @@ namespace DNNClassifier
 
         private void showReconstructionsButton_Click(object sender, EventArgs e)
         {
-            showReconstructions();
+            ShowReconstructions();
         }
 
-        private void showReconstructions()
+        private void ShowReconstructions()
         {
             if (exportImagesCheckbox.Checked)
             {
@@ -111,9 +124,10 @@ namespace DNNClassifier
 
         private void reconstructSingleButton_Click(object sender, EventArgs e)
         {
-            var exportPath = singleImageTextbox.Text + "\\reconstruction.bmp";
+            var exportPath = Path.GetDirectoryName(singleImageTextbox.Text) + "\\" + Path.GetFileNameWithoutExtension(singleImageTextbox.Text) + "reconstruction.bmp";
+
             var dc = new RBMDataConverter();
-            var trainingData = dc.TrainingSetFromPath(singleImageTextbox.Text);
+            var trainingData = dc.TrainingSetFromSingleImage(singleImageTextbox.Text);
             var activations = _rbm.ComputeActivationsExact(trainingData[0]);
             var reconstruction = _rbm.ReconstructExact(activations);
             dc.SaveDataToImage(reconstruction, exportPath, 30, 30);
@@ -126,11 +140,17 @@ namespace DNNClassifier
                 int maxIndex = output.ToList().IndexOf(maxClassifierOutput);
                 classifierOutputTextbox.Text = classes[maxIndex];    
             }
+
+            var im = Image.FromFile(singleImageTextbox.Text);
+            inputPictureBox.Image = im;
+            var imRec = Image.FromFile(exportPath);
+            reconstructionPictureBox.Image = imRec;
+
         }
 
         private void startTrainingButton_Click(object sender, EventArgs e)
         {
-            _trainingThread = new Thread(new ThreadStart(trainRBM));
+            _trainingThread = new Thread(TrainRbm);
             _trainingThread.Start();
             renderTimer.Enabled = true;
         }
@@ -143,60 +163,43 @@ namespace DNNClassifier
 
         private void createRBMButton_Click(object sender, EventArgs e)
         {
-            CreateRBM();
-        }
-
-        private void CreateRBM()
-        {
             _rbm = new RBM(2701, Convert.ToInt16(hiddenUnitsTextbox.Text), Convert.ToDouble(learningRateTextbox.Text), 0.1);
         }
 
         private void renderTimer_Tick(object sender, EventArgs e)
         {
             ExportWeightVisualizations();
-            showReconstructions();
+            ShowReconstructions();
         }
 
         private void exportWeightsButton_Click(object sender, EventArgs e)
         {
-            exportRBMWeights();
+            ExportRbmWeights();
         }
 
-        private void exportRBMWeights()
+        private void ExportRbmWeights()
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(exportRBMWeightsTextbox.Text, FileMode.Create, FileAccess.Write, FileShare.None);
-            formatter.Serialize(stream, _rbm);
-            stream.Close();
+            _rbm.ExportWeights(exportRBMWeightsTextbox.Text);
         }
 
-        private void exportNNWeights()
+        private void ExportNNWeights()
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(NNWeightsPathTextbox.Text, FileMode.Create, FileAccess.Write, FileShare.None);
-            formatter.Serialize(stream, _nn);
-            stream.Close();
+            _nn.ExportWeights(NNWeightsPathTextbox.Text);
         }
 
         private void importWeightsButton_Click(object sender, EventArgs e)
         {
-            importRBMWeights();
+            ImportRBMWeights();
         }
 
-        private void importRBMWeights()
+        private void ImportRBMWeights()
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(exportRBMWeightsTextbox.Text, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _rbm = (RBM) formatter.Deserialize(stream);
-            stream.Close();
+            _rbm = RBM.ImportWeights(exportRBMWeightsTextbox.Text);
         }
 
-        private void importNNWeights()
+        private void ImportNNWeights()
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(NNWeightsPathTextbox.Text, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _nn = (NN)formatter.Deserialize(stream);
-            stream.Close();
+            _nn = NN.ImportWeights(NNWeightsPathTextbox.Text);
         }
 
         private void createNNButton_Click(object sender, EventArgs e)
@@ -214,27 +217,24 @@ namespace DNNClassifier
         private void exportLabelledRBMActivationsButton_Click(object sender, EventArgs e)
         {
             //Calculate activations
-            int classIndex = 0;
             var labelledImagesPath = labelledImagePathTextbox.Text;
             var paths = Directory.GetDirectories(labelledImagesPath);
-            string[] classes = ClassNames();
-            int classCount = classes.Length;
-
-            int hiddenActivationCount = Convert.ToInt32(hiddenUnitsTextbox.Text);
+            var classes = ClassNames();
+            var classCount = classes.Length;
 
             //Get total number of training examples
-            int numTrainingSamples = CountLabelledExamples();
+            var numTrainingSamples = CountLabelledExamples();
 
-            double[][] inputs = new double[numTrainingSamples][];
-            double[][] targets = new double[numTrainingSamples][];
+            var inputs = new double[numTrainingSamples][];
+            var targets = new double[numTrainingSamples][];
 
-            int sampleIndex = 0;
+            var sampleIndex = 0;
 
             for (var i = 0; i < classCount; i++)
             {
                 var dc = new RBMDataConverter();
                 var trainingData = dc.TrainingSetFromPath(paths[i]);
-                int thisSetCount = trainingData.Length;
+                var thisSetCount = trainingData.Length;
                 for (var j = 0; j < thisSetCount; j++)
                 {
                     inputs[sampleIndex] = _rbm.ComputeActivationsExact(trainingData[j]);
@@ -264,17 +264,14 @@ namespace DNNClassifier
 
         private void importRBMActivationsButton_Click(object sender, EventArgs e)
         {
-
-
             IFormatter formatter = new BinaryFormatter();
             Stream stream = new FileStream(hiddenActivationsPathTextbox.Text + "activations.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-            double[][] inputs = (double[][]) formatter.Deserialize(stream);
+            var inputs = (double[][]) formatter.Deserialize(stream);
             stream.Close();
 
             Stream stream2 = new FileStream(hiddenActivationsPathTextbox.Text + "targets.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-            double[][] targets = (double[][])formatter.Deserialize(stream2);
+            var targets = (double[][])formatter.Deserialize(stream2);
             stream2.Close();
-
 
             if (_nn == null)
                 CreateNN();
@@ -301,18 +298,35 @@ namespace DNNClassifier
         private void trainNNButton_Click(object sender, EventArgs e)
         {
             _nn.Train(_nn.Inputs, _nn.Targets, Convert.ToInt32(trainingCyclesTextbox.Text));
-            double error = _nn.AverageError(_nn.Inputs, _nn.Targets);
-            classifierErrorTextbox.Text = error.ToString();
+            var error = _nn.AverageError(_nn.Inputs, _nn.Targets);
+            classifierErrorTextbox.Text = error.ToString(CultureInfo.InvariantCulture);
         }
 
         private void exportNNButton_Click(object sender, EventArgs e)
         {
-            exportNNWeights();
+            ExportNNWeights();
         }
 
         private void importNNButton_Click(object sender, EventArgs e)
         {
-            importNNWeights();
+            ImportNNWeights();
+        }
+
+        private void singleImageTextbox_DragDrop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+            foreach (var file in files)
+            {
+                singleImageTextbox.Text = file;
+                reconstructSingleButton_Click(sender, e);    
+            }
+        }
+
+        private void loadAllButton_Click(object sender, EventArgs e)
+        {
+            ImportRBMWeights();
+            importNNButton_Click(sender, e);
         }
 
     }

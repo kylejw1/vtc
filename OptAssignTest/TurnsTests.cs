@@ -120,13 +120,13 @@ namespace OptAssignTest
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.South, Direction.East, new Path.Vector(VehicleRadius + 1, 0));
+                .AddTurn(DefaultSettings, Direction.South, Direction.East, new Path.Vector(2*VehicleRadius + 1, 0));
 
             // vehicle goes from bottom to up
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings, Direction.South, new Path.Vector(-VehicleRadius, 0));
+                .AddVerticalPath(DefaultSettings, Direction.South, new Path.Vector(-2*VehicleRadius, 0));
             return script;
         }
 

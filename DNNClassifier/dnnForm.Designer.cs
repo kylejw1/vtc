@@ -1,6 +1,6 @@
 ﻿namespace DNNClassifier
 {
-    partial class dnnForm
+    partial class DnnForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(dnnForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DnnForm));
             this.trainingPathTextbox = new System.Windows.Forms.TextBox();
             this.trainRBMButton = new System.Windows.Forms.Button();
             this.exportWeightVisButton = new System.Windows.Forms.Button();
@@ -74,6 +74,13 @@
             this.label12 = new System.Windows.Forms.Label();
             this.NNWeightsPathTextbox = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.inputPictureBox = new System.Windows.Forms.PictureBox();
+            this.reconstructionPictureBox = new System.Windows.Forms.PictureBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.loadAllButton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.inputPictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reconstructionPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // trainingPathTextbox
@@ -166,7 +173,7 @@
             this.hiddenUnitsTextbox.Name = "hiddenUnitsTextbox";
             this.hiddenUnitsTextbox.Size = new System.Drawing.Size(100, 20);
             this.hiddenUnitsTextbox.TabIndex = 11;
-            this.hiddenUnitsTextbox.Text = "50";
+            this.hiddenUnitsTextbox.Text = "200";
             // 
             // label4
             // 
@@ -217,8 +224,7 @@
             this.singleImageTextbox.Name = "singleImageTextbox";
             this.singleImageTextbox.Size = new System.Drawing.Size(559, 20);
             this.singleImageTextbox.TabIndex = 17;
-            this.singleImageTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\examp" +
-    "les\\Single Image\\";
+            this.singleImageTextbox.DragDrop += new System.Windows.Forms.DragEventHandler(this.singleImageTextbox_DragDrop);
             // 
             // label6
             // 
@@ -443,9 +449,9 @@
             this.exportImagesCheckbox.AutoSize = true;
             this.exportImagesCheckbox.Location = new System.Drawing.Point(12, 235);
             this.exportImagesCheckbox.Name = "exportImagesCheckbox";
-            this.exportImagesCheckbox.Size = new System.Drawing.Size(181, 17);
+            this.exportImagesCheckbox.Size = new System.Drawing.Size(282, 17);
             this.exportImagesCheckbox.TabIndex = 45;
-            this.exportImagesCheckbox.Text = "Export weights and visualizations";
+            this.exportImagesCheckbox.Text = "Export weight visualizations and image reconstructions";
             this.exportImagesCheckbox.UseVisualStyleBackColor = true;
             // 
             // label12
@@ -475,12 +481,70 @@
             this.textBox1.TabIndex = 48;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
+            // inputPictureBox
+            // 
+            this.inputPictureBox.BackColor = System.Drawing.Color.White;
+            this.inputPictureBox.Location = new System.Drawing.Point(741, 359);
+            this.inputPictureBox.Name = "inputPictureBox";
+            this.inputPictureBox.Size = new System.Drawing.Size(175, 159);
+            this.inputPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.inputPictureBox.TabIndex = 49;
+            this.inputPictureBox.TabStop = false;
+            // 
+            // reconstructionPictureBox
+            // 
+            this.reconstructionPictureBox.BackColor = System.Drawing.Color.White;
+            this.reconstructionPictureBox.Location = new System.Drawing.Point(922, 359);
+            this.reconstructionPictureBox.Name = "reconstructionPictureBox";
+            this.reconstructionPictureBox.Size = new System.Drawing.Size(175, 159);
+            this.reconstructionPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.reconstructionPictureBox.TabIndex = 50;
+            this.reconstructionPictureBox.TabStop = false;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(741, 340);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(31, 13);
+            this.label13.TabIndex = 51;
+            this.label13.Text = "Input";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(919, 340);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(79, 13);
+            this.label14.TabIndex = 52;
+            this.label14.Text = "Reconstruction";
+            // 
+            // loadAllButton
+            // 
+            this.loadAllButton.BackColor = System.Drawing.Color.MediumBlue;
+            this.loadAllButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.loadAllButton.Font = new System.Drawing.Font("Consolas", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.loadAllButton.ForeColor = System.Drawing.Color.White;
+            this.loadAllButton.Location = new System.Drawing.Point(893, 253);
+            this.loadAllButton.Name = "loadAllButton";
+            this.loadAllButton.Size = new System.Drawing.Size(154, 45);
+            this.loadAllButton.TabIndex = 53;
+            this.loadAllButton.Text = "Load All";
+            this.loadAllButton.UseVisualStyleBackColor = false;
+            this.loadAllButton.Click += new System.EventHandler(this.loadAllButton_Click);
+            // 
             // dnnForm
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(1269, 642);
+            this.ClientSize = new System.Drawing.Size(1269, 545);
+            this.Controls.Add(this.loadAllButton);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.reconstructionPictureBox);
+            this.Controls.Add(this.inputPictureBox);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.NNWeightsPathTextbox);
@@ -524,8 +588,10 @@
             this.Controls.Add(this.exportWeightVisButton);
             this.Controls.Add(this.trainRBMButton);
             this.Controls.Add(this.trainingPathTextbox);
-            this.Name = "dnnForm";
+            this.Name = "DnnForm";
             this.Text = "DNN Classifier Creator";
+            ((System.ComponentModel.ISupportInitialize)(this.inputPictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reconstructionPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -577,6 +643,11 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox NNWeightsPathTextbox;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.PictureBox inputPictureBox;
+        private System.Windows.Forms.PictureBox reconstructionPictureBox;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Button loadAllButton;
     }
 }
 

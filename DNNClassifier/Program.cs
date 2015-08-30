@@ -16,7 +16,7 @@ namespace DNNClassifier
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new dnnForm());
+            Application.Run(new DnnForm());
         }
     }
 }
