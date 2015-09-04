@@ -108,9 +108,9 @@ namespace VTC
 
            // check if app should run in unit test visualization mode
            _unitTestsMode = false;
-           if ((appArgument != null) && appArgument.EndsWith(".dll", true, CultureInfo.InvariantCulture))
+           if ("-tests".Equals(appArgument, StringComparison.OrdinalIgnoreCase))
            {
-               _unitTestsMode = DetectTestScenarios(appArgument);
+               _unitTestsMode = DetectTestScenarios(settings.UnitTestsDll);
            }
 
            // otherwise - run in standard mode
@@ -292,6 +292,12 @@ namespace VTC
            {
                while (! string.IsNullOrWhiteSpace(assemblyName))
                {
+                   if (! Path.IsPathRooted(assemblyName))
+                   {
+                       var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                       assemblyName = Path.Combine(currentDir, assemblyName);
+                   }
+
                    if (! File.Exists(assemblyName)) break;
 
                    var assembly = Assembly.LoadFile(assemblyName);
