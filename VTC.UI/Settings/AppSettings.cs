@@ -79,6 +79,14 @@ namespace VTC.Settings
         public string RegionConfigPath { get; private set; }
 
         /// <summary>
+        /// Assembly with unit tests to visualize.
+        /// </summary>
+        public string UnitTestsDll
+        {
+            get { return ConfigurationManager.AppSettings["UnitTestDll"]; }
+        }
+
+        /// <summary>
         /// Filepath of the configuration file.
         /// </summary>
         public string FilePath

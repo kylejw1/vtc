@@ -34,7 +34,7 @@ During debugging it's useful to view image objects as a raster image, not as a a
 Pass pathname of local video as command line argument.
 
 ##Visualizing unit tests
-Pass full pathname to assembly with unit tests. 
+Use `-tests` command line arguments to run unit tests (it uses loads DLL specified in UnitTestDll value in app config). <br>
 **IMPORTANT:** unit tests using **OWN** settings. Check unit test source code to see values!
 
 #Debug output
