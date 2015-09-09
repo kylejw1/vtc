@@ -292,6 +292,7 @@ namespace VTC
            {
                while (! string.IsNullOrWhiteSpace(assemblyName))
                {
+                   // ensure absolute path
                    if (! Path.IsPathRooted(assemblyName))
                    {
                        var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
