@@ -4,7 +4,7 @@ Video Traffic Counter
 
 ---
 
-Live: [www.traffic-camera.com](http://www.traffic-camera.com)<br> Development: [dev.traffic-camera.com](http://dev.traffic-camera.com)
+Live: [www.traffic-camera.com](http://www.traffic-camera.com) Development: [dev.traffic-camera.com](http://dev.traffic-camera.com)
 
 Realtime video-based object tracking software. Written in C# using Emgu CV. Requires a webcam.
 
@@ -13,11 +13,14 @@ Realtime video-based object tracking software. Written in C# using Emgu CV. Requ
 Get sources to some dir (say - `c:\projects\vtc`). Further referenced as `REPODIR`.
 
 ##EmguCV
-It's assumed that `emgucv-windows-universal 3.0.0.2157` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal 3.0.0.2157\` dir).
+Download the EmguCV libraries here: 
+[http://sourceforge.net/projects/emgucv/](http://sourceforge.net/projects/emgucv/ "EmguCV download page")
+
 * Solution projects are using the path, so no need to fix it.
 * Run **setup.bat** (as Administrator) to create links to huge x86/x64 dirs of EmguCV library.
 ** (not sure) maybe it's necessary to build solution before the step above, so `bin` folder got created.
-[http://sourceforge.net/projects/emgucv/](http://sourceforge.net/projects/emgucv/ "EmguCV download page")
+
+It's assumed that `emgucv-windows-universal 3.0.0.2157` version of EmguCV is installed with default options (IOW - the library installed to `C:\Emgu\emgucv-windows-universal 3.0.0.2157\` dir).
 
 ##Manifest
 * It's necessary to remove manifest to run project on dev machine.
