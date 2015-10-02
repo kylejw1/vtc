@@ -100,7 +100,7 @@ namespace VTC.Kernel.Vistas
 
         //************* Rendering parameters ***************  
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
-        bool render_clean = false;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
+        bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
 
         private readonly MultipleHypothesisTracker MHT;
 
@@ -388,9 +388,8 @@ namespace VTC.Kernel.Vistas
 
         }
 
-        public Image<Bgr, byte> GetCurrentStateImage()
+        public Image<Bgr, byte> GetCurrentStateImage(Image<Bgr, byte> frame)
         {
-            var frame = _frame.Clone();
 
             var vehicles = MHT.CurrentVehicles;
 

@@ -56,10 +56,6 @@
             this.importWeightsButton = new System.Windows.Forms.Button();
             this.exportRBMWeightsTextbox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.hiddenActivationsPathTextbox = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.exportRBMActivationsButton = new System.Windows.Forms.Button();
-            this.importRBMActivationsButton = new System.Windows.Forms.Button();
             this.trainNNButton = new System.Windows.Forms.Button();
             this.createNNButton = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
@@ -79,32 +75,36 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.loadAllButton = new System.Windows.Forms.Button();
+            this.calculateActivationsButton = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.inputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.reconstructionPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // trainingPathTextbox
             // 
+            this.trainingPathTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.trainingPathTextbox.Location = new System.Drawing.Point(12, 12);
             this.trainingPathTextbox.Name = "trainingPathTextbox";
-            this.trainingPathTextbox.Size = new System.Drawing.Size(559, 20);
+            this.trainingPathTextbox.Size = new System.Drawing.Size(357, 20);
             this.trainingPathTextbox.TabIndex = 1;
-            this.trainingPathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\examp" +
-    "les\\Car";
+            this.trainingPathTextbox.Text = "\\examples\\Car";
             // 
             // trainRBMButton
             // 
-            this.trainRBMButton.Location = new System.Drawing.Point(893, 43);
+            this.trainRBMButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.trainRBMButton.Location = new System.Drawing.Point(763, 68);
             this.trainRBMButton.Name = "trainRBMButton";
             this.trainRBMButton.Size = new System.Drawing.Size(154, 25);
             this.trainRBMButton.TabIndex = 2;
-            this.trainRBMButton.Text = "2. Train RBM (fixed iterations)";
+            this.trainRBMButton.Text = "Train RBM (fixed cycles)";
             this.trainRBMButton.UseVisualStyleBackColor = true;
             this.trainRBMButton.Click += new System.EventHandler(this.trainRBMButton_Click);
             // 
             // exportWeightVisButton
             // 
-            this.exportWeightVisButton.Location = new System.Drawing.Point(1078, 43);
+            this.exportWeightVisButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportWeightVisButton.Location = new System.Drawing.Point(374, 470);
             this.exportWeightVisButton.Name = "exportWeightVisButton";
             this.exportWeightVisButton.Size = new System.Drawing.Size(179, 25);
             this.exportWeightVisButton.TabIndex = 3;
@@ -114,7 +114,8 @@
             // 
             // showReconstructionsButton
             // 
-            this.showReconstructionsButton.Location = new System.Drawing.Point(1078, 12);
+            this.showReconstructionsButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.showReconstructionsButton.Location = new System.Drawing.Point(374, 439);
             this.showReconstructionsButton.Name = "showReconstructionsButton";
             this.showReconstructionsButton.Size = new System.Drawing.Size(179, 25);
             this.showReconstructionsButton.TabIndex = 4;
@@ -124,52 +125,56 @@
             // 
             // reconstructionPathTextbox
             // 
+            this.reconstructionPathTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.reconstructionPathTextbox.Location = new System.Drawing.Point(12, 38);
             this.reconstructionPathTextbox.Name = "reconstructionPathTextbox";
-            this.reconstructionPathTextbox.Size = new System.Drawing.Size(559, 20);
+            this.reconstructionPathTextbox.Size = new System.Drawing.Size(357, 20);
             this.reconstructionPathTextbox.TabIndex = 6;
-            this.reconstructionPathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\examp" +
-    "les\\reconstructions";
+            this.reconstructionPathTextbox.Text = "\\examples\\reconstructions";
             // 
             // visualizationPathTextbox
             // 
+            this.visualizationPathTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.visualizationPathTextbox.Location = new System.Drawing.Point(12, 64);
             this.visualizationPathTextbox.Name = "visualizationPathTextbox";
-            this.visualizationPathTextbox.Size = new System.Drawing.Size(559, 20);
+            this.visualizationPathTextbox.Size = new System.Drawing.Size(357, 20);
             this.visualizationPathTextbox.TabIndex = 7;
-            this.visualizationPathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\examp" +
-    "les\\visualizations";
+            this.visualizationPathTextbox.Text = "\\examples\\visualizations";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(578, 18);
+            this.label1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(376, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(105, 13);
+            this.label1.Size = new System.Drawing.Size(127, 13);
             this.label1.TabIndex = 8;
             this.label1.Text = "Training images path";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(578, 41);
+            this.label2.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(376, 38);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(108, 13);
+            this.label2.Size = new System.Drawing.Size(127, 13);
             this.label2.TabIndex = 9;
             this.label2.Text = "Reconstructions path";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(578, 67);
+            this.label3.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(376, 64);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(94, 13);
+            this.label3.Size = new System.Drawing.Size(121, 13);
             this.label3.TabIndex = 10;
             this.label3.Text = "Visualizations path";
             // 
             // hiddenUnitsTextbox
             // 
-            this.hiddenUnitsTextbox.Location = new System.Drawing.Point(471, 227);
+            this.hiddenUnitsTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hiddenUnitsTextbox.Location = new System.Drawing.Point(12, 204);
             this.hiddenUnitsTextbox.Name = "hiddenUnitsTextbox";
             this.hiddenUnitsTextbox.Size = new System.Drawing.Size(100, 20);
             this.hiddenUnitsTextbox.TabIndex = 11;
@@ -178,15 +183,17 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(577, 235);
+            this.label4.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(118, 212);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(143, 13);
+            this.label4.Size = new System.Drawing.Size(163, 13);
             this.label4.TabIndex = 12;
             this.label4.Text = "RBM hidden units/NN inputs";
             // 
             // trainingCyclesTextbox
             // 
-            this.trainingCyclesTextbox.Location = new System.Drawing.Point(471, 252);
+            this.trainingCyclesTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.trainingCyclesTextbox.Location = new System.Drawing.Point(12, 229);
             this.trainingCyclesTextbox.Name = "trainingCyclesTextbox";
             this.trainingCyclesTextbox.Size = new System.Drawing.Size(100, 20);
             this.trainingCyclesTextbox.TabIndex = 13;
@@ -195,24 +202,27 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(578, 261);
+            this.label5.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(119, 238);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(78, 13);
+            this.label5.Size = new System.Drawing.Size(97, 13);
             this.label5.TabIndex = 14;
             this.label5.Text = "Training cycles";
             // 
             // learningRateLabel
             // 
             this.learningRateLabel.AutoSize = true;
-            this.learningRateLabel.Location = new System.Drawing.Point(578, 281);
+            this.learningRateLabel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.learningRateLabel.Location = new System.Drawing.Point(119, 258);
             this.learningRateLabel.Name = "learningRateLabel";
-            this.learningRateLabel.Size = new System.Drawing.Size(69, 13);
+            this.learningRateLabel.Size = new System.Drawing.Size(85, 13);
             this.learningRateLabel.TabIndex = 16;
             this.learningRateLabel.Text = "Learning rate";
             // 
             // learningRateTextbox
             // 
-            this.learningRateTextbox.Location = new System.Drawing.Point(471, 278);
+            this.learningRateTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.learningRateTextbox.Location = new System.Drawing.Point(12, 255);
             this.learningRateTextbox.Name = "learningRateTextbox";
             this.learningRateTextbox.Size = new System.Drawing.Size(100, 20);
             this.learningRateTextbox.TabIndex = 15;
@@ -220,24 +230,27 @@
             // 
             // singleImageTextbox
             // 
-            this.singleImageTextbox.Location = new System.Drawing.Point(12, 167);
+            this.singleImageTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.singleImageTextbox.Location = new System.Drawing.Point(12, 142);
             this.singleImageTextbox.Name = "singleImageTextbox";
-            this.singleImageTextbox.Size = new System.Drawing.Size(559, 20);
+            this.singleImageTextbox.Size = new System.Drawing.Size(357, 20);
             this.singleImageTextbox.TabIndex = 17;
             this.singleImageTextbox.DragDrop += new System.Windows.Forms.DragEventHandler(this.singleImageTextbox_DragDrop);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(577, 170);
+            this.label6.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(375, 142);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(91, 13);
+            this.label6.Size = new System.Drawing.Size(109, 13);
             this.label6.TabIndex = 19;
             this.label6.Text = "Single image path";
             // 
             // reconstructSingleButton
             // 
-            this.reconstructSingleButton.Location = new System.Drawing.Point(1078, 75);
+            this.reconstructSingleButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.reconstructSingleButton.Location = new System.Drawing.Point(374, 502);
             this.reconstructSingleButton.Name = "reconstructSingleButton";
             this.reconstructSingleButton.Size = new System.Drawing.Size(179, 35);
             this.reconstructSingleButton.TabIndex = 20;
@@ -247,31 +260,34 @@
             // 
             // startTrainingButton
             // 
-            this.startTrainingButton.Location = new System.Drawing.Point(741, 43);
+            this.startTrainingButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.startTrainingButton.Location = new System.Drawing.Point(578, 68);
             this.startTrainingButton.Name = "startTrainingButton";
-            this.startTrainingButton.Size = new System.Drawing.Size(146, 25);
+            this.startTrainingButton.Size = new System.Drawing.Size(173, 25);
             this.startTrainingButton.TabIndex = 21;
-            this.startTrainingButton.Text = "2. Start training";
+            this.startTrainingButton.Text = "Start training";
             this.startTrainingButton.UseVisualStyleBackColor = true;
             this.startTrainingButton.Click += new System.EventHandler(this.startTrainingButton_Click);
             // 
             // stopTrainingButton
             // 
-            this.stopTrainingButton.Location = new System.Drawing.Point(741, 74);
+            this.stopTrainingButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.stopTrainingButton.Location = new System.Drawing.Point(578, 100);
             this.stopTrainingButton.Name = "stopTrainingButton";
-            this.stopTrainingButton.Size = new System.Drawing.Size(146, 25);
+            this.stopTrainingButton.Size = new System.Drawing.Size(173, 25);
             this.stopTrainingButton.TabIndex = 22;
-            this.stopTrainingButton.Text = "3. Stop training";
+            this.stopTrainingButton.Text = "Stop training";
             this.stopTrainingButton.UseVisualStyleBackColor = true;
             this.stopTrainingButton.Click += new System.EventHandler(this.stopTrainingButton_Click);
             // 
             // createRBMButton
             // 
-            this.createRBMButton.Location = new System.Drawing.Point(741, 12);
+            this.createRBMButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.createRBMButton.Location = new System.Drawing.Point(578, 36);
             this.createRBMButton.Name = "createRBMButton";
-            this.createRBMButton.Size = new System.Drawing.Size(146, 25);
+            this.createRBMButton.Size = new System.Drawing.Size(173, 25);
             this.createRBMButton.TabIndex = 23;
-            this.createRBMButton.Text = "1. Create RBM";
+            this.createRBMButton.Text = "Create RBM";
             this.createRBMButton.UseVisualStyleBackColor = true;
             this.createRBMButton.Click += new System.EventHandler(this.createRBMButton_Click);
             // 
@@ -282,119 +298,90 @@
             // 
             // exportWeightsButton
             // 
-            this.exportWeightsButton.Location = new System.Drawing.Point(741, 107);
+            this.exportWeightsButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportWeightsButton.Location = new System.Drawing.Point(578, 132);
             this.exportWeightsButton.Name = "exportWeightsButton";
-            this.exportWeightsButton.Size = new System.Drawing.Size(146, 25);
+            this.exportWeightsButton.Size = new System.Drawing.Size(173, 25);
             this.exportWeightsButton.TabIndex = 24;
-            this.exportWeightsButton.Text = "4. Export RBM weights";
+            this.exportWeightsButton.Text = "Export RBM weights";
             this.exportWeightsButton.UseVisualStyleBackColor = true;
             this.exportWeightsButton.Click += new System.EventHandler(this.exportWeightsButton_Click);
             // 
             // importWeightsButton
             // 
-            this.importWeightsButton.Location = new System.Drawing.Point(893, 107);
+            this.importWeightsButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.importWeightsButton.Location = new System.Drawing.Point(763, 132);
             this.importWeightsButton.Name = "importWeightsButton";
             this.importWeightsButton.Size = new System.Drawing.Size(154, 25);
             this.importWeightsButton.TabIndex = 25;
-            this.importWeightsButton.Text = "4. Import RBM weights";
+            this.importWeightsButton.Text = "Import RBM weights";
             this.importWeightsButton.UseVisualStyleBackColor = true;
             this.importWeightsButton.Click += new System.EventHandler(this.importWeightsButton_Click);
             // 
             // exportRBMWeightsTextbox
             // 
+            this.exportRBMWeightsTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exportRBMWeightsTextbox.Location = new System.Drawing.Point(12, 90);
             this.exportRBMWeightsTextbox.Name = "exportRBMWeightsTextbox";
-            this.exportRBMWeightsTextbox.Size = new System.Drawing.Size(559, 20);
+            this.exportRBMWeightsTextbox.Size = new System.Drawing.Size(357, 20);
             this.exportRBMWeightsTextbox.TabIndex = 26;
-            this.exportRBMWeightsTextbox.Text = "C:\\Users\\asfarley\\Desktop\\Weights\\rbm_weights.bin";
+            this.exportRBMWeightsTextbox.Text = "\\Weights\\rbm_weights.bin";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(577, 93);
+            this.label7.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(375, 90);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(100, 13);
+            this.label7.Size = new System.Drawing.Size(109, 13);
             this.label7.TabIndex = 28;
             this.label7.Text = "RBM Weights  path";
             // 
-            // hiddenActivationsPathTextbox
-            // 
-            this.hiddenActivationsPathTextbox.Location = new System.Drawing.Point(12, 142);
-            this.hiddenActivationsPathTextbox.Name = "hiddenActivationsPathTextbox";
-            this.hiddenActivationsPathTextbox.Size = new System.Drawing.Size(559, 20);
-            this.hiddenActivationsPathTextbox.TabIndex = 31;
-            this.hiddenActivationsPathTextbox.Text = "C:\\Users\\asfarley\\Desktop\\Activations\\";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(578, 145);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(121, 13);
-            this.label9.TabIndex = 32;
-            this.label9.Text = "Hidden Activations Path";
-            // 
-            // exportRBMActivationsButton
-            // 
-            this.exportRBMActivationsButton.Location = new System.Drawing.Point(741, 139);
-            this.exportRBMActivationsButton.Name = "exportRBMActivationsButton";
-            this.exportRBMActivationsButton.Size = new System.Drawing.Size(146, 25);
-            this.exportRBMActivationsButton.TabIndex = 33;
-            this.exportRBMActivationsButton.Text = "6. Export RBM activations";
-            this.exportRBMActivationsButton.UseVisualStyleBackColor = true;
-            this.exportRBMActivationsButton.Click += new System.EventHandler(this.exportLabelledRBMActivationsButton_Click);
-            // 
-            // importRBMActivationsButton
-            // 
-            this.importRBMActivationsButton.Location = new System.Drawing.Point(741, 204);
-            this.importRBMActivationsButton.Name = "importRBMActivationsButton";
-            this.importRBMActivationsButton.Size = new System.Drawing.Size(146, 25);
-            this.importRBMActivationsButton.TabIndex = 34;
-            this.importRBMActivationsButton.Text = "8. Import RBM activations";
-            this.importRBMActivationsButton.UseVisualStyleBackColor = true;
-            this.importRBMActivationsButton.Click += new System.EventHandler(this.importRBMActivationsButton_Click);
-            // 
             // trainNNButton
             // 
-            this.trainNNButton.Location = new System.Drawing.Point(741, 238);
+            this.trainNNButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.trainNNButton.Location = new System.Drawing.Point(578, 228);
             this.trainNNButton.Name = "trainNNButton";
-            this.trainNNButton.Size = new System.Drawing.Size(146, 25);
+            this.trainNNButton.Size = new System.Drawing.Size(173, 25);
             this.trainNNButton.TabIndex = 35;
-            this.trainNNButton.Text = "9. Train NN";
+            this.trainNNButton.Text = "Train NN";
             this.trainNNButton.UseVisualStyleBackColor = true;
             this.trainNNButton.Click += new System.EventHandler(this.trainNNButton_Click);
             // 
             // createNNButton
             // 
-            this.createNNButton.Location = new System.Drawing.Point(741, 173);
+            this.createNNButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.createNNButton.Location = new System.Drawing.Point(578, 164);
             this.createNNButton.Name = "createNNButton";
-            this.createNNButton.Size = new System.Drawing.Size(146, 25);
+            this.createNNButton.Size = new System.Drawing.Size(173, 25);
             this.createNNButton.TabIndex = 36;
-            this.createNNButton.Text = "7. Create NN";
+            this.createNNButton.Text = "Create NN";
             this.createNNButton.UseVisualStyleBackColor = true;
             this.createNNButton.Click += new System.EventHandler(this.createNNButton_Click);
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(577, 196);
+            this.label8.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(375, 168);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(102, 13);
+            this.label8.Size = new System.Drawing.Size(121, 13);
             this.label8.TabIndex = 38;
             this.label8.Text = "Labelled image path";
             // 
             // labelledImagePathTextbox
             // 
-            this.labelledImagePathTextbox.Location = new System.Drawing.Point(12, 193);
+            this.labelledImagePathTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelledImagePathTextbox.Location = new System.Drawing.Point(12, 168);
             this.labelledImagePathTextbox.Name = "labelledImagePathTextbox";
-            this.labelledImagePathTextbox.Size = new System.Drawing.Size(559, 20);
+            this.labelledImagePathTextbox.Size = new System.Drawing.Size(357, 20);
             this.labelledImagePathTextbox.TabIndex = 37;
-            this.labelledImagePathTextbox.Text = "C:\\Emgu\\emgucv-windows-universal 3.0.0.2157\\Emgu.CV.Example\\vtc_eugene3\\bin\\examp" +
-    "les\\LabeledInputs\\";
+            this.labelledImagePathTextbox.Text = "\\examples\\LabeledInputs\\";
             // 
             // classifierErrorTextbox
             // 
-            this.classifierErrorTextbox.Location = new System.Drawing.Point(471, 304);
+            this.classifierErrorTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.classifierErrorTextbox.Location = new System.Drawing.Point(12, 281);
             this.classifierErrorTextbox.Name = "classifierErrorTextbox";
             this.classifierErrorTextbox.Size = new System.Drawing.Size(100, 20);
             this.classifierErrorTextbox.TabIndex = 39;
@@ -402,15 +389,17 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(577, 307);
+            this.label10.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(118, 284);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(72, 13);
+            this.label10.Size = new System.Drawing.Size(103, 13);
             this.label10.TabIndex = 40;
             this.label10.Text = "Classifier error";
             // 
             // classifierOutputTextbox
             // 
-            this.classifierOutputTextbox.Location = new System.Drawing.Point(471, 330);
+            this.classifierOutputTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.classifierOutputTextbox.Location = new System.Drawing.Point(12, 307);
             this.classifierOutputTextbox.Name = "classifierOutputTextbox";
             this.classifierOutputTextbox.Size = new System.Drawing.Size(100, 20);
             this.classifierOutputTextbox.TabIndex = 41;
@@ -418,38 +407,42 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(577, 332);
+            this.label11.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(118, 309);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(81, 13);
+            this.label11.Size = new System.Drawing.Size(109, 13);
             this.label11.TabIndex = 42;
             this.label11.Text = "Classifier output";
             // 
             // exportNNButton
             // 
-            this.exportNNButton.Location = new System.Drawing.Point(741, 273);
+            this.exportNNButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportNNButton.Location = new System.Drawing.Point(578, 260);
             this.exportNNButton.Name = "exportNNButton";
-            this.exportNNButton.Size = new System.Drawing.Size(146, 25);
+            this.exportNNButton.Size = new System.Drawing.Size(173, 25);
             this.exportNNButton.TabIndex = 43;
-            this.exportNNButton.Text = "10. Export NN";
+            this.exportNNButton.Text = "Export NN";
             this.exportNNButton.UseVisualStyleBackColor = true;
             this.exportNNButton.Click += new System.EventHandler(this.exportNNButton_Click);
             // 
             // importNNButton
             // 
-            this.importNNButton.Location = new System.Drawing.Point(893, 173);
+            this.importNNButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.importNNButton.Location = new System.Drawing.Point(763, 163);
             this.importNNButton.Name = "importNNButton";
             this.importNNButton.Size = new System.Drawing.Size(154, 25);
             this.importNNButton.TabIndex = 44;
-            this.importNNButton.Text = "7. Import NN";
+            this.importNNButton.Text = "Import NN";
             this.importNNButton.UseVisualStyleBackColor = true;
             this.importNNButton.Click += new System.EventHandler(this.importNNButton_Click);
             // 
             // exportImagesCheckbox
             // 
             this.exportImagesCheckbox.AutoSize = true;
-            this.exportImagesCheckbox.Location = new System.Drawing.Point(12, 235);
+            this.exportImagesCheckbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportImagesCheckbox.Location = new System.Drawing.Point(12, 333);
             this.exportImagesCheckbox.Name = "exportImagesCheckbox";
-            this.exportImagesCheckbox.Size = new System.Drawing.Size(282, 17);
+            this.exportImagesCheckbox.Size = new System.Drawing.Size(350, 17);
             this.exportImagesCheckbox.TabIndex = 45;
             this.exportImagesCheckbox.Text = "Export weight visualizations and image reconstructions";
             this.exportImagesCheckbox.UseVisualStyleBackColor = true;
@@ -457,34 +450,37 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(577, 119);
+            this.label12.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(375, 116);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(92, 13);
+            this.label12.Size = new System.Drawing.Size(103, 13);
             this.label12.TabIndex = 47;
             this.label12.Text = "NN Weights  path";
             // 
             // NNWeightsPathTextbox
             // 
+            this.NNWeightsPathTextbox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.NNWeightsPathTextbox.Location = new System.Drawing.Point(12, 116);
             this.NNWeightsPathTextbox.Name = "NNWeightsPathTextbox";
-            this.NNWeightsPathTextbox.Size = new System.Drawing.Size(559, 20);
+            this.NNWeightsPathTextbox.Size = new System.Drawing.Size(357, 20);
             this.NNWeightsPathTextbox.TabIndex = 46;
-            this.NNWeightsPathTextbox.Text = "C:\\Users\\asfarley\\Desktop\\Weights\\nn_weights.bin";
+            this.NNWeightsPathTextbox.Text = "\\Weights\\nn_weights.bin";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(12, 396);
+            this.textBox1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox1.Location = new System.Drawing.Point(597, 380);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(488, 122);
+            this.textBox1.Size = new System.Drawing.Size(320, 159);
             this.textBox1.TabIndex = 48;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
             // inputPictureBox
             // 
             this.inputPictureBox.BackColor = System.Drawing.Color.White;
-            this.inputPictureBox.Location = new System.Drawing.Point(741, 359);
+            this.inputPictureBox.Location = new System.Drawing.Point(12, 380);
             this.inputPictureBox.Name = "inputPictureBox";
             this.inputPictureBox.Size = new System.Drawing.Size(175, 159);
             this.inputPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -494,7 +490,7 @@
             // reconstructionPictureBox
             // 
             this.reconstructionPictureBox.BackColor = System.Drawing.Color.White;
-            this.reconstructionPictureBox.Location = new System.Drawing.Point(922, 359);
+            this.reconstructionPictureBox.Location = new System.Drawing.Point(193, 380);
             this.reconstructionPictureBox.Name = "reconstructionPictureBox";
             this.reconstructionPictureBox.Size = new System.Drawing.Size(175, 159);
             this.reconstructionPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -504,28 +500,30 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(741, 340);
+            this.label13.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(11, 361);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(31, 13);
+            this.label13.Size = new System.Drawing.Size(37, 13);
             this.label13.TabIndex = 51;
             this.label13.Text = "Input";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(919, 340);
+            this.label14.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(190, 361);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(79, 13);
+            this.label14.Size = new System.Drawing.Size(91, 13);
             this.label14.TabIndex = 52;
             this.label14.Text = "Reconstruction";
             // 
             // loadAllButton
             // 
-            this.loadAllButton.BackColor = System.Drawing.Color.MediumBlue;
-            this.loadAllButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.loadAllButton.Font = new System.Drawing.Font("Consolas", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.loadAllButton.ForeColor = System.Drawing.Color.White;
-            this.loadAllButton.Location = new System.Drawing.Point(893, 253);
+            this.loadAllButton.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.loadAllButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.loadAllButton.Font = new System.Drawing.Font("Consolas", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.loadAllButton.ForeColor = System.Drawing.Color.Black;
+            this.loadAllButton.Location = new System.Drawing.Point(763, 238);
             this.loadAllButton.Name = "loadAllButton";
             this.loadAllButton.Size = new System.Drawing.Size(154, 45);
             this.loadAllButton.TabIndex = 53;
@@ -533,13 +531,36 @@
             this.loadAllButton.UseVisualStyleBackColor = false;
             this.loadAllButton.Click += new System.EventHandler(this.loadAllButton_Click);
             // 
-            // dnnForm
+            // calculateActivationsButton
+            // 
+            this.calculateActivationsButton.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.calculateActivationsButton.Location = new System.Drawing.Point(578, 196);
+            this.calculateActivationsButton.Name = "calculateActivationsButton";
+            this.calculateActivationsButton.Size = new System.Drawing.Size(173, 25);
+            this.calculateActivationsButton.TabIndex = 54;
+            this.calculateActivationsButton.Text = "Calculate RBM activations";
+            this.calculateActivationsButton.UseVisualStyleBackColor = true;
+            this.calculateActivationsButton.Click += new System.EventHandler(this.calculateActivationsButton_Click);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(592, 5);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(220, 28);
+            this.label15.TabIndex = 55;
+            this.label15.Text = "Create and Train";
+            // 
+            // DnnForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(1269, 545);
+            this.ClientSize = new System.Drawing.Size(931, 548);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.calculateActivationsButton);
             this.Controls.Add(this.loadAllButton);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.label13);
@@ -559,10 +580,6 @@
             this.Controls.Add(this.labelledImagePathTextbox);
             this.Controls.Add(this.createNNButton);
             this.Controls.Add(this.trainNNButton);
-            this.Controls.Add(this.importRBMActivationsButton);
-            this.Controls.Add(this.exportRBMActivationsButton);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.hiddenActivationsPathTextbox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.exportRBMWeightsTextbox);
             this.Controls.Add(this.importWeightsButton);
@@ -588,6 +605,9 @@
             this.Controls.Add(this.exportWeightVisButton);
             this.Controls.Add(this.trainRBMButton);
             this.Controls.Add(this.trainingPathTextbox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "DnnForm";
             this.Text = "DNN Classifier Creator";
             ((System.ComponentModel.ISupportInitialize)(this.inputPictureBox)).EndInit();
@@ -625,10 +645,6 @@
         private System.Windows.Forms.Button importWeightsButton;
         private System.Windows.Forms.TextBox exportRBMWeightsTextbox;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox hiddenActivationsPathTextbox;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Button exportRBMActivationsButton;
-        private System.Windows.Forms.Button importRBMActivationsButton;
         private System.Windows.Forms.Button trainNNButton;
         private System.Windows.Forms.Button createNNButton;
         private System.Windows.Forms.Label label8;
@@ -648,6 +664,8 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Button loadAllButton;
+        private System.Windows.Forms.Button calculateActivationsButton;
+        private System.Windows.Forms.Label label15;
     }
 }
 

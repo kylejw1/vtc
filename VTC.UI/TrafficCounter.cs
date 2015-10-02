@@ -202,6 +202,8 @@ namespace VTC
                   GetCameraFrameBytes
                  ));
 
+         ServerReporter.INSTANCE.Start(); //TODO: Figure out a better way of synchronizing this state with UI (checkbox).
+
       }
 
        /// <summary>
@@ -415,12 +417,13 @@ namespace VTC
                   }
 
                   Image<Bgr, Byte> frameForProcessing = frame.Clone(); // Necessary so that frame.Data becomes accessible
+                  Image<Bgr, Byte> frameForRendering = frame.Clone();
 
                   // Send the new image frame to the vista for processing
                   _vista.Update(frameForProcessing);
 
                   // Update image boxes
-                  UpdateImageBoxes(frameForProcessing);
+                  UpdateImageBoxes(frameForRendering);
 
                   // Update statistics
                   trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
@@ -464,7 +467,7 @@ namespace VTC
 
        private void UpdateImageBoxes(Image<Bgr, Byte> frame)
        {
-           Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage();
+           Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage(frame);
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
            Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundUpdateMoG;
 
@@ -607,6 +610,11 @@ namespace VTC
                }
            }
            
+       }
+
+       private void watchdogTimer_Tick(object sender, EventArgs e)
+       {
+           File.SetLastWriteTime("C:\\TrafficCounter\\heartbeat", DateTime.Now);
        }
    }
 }

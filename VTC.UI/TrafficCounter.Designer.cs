@@ -61,6 +61,7 @@ namespace VTC
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
             this.exportDatasetTimer = new System.Windows.Forms.Timer(this.components);
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
+            this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -273,6 +274,8 @@ namespace VTC
             // pushStateCheckbox
             // 
             this.pushStateCheckbox.AutoSize = true;
+            this.pushStateCheckbox.Checked = true;
+            this.pushStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pushStateCheckbox.Location = new System.Drawing.Point(262, 261);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
             this.pushStateCheckbox.Size = new System.Drawing.Size(117, 17);
@@ -318,6 +321,12 @@ namespace VTC
             this.exportDatasetsCheckbox.Text = "Export datasets periodically";
             this.exportDatasetsCheckbox.UseVisualStyleBackColor = true;
             // 
+            // watchdogTimer
+            // 
+            this.watchdogTimer.Enabled = true;
+            this.watchdogTimer.Interval = 5000;
+            this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -351,6 +360,9 @@ namespace VTC
             this.Controls.Add(this.trackCountBox);
             this.Controls.Add(this.pushStateCheckbox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(570, 428);
+            this.MinimumSize = new System.Drawing.Size(570, 428);
             this.Name = "TrafficCounter";
             this.Text = "VTC";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.TrafficCounter_FormClosed);
@@ -390,6 +402,7 @@ namespace VTC
       private CheckBox delayProcessingCheckbox;
       private Timer exportDatasetTimer;
       private CheckBox exportDatasetsCheckbox;
+      private Timer watchdogTimer;
 
 
    }

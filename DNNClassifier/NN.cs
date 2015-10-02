@@ -18,14 +18,16 @@ namespace DNNClassifier
         private double[][] _weights;
         public double[][] Inputs;
         public double[][] Targets;
+        public string[] Classes;
         public int TrainingCycles;
         private readonly double _l;
 
-        public NN(int inputLength, int outputLength, double learningRate)
+        public NN(int inputLength, int outputLength, double learningRate, string[] classes)
         {
             _l = learningRate;
             InitializeWeights(inputLength+1, outputLength);
             TrainingCycles = 0;
+            Classes = classes;
         }
 
         /// <summary>
@@ -205,6 +207,15 @@ namespace DNNClassifier
             var result = (NN)formatter.Deserialize(stream);
             stream.Close();
             return result;
+        }
+
+
+        public string ClassifyInput(double[] input)
+        {
+            double[] output = Evaluate(input);
+            double maxClassifierOutput = output.Max();
+            int maxIndex = output.ToList().IndexOf(maxClassifierOutput);
+            return Classes[maxIndex];    
         }
 
     }

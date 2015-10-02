@@ -275,9 +275,64 @@ namespace DNNClassifier
         {
             IFormatter formatter = new BinaryFormatter();
             Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            RBM result = (RBM)formatter.Deserialize(stream);
+            var result = (RBM)formatter.Deserialize(stream);
             stream.Close();
             return result;
+        }
+
+        /// <summary>
+        /// Render weights as 30x30 pixel color bitmaps and write to disk.
+        /// </summary>
+        /// <param name="exportPath"></param>
+        public void ExportWeightVisualizations(string exportPath)
+        {
+                var dc = new RBMDataConverter();
+
+                var maxWeight = 0.0;
+                var minWeight = 0.0;
+                const double maxAfter = 255.0;
+                const double minAfter = 0.0;
+
+                for (var i = 1; i < Weights.Length; i++)
+                    for (int j = 1; j < Weights[i].Length; j++)
+                        if (Weights[i][j] > maxWeight)
+                            maxWeight = Weights[i][j];
+
+                for (var i = 1; i < Weights.Length; i++)
+                    for (var j = 1; j < Weights[i].Length; j++)
+                        if (Weights[i][j] < minWeight)
+                            minWeight = Weights[i][j];
+
+                var transformedWeights = new double[Weights.Length][];
+                for (var i = 0; i < Weights.Length; i++)
+                {
+                    var newWeightsArray = new double[Weights[0].Length];
+                    for (int j = 0; j < Weights[i].Length; j++)
+                        newWeightsArray[j] = (Weights[i][j] - minWeight) * (maxAfter - minAfter) / (maxWeight - minWeight);
+
+                    transformedWeights[i] = newWeightsArray;
+                }
+
+                for (var i = 0; i < Weights.Length; i++)
+                {
+                    dc.SaveRawDataToImage(transformedWeights[i], exportPath + "\\" + i + ".bmp", 30, 30);
+                }
+        }
+
+        /// <summary>
+        /// Export reconstruction of single image, return activations. 
+        /// </summary>
+        /// <param name="inputPath"></param>
+        /// <param name="exportPath"></param>
+        /// <returns></returns>
+        public double[] ExportSingleReconstruction(string inputPath, string exportPath)
+        {
+            var dc = new RBMDataConverter();
+            var trainingData = dc.TrainingSetFromSingleImage(inputPath);
+            var activations = ComputeActivationsExact(trainingData[0]);
+            var reconstruction = ReconstructExact(activations);
+            dc.SaveDataToImage(reconstruction, exportPath, 30, 30);
+            return activations;
         }
 
     }

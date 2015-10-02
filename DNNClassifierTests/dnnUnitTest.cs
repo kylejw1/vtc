@@ -28,7 +28,7 @@ namespace DNNClassifierTests
         [TestMethod]
         public void NNSolvesTrivialExample()
         {
-            var nn = new NN(1, 1, 0.1);
+            var nn = new NN(1, 1, 0.1, new string[0]);
 
             double[][] inputs = new double[2][];
             inputs[0] = new double[] { 1 };
