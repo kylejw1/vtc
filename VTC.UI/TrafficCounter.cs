@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 using VTC.CaptureSource;
 using VTC.Kernel;
 using VTC.Kernel.RegionConfig;
@@ -26,7 +27,9 @@ namespace VTC
 {
    public partial class TrafficCounter : Form
    {
-      private readonly AppSettings _settings;
+       private static readonly Logger _logger = LogManager.GetLogger("main.form");
+
+       private readonly AppSettings _settings;
        private const string IpCamerasFilename = "ipCameras.txt";
 
        private VideoDisplay _mainDisplay;
@@ -157,7 +160,7 @@ namespace VTC
                _velocityFieldDisplay.Update(image);
                Image<Gray, byte> pimage;
                pimage = _vista.VelocityProjection();
-               _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());    
+               _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
            }
        }
 
@@ -209,11 +212,18 @@ namespace VTC
        /// <summary>
        /// Write log message.
        /// </summary>
+       /// <param name="logLevel">Log message severity.</param>
        /// <param name="format">Message format.</param>
        /// <param name="args">Format argument.</param>
-       private static void Log(string format, params object[] args)
+       private static void Log(LogLevel logLevel, string format, params object[] args)
        {
            Console.WriteLine(format, args);
+           _logger.Log(logLevel, format, args);
+       }
+
+       private static void Log(string format, params object[] args)
+       {
+           Log(LogLevel.Info, format, args);
        }
 
        /// <summary>
@@ -294,6 +304,7 @@ namespace VTC
            {
                while (! string.IsNullOrWhiteSpace(assemblyName))
                {
+                   // ensure absolute path
                    if (! Path.IsPathRooted(assemblyName))
                    {
                        var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -317,13 +328,14 @@ namespace VTC
                        AddCamera(captureContext.Capture);
                    }
 
+                   Log(LogLevel.Trace, "Test mode detected.");
                    result = true;
                    break;
                }
            }
            catch (Exception e)
            {
-               Log(e.ToString());
+               Log(LogLevel.Error, e.ToString());
            }
 
            return result;
@@ -380,7 +392,7 @@ namespace VTC
           catch (Exception ex)
           {
               var message = "Cannot save configuration settings. Error: " + ex.Message;
-              Log(message);
+              Log(LogLevel.Error, message);
               MessageBox.Show(message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
           }
       }

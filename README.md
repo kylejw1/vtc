@@ -13,7 +13,7 @@ Realtime video-based object tracking software. Written in C# using Emgu CV. Requ
 Get sources to some dir (say - `c:\projects\vtc`). Further referenced as `REPODIR`.
 
 ##EmguCV
-Download the EmguCV libraries here: 
+Download the EmguCV libraries here:
 [http://sourceforge.net/projects/emgucv/](http://sourceforge.net/projects/emgucv/ "EmguCV download page")
 
 * Solution projects are using the path, so no need to fix it.
@@ -36,6 +36,9 @@ Pass pathname of local video as command line argument.
 ##Visualizing unit tests
 Use `-tests` command line arguments to run unit tests (it uses loads DLL specified in UnitTestDll value in app config). <br>
 **IMPORTANT:** unit tests using **OWN** settings. Check unit test source code to see values!
+
+##Logs
+Logs located at `%AppData%\VTC\1.0\Logs\` dir.
 
 #Debug output
 Debug output is written to C:\TrafficCounter\VTClog.txt (see app.config)
