@@ -15,6 +15,7 @@ namespace VTC
     {
 
         public string LayerName;
+		public Emgu.CV.UI.ImageBox ImageBox {  get { return imageBox; } }
 
         public void Update(Image<Bgr, Byte> frame)
         {
@@ -30,6 +31,7 @@ namespace VTC
         public VideoDisplay(string name, Point initialPosition)
         {
             InitializeComponent();
+			LayerName = name;
             this.Text = "VideoDisplay: " + name;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = initialPosition;

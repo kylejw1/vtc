@@ -61,6 +61,7 @@ namespace VTC
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
             this.exportDatasetTimer = new System.Windows.Forms.Timer(this.components);
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
+			this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
@@ -298,7 +299,7 @@ namespace VTC
             // delayProcessingCheckbox
             // 
             this.delayProcessingCheckbox.AutoSize = true;
-            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 352);
+            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 381);
             this.delayProcessingCheckbox.Name = "delayProcessingCheckbox";
             this.delayProcessingCheckbox.Size = new System.Drawing.Size(107, 17);
             this.delayProcessingCheckbox.TabIndex = 71;
@@ -326,12 +327,21 @@ namespace VTC
             this.watchdogTimer.Enabled = true;
             this.watchdogTimer.Interval = 5000;
             this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
+            // btnToggleVideoMux
+            // 
+            this.btnToggleVideoMux.Location = new System.Drawing.Point(261, 352);
+            this.btnToggleVideoMux.Name = "btnToggleVideoMux";
+            this.btnToggleVideoMux.Size = new System.Drawing.Size(196, 23);
+            this.btnToggleVideoMux.TabIndex = 63;
+            this.btnToggleVideoMux.Text = "Toggle Video Mux";
+            this.btnToggleVideoMux.UseVisualStyleBackColor = true;
+            this.btnToggleVideoMux.Click += new System.EventHandler(this.btnToggleVideoMux_Click);
             // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(554, 390);
+            this.ClientSize = new System.Drawing.Size(554, 429);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
@@ -341,6 +351,7 @@ namespace VTC
             this.Controls.Add(this.exportTrainingImagesButton);
             this.Controls.Add(this.timeActiveTextBox);
             this.Controls.Add(this.label11);
+			this.Controls.Add(this.btnToggleVideoMux);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.frameHeightBox);
             this.Controls.Add(this.label6);
@@ -402,6 +413,7 @@ namespace VTC
       private CheckBox delayProcessingCheckbox;
       private Timer exportDatasetTimer;
       private CheckBox exportDatasetsCheckbox;
+	  private Button btnToggleVideoMux;
       private Timer watchdogTimer;
 
 

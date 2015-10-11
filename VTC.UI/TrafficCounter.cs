@@ -39,6 +39,7 @@ namespace VTC
        private VideoDisplay _velocityProjectDisplay;
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
+	   private VideoMux _videoMux;
 
       private readonly DateTime _applicationStartTime;
 
@@ -173,13 +174,17 @@ namespace VTC
            _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
-           _mainDisplay.Show();
-           _movementDisplay.Show();
-           _backgroundDisplay.Show();
-           _velocityFieldDisplay.Show();
-           _velocityProjectDisplay.Show();
-           _mixtureDisplay.Show();
-           _mixtureMovementDisplay.Show();
+		   
+		   
+		    _videoMux = new VideoMux();
+            _videoMux.AddDisplay(_mainDisplay.ImageBox, _mainDisplay.LayerName);
+			_videoMux.AddDisplay(_movementDisplay.ImageBox, _movementDisplay.LayerName);
+			_videoMux.AddDisplay(_backgroundDisplay.ImageBox, _backgroundDisplay.LayerName);
+			_videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
+			_videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
+			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
+			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
+			_videoMux.Show();
        }
 
        void Run()
@@ -541,9 +546,26 @@ namespace VTC
               Debug.WriteLine("Post state success: " + success + " " + DateTime.Now);
           }
       }
+	  
+	  private void btnToggleVideoMux_Click(object sender, EventArgs e)
+        {
+            if (null == _videoMux || _videoMux.IsDisposed)
+            {
+                CreateVideoWindows();
+                _videoMux.Show();
+                return;
+            }
+            
+            if (_videoMux.Visible)
+            {
+                _videoMux.Hide();
+            } else
+            {
+                _videoMux.Show();
+            }
+        }
 
-
-       private void btnConfigureRegions_Click(object sender, EventArgs e)
+      private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
           RegionEditor r = new RegionEditor(_vista.Color_Background, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)

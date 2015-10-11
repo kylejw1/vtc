@@ -163,6 +163,12 @@
     <Compile Include="VideoDisplay.Designer.cs">
       <DependentUpon>VideoDisplay.cs</DependentUpon>
     </Compile>
+	 <Compile Include="VideoMux.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VideoMux.Designer.cs">
+      <DependentUpon>VideoMux.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
@@ -183,6 +189,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="VideoDisplay.resx">
       <DependentUpon>VideoDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+	 <EmbeddedResource Include="VideoMux.resx">
+      <DependentUpon>VideoMux.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
