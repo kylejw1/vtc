@@ -8,6 +8,7 @@ using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
+using System.Collections;
 
 namespace VTC.Kernel.Vistas
 {
@@ -44,6 +45,7 @@ namespace VTC.Kernel.Vistas
 
         public Measurements[] MeasurementsArray;
         public SortedList<CvBlob, int> BlobsWithArea;
+        public Queue<Measurements[]> MeasurementArrayQueue;
         
         public Image<Gray, byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
         public Image<Gray, byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
@@ -173,6 +175,8 @@ namespace VTC.Kernel.Vistas
 
             MoGBackgroundSingleton = new MoGBackground(_width, _height);
             BlobsWithArea = new SortedList<CvBlob, int>();
+
+            MeasurementArrayQueue = new Queue<Measurements[]>(900);
         }
 
         public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
@@ -232,6 +236,10 @@ namespace VTC.Kernel.Vistas
 
                 //var measurements = FindBlobCenters(newFrame, count);
                 MeasurementsArray = FindClosedBlobCenters(newFrame);
+                MeasurementArrayQueue.Enqueue(MeasurementsArray);
+                while (MeasurementArrayQueue.Count > 300)
+                    MeasurementArrayQueue.Dequeue();
+
                 MHT.Update(MeasurementsArray);
 
                 // First update base class stats
@@ -342,6 +350,8 @@ namespace VTC.Kernel.Vistas
                     BlobsWithArea.Add(targetBlob, targetBlob.Area);
 
                 int numWebcamBlobsFound = BlobsWithArea.Count();
+                if (numWebcamBlobsFound > Settings.MaxTargets)
+                    numWebcamBlobsFound = Settings.MaxTargets;
 
                 coordinates = new Measurements[numWebcamBlobsFound];
                 for(int i=0; i<numWebcamBlobsFound; i++)

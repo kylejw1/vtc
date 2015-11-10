@@ -46,7 +46,6 @@ namespace VTC
             this.frameWidthBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.serverUrlTextBox = new System.Windows.Forms.TextBox();
-            this.debugTextBox = new System.Windows.Forms.TextBox();
             this.tbVistaStats = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.intersectionIDTextBox = new System.Windows.Forms.TextBox();
@@ -61,7 +60,7 @@ namespace VTC
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
             this.exportDatasetTimer = new System.Windows.Forms.Timer(this.components);
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
-			this.btnToggleVideoMux = new System.Windows.Forms.Button();
+            this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
@@ -73,7 +72,7 @@ namespace VTC
             // 
             // updateSamplePoint
             // 
-            this.updateSamplePoint.Location = new System.Drawing.Point(120, 259);
+            this.updateSamplePoint.Location = new System.Drawing.Point(126, 125);
             this.updateSamplePoint.Name = "updateSamplePoint";
             this.updateSamplePoint.Size = new System.Drawing.Size(75, 23);
             this.updateSamplePoint.TabIndex = 69;
@@ -84,7 +83,7 @@ namespace VTC
             // saveRGBSamplesCheckBox
             // 
             this.saveRGBSamplesCheckBox.AutoSize = true;
-            this.saveRGBSamplesCheckBox.Location = new System.Drawing.Point(15, 288);
+            this.saveRGBSamplesCheckBox.Location = new System.Drawing.Point(21, 154);
             this.saveRGBSamplesCheckBox.Name = "saveRGBSamplesCheckBox";
             this.saveRGBSamplesCheckBox.Size = new System.Drawing.Size(87, 17);
             this.saveRGBSamplesCheckBox.TabIndex = 68;
@@ -93,7 +92,7 @@ namespace VTC
             // 
             // rgbCoordinateTextbox
             // 
-            this.rgbCoordinateTextbox.Location = new System.Drawing.Point(11, 261);
+            this.rgbCoordinateTextbox.Location = new System.Drawing.Point(17, 127);
             this.rgbCoordinateTextbox.Name = "rgbCoordinateTextbox";
             this.rgbCoordinateTextbox.Size = new System.Drawing.Size(100, 20);
             this.rgbCoordinateTextbox.TabIndex = 67;
@@ -110,7 +109,7 @@ namespace VTC
             // 
             // timeActiveTextBox
             // 
-            this.timeActiveTextBox.Location = new System.Drawing.Point(11, 326);
+            this.timeActiveTextBox.Location = new System.Drawing.Point(17, 177);
             this.timeActiveTextBox.Name = "timeActiveTextBox";
             this.timeActiveTextBox.ReadOnly = true;
             this.timeActiveTextBox.Size = new System.Drawing.Size(100, 20);
@@ -119,7 +118,7 @@ namespace VTC
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(117, 329);
+            this.label11.Location = new System.Drawing.Point(123, 180);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(62, 13);
             this.label11.TabIndex = 64;
@@ -182,14 +181,6 @@ namespace VTC
             this.serverUrlTextBox.Name = "serverUrlTextBox";
             this.serverUrlTextBox.Size = new System.Drawing.Size(195, 20);
             this.serverUrlTextBox.TabIndex = 57;
-            // 
-            // debugTextBox
-            // 
-            this.debugTextBox.Location = new System.Drawing.Point(14, 125);
-            this.debugTextBox.Multiline = true;
-            this.debugTextBox.Name = "debugTextBox";
-            this.debugTextBox.Size = new System.Drawing.Size(240, 112);
-            this.debugTextBox.TabIndex = 56;
             // 
             // tbVistaStats
             // 
@@ -322,11 +313,6 @@ namespace VTC
             this.exportDatasetsCheckbox.Text = "Export datasets periodically";
             this.exportDatasetsCheckbox.UseVisualStyleBackColor = true;
             // 
-            // watchdogTimer
-            // 
-            this.watchdogTimer.Enabled = true;
-            this.watchdogTimer.Interval = 5000;
-            this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
             // btnToggleVideoMux
             // 
             this.btnToggleVideoMux.Location = new System.Drawing.Point(261, 352);
@@ -337,11 +323,17 @@ namespace VTC
             this.btnToggleVideoMux.UseVisualStyleBackColor = true;
             this.btnToggleVideoMux.Click += new System.EventHandler(this.btnToggleVideoMux_Click);
             // 
+            // watchdogTimer
+            // 
+            this.watchdogTimer.Enabled = true;
+            this.watchdogTimer.Interval = 5000;
+            this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(554, 429);
+            this.ClientSize = new System.Drawing.Size(576, 427);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
@@ -351,7 +343,7 @@ namespace VTC
             this.Controls.Add(this.exportTrainingImagesButton);
             this.Controls.Add(this.timeActiveTextBox);
             this.Controls.Add(this.label11);
-			this.Controls.Add(this.btnToggleVideoMux);
+            this.Controls.Add(this.btnToggleVideoMux);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.frameHeightBox);
             this.Controls.Add(this.label6);
@@ -359,7 +351,6 @@ namespace VTC
             this.Controls.Add(this.frameWidthBox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.serverUrlTextBox);
-            this.Controls.Add(this.debugTextBox);
             this.Controls.Add(this.tbVistaStats);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.intersectionIDTextBox);
@@ -372,7 +363,6 @@ namespace VTC
             this.Controls.Add(this.pushStateCheckbox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(570, 428);
             this.MinimumSize = new System.Drawing.Size(570, 428);
             this.Name = "TrafficCounter";
             this.Text = "VTC";
@@ -398,7 +388,6 @@ namespace VTC
       private TextBox frameWidthBox;
       private Label label7;
       private TextBox serverUrlTextBox;
-      private TextBox debugTextBox;
       private TextBox tbVistaStats;
       private Label label4;
       private TextBox intersectionIDTextBox;

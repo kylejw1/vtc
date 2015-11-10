@@ -39,6 +39,7 @@ namespace VTC
        private VideoDisplay _velocityProjectDisplay;
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
+       private VideoDisplay _3DPointsDisplay;
 	   private VideoMux _videoMux;
 
       private readonly DateTime _applicationStartTime;
@@ -148,6 +149,7 @@ namespace VTC
            CreateVideoWindows();
 
            _applicationStartTime = DateTime.Now;
+           
            Run();
       }
 
@@ -174,6 +176,7 @@ namespace VTC
            _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
+           _3DPointsDisplay = new VideoDisplay("3D Points", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
 		   
 		   
 		    _videoMux = new VideoMux();
@@ -184,6 +187,7 @@ namespace VTC
 			_videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
+            _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
 			_videoMux.Show();
        }
 
@@ -488,9 +492,13 @@ namespace VTC
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
            Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundUpdateMoG;
 
+           //Render 3D points
+           Image<Bgr, byte> pointsImage = Render3DPoints();
+
            _mainDisplay.Update(stateImage);
            _backgroundDisplay.Update(backgroundImage);
            _mixtureDisplay.Update(mogImage);
+           _3DPointsDisplay.Update(pointsImage);
 
           if (_vista.Movement_Mask != null)
           {
@@ -504,6 +512,24 @@ namespace VTC
               _mixtureMovementDisplay.Update(movementTimesImageMoG);
           }
       }
+
+       private Image<Bgr, byte> Render3DPoints()
+       {
+           Image<Bgr,byte> pointsImage = new Image<Bgr, byte>(new Size(_vista._frame.Width, _vista._frame.Height));
+           var measurementsArrayArray = _vista.MeasurementArrayQueue.ToArray();
+           var totalLength = measurementsArrayArray.Length;
+
+           for(int i=0;i< totalLength;i++)
+               for (int j = 0; j < measurementsArrayArray[i].Length; j++)
+               {
+                   var p = measurementsArrayArray[i][j];
+                   double intensity = (double) (totalLength - i)/totalLength;
+                   intensity = 1 - intensity;
+                   pointsImage.Draw(new CircleF(new PointF((float)p.X,(float)p.Y), (float)1.0),new Bgr(200*intensity,0,0));
+               }
+               
+           return pointsImage;
+       }
 
       void PushStateProcess(object sender, EventArgs e)
       {
