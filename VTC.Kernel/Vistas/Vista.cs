@@ -103,6 +103,7 @@ namespace VTC.Kernel.Vistas
         //************* Rendering parameters ***************  
         double velocity_render_multiplier = 1.0; //Velocity is multiplied by this quantity to give a line length for rendering
         bool render_clean = true;                //Don't draw velocity vector, use fixed-size object circles. Should add this as checkbox to UI.
+        public bool hide_trackers = false;              //Don't draw tracker circles at all
 
         private readonly MultipleHypothesisTracker MHT;
 
@@ -229,7 +230,7 @@ namespace VTC.Kernel.Vistas
 
                 UpdateBackground(newFrame);
 
-                if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0)
+                if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0 && EnableMoG)
                     UpdateBackgroundMoGIncremental(newFrame);
 
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
@@ -283,10 +284,10 @@ namespace VTC.Kernel.Vistas
             Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
             Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
 
-            movementMask._Erode(1);
-            movementMask._Dilate(1);
-            movementMask._Erode(1);
-            movementMask._Dilate(1);
+            //movementMask._Erode(1);
+            //movementMask._Dilate(1);
+            //movementMask._Erode(1);
+            //movementMask._Dilate(1);
             movementMask._SmoothGaussian(5, 5, 1, 1);
             movementMask._ThresholdBinary(_thresholdColor, CeilingColor);
 
@@ -408,32 +409,58 @@ namespace VTC.Kernel.Vistas
 
                 var lastState = vehicle.StateHistory.Last();
 
-                float x = (float)lastState.X;
-                float y = (float)lastState.Y;
+                float x = (float) lastState.X;
+                float y = (float) lastState.Y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
 
-                float radius = validation_region_deviation * ((float)Math.Sqrt(Math.Pow(lastState.CovX, 2) + (float)Math.Pow(lastState.CovY, 2)));
+                float radius = validation_region_deviation*
+                               ((float) Math.Sqrt(Math.Pow(lastState.CovX, 2) + (float) Math.Pow(lastState.CovY, 2)));
                 if (radius < 2.0)
-                    radius = (float)2.0;
+                    radius = (float) 2.0;
 
-                float vx_render = (float)(velocity_render_multiplier * lastState.Vx);
-                float vy_render = (float)(velocity_render_multiplier * lastState.Vy);
+                float vx_render = (float) (velocity_render_multiplier*lastState.Vx);
+                float vy_render = (float) (velocity_render_multiplier*lastState.Vy);
 
-
-                if (render_clean)
+                if (!hide_trackers)
                 {
-                    frame.Draw(new CircleF(new PointF(x, y), 10), new Bgr(vehicle.StateHistory.Last().Blue, vehicle.StateHistory.Last().Green, vehicle.StateHistory.Last().Red), 2);
-                    frame.Draw(new CircleF(new PointF(x, y), 2), StateColorGreen, 1);
+                    if (render_clean)
+                    {
+                        frame.Draw(new CircleF(new PointF(x, y), 10),
+                            new Bgr(vehicle.StateHistory.Last().Blue, vehicle.StateHistory.Last().Green,
+                                vehicle.StateHistory.Last().Red), 2);
+                        frame.Draw(new CircleF(new PointF(x, y), 2), StateColorGreen, 1);
+                    }
+                    else
+                    {
+                        frame.Draw(new CircleF(new PointF(x, y), radius), StateColorGreen, 1);
+                        frame.Draw(
+                            new LineSegment2D(new Point((int) x, (int) y),
+                                new Point((int) (x + vx_render), (int) (y + vy_render))), StateColorRed, 1);
+                    }
                 }
-                else
-                {
-                    frame.Draw(new CircleF(new PointF(x, y), radius), StateColorGreen, 1);
-                    frame.Draw(new LineSegment2D(new Point((int)x, (int)y), new Point((int)(x + vx_render), (int)(y + vy_render))), StateColorRed, 1);
-                }
+            });
 
+            //foreach (var s in MHT.Trajectories.SelectMany(t => t.stateEstimates))
+            //    frame.Draw(new CircleF(new PointF((float)s.X, (float)s.Y), 1), new Bgr(s.Blue, s.Green, s.Red));
+
+
+            double minDistance = 100;
+            foreach (var t in MHT.Trajectories)
+            {
+                double distance = Math.Sqrt(Math.Pow(t.stateEstimates.First().X - t.stateEstimates.Last().X, 2) +
+                                            Math.Pow(t.stateEstimates.First().Y - t.stateEstimates.Last().Y, 2));
+
+
+                if (distance > minDistance)
+                {
+                    double ageFactor = 1.0 - (double) (DateTime.Now - t.exitTime).Ticks / (TimeSpan.FromSeconds(3).Ticks);
+                    Bgr trajectoryColor = new Bgr(0, 0, 200*ageFactor);
+                    Point[] trajectoryRendering = t.stateEstimates.Select(s => new Point((int)s.X, (int)s.Y)).ToArray();
+                    frame.DrawPolyline(trajectoryRendering, false, trajectoryColor);    
+                }
             }
-           );
+                
 
             return frame;
         }

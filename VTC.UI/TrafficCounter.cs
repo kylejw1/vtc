@@ -22,6 +22,7 @@ using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
+using SkyXoft.BusinessSolutions.LicenseManager.Protector;
 
 namespace VTC
 {
@@ -42,7 +43,11 @@ namespace VTC
        private VideoDisplay _3DPointsDisplay;
 	   private VideoMux _videoMux;
 
-      private readonly DateTime _applicationStartTime;
+       private readonly DateTime _applicationStartTime;
+       private DateTime _lastDatasetExportTime;
+       ExtendedLicense license;
+       bool isActivated;
+
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
       private ICaptureSource _selectedCamera;
@@ -106,6 +111,13 @@ namespace VTC
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, string appArgument = null)
        {
+           ValidateLicense();
+
+           if (isActivated)
+               MessageBox.Show("License validated");
+           else
+               MessageBox.Show("License invalid");
+
            _appArgument = appArgument;
           InitializeComponent();
 
@@ -142,13 +154,12 @@ namespace VTC
            System.Windows.Forms.Timer t = new System.Windows.Forms.Timer {Interval = 1000};
            t.Tick += OnTick;
            t.Start();
-           //Clear sample files
-           ClearRGBSamplesFile();
 
            //Create video windows
            CreateVideoWindows();
 
            _applicationStartTime = DateTime.Now;
+           _lastDatasetExportTime = DateTime.Now;
            
            Run();
       }
@@ -450,41 +461,19 @@ namespace VTC
                   trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
                   tbVistaStats.Text = _vista.GetStatString();
 
-                  // Save R,G,B samples
-                  StoreRGBSample(frameForProcessing);
-                  Thread.Sleep((int)_settings.Timestep * 1000);
+                  Thread.Sleep((int)_settings.Timestep * 1000); //TODO: don't use a hardcoded wait here
                   TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
                   timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+
+                  //Export training images
+                  if(DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
+                  tryExportDataset(frameForProcessing);
 
                   if (delayProcessingCheckbox.Checked)
                       Thread.Sleep(500);
 
               }   
       }
-
-
-       private void ClearRGBSamplesFile()
-       {
-           string path = @"RGB.txt";
-           using (File.CreateText(path))
-           {
-           }
-       }
-
-       private void StoreRGBSample(Image<Bgr, byte> frame)
-       {
-           if (frame != null && saveRGBSamplesCheckBox.Checked)
-           {
-               Bgr pixel = frame[_rgbSamplePoint.Y, _rgbSamplePoint.X];
-               double r = pixel.Red;
-               double g = pixel.Green;
-               double b = pixel.Blue;
-
-               string path = @"RGB.txt";
-               using (StreamWriter sw = File.AppendText(path))
-                   sw.WriteLine(r + "," + g + "," + b);    
-           }
-       }
 
        private void UpdateImageBoxes(Image<Bgr, Byte> frame)
        {
@@ -525,7 +514,8 @@ namespace VTC
                    var p = measurementsArrayArray[i][j];
                    double intensity = (double) (totalLength - i)/totalLength;
                    intensity = 1 - intensity;
-                   pointsImage.Draw(new CircleF(new PointF((float)p.X,(float)p.Y), (float)1.0),new Bgr(200*intensity,0,0));
+                   Bgr color = new Bgr(p.Blue * intensity, p.Green * intensity, p.Red * intensity);
+                   pointsImage.Draw(new CircleF(new PointF((float)p.X,(float)p.Y), (float)1.0),color);
                }
                
            return pointsImage;
@@ -627,54 +617,73 @@ namespace VTC
           }
       }
 
-      private void exportTrainingImagesButton_Click(object sender, EventArgs e)
-      {
-              using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
-              {
-                  if (frame != null)
-                  {
-                      //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr,float>());
-                      //ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, _vista.Training_Image.Convert<Bgr,float>(), _vista.CurrentVehicles);
-                      ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings, frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
-                      eT.Show();
-                  }
-              }
-      }
-
-       private Point _rgbSamplePoint;
        private readonly bool _unitTestsMode;
 
-       private void updateSamplePoint_Click(object sender, EventArgs e)
-       {
-           string text = rgbCoordinateTextbox.Text;
-           string first = text.Split(',')[0];
-           string second = text.Split(',')[1];
-           _rgbSamplePoint.X = Convert.ToInt32(first);
-           _rgbSamplePoint.Y = Convert.ToInt32(second);
-       }
+       
 
        private void MoGcheckBox_CheckedChanged(object sender, EventArgs e)
        {
            _vista.EnableMoG = MoGcheckBox.Checked;
        }
 
-       private void exportDatasetTimer_Tick(object sender, EventArgs e)
+       private void tryExportDataset(Image<Bgr,byte> frame)
        {
-           if(exportDatasetsCheckbox.Checked)
+           _lastDatasetExportTime = DateTime.Now;
+           if (exportDatasetsCheckbox.Checked)
            {
-               using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
-               {
                    ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings,
                        frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
-                   eT.autoExportScaledPositives();
-               }
-           }
-           
+                   //eT.autoExportScaledPositives();
+                   //eT.autoExportScaledMasks();
+                   //eT.autoExportMasks();
+                   eT.autoExportDualImages();
+           }              
        }
 
        private void watchdogTimer_Tick(object sender, EventArgs e)
        {
            File.SetLastWriteTime("C:\\TrafficCounter\\heartbeat", DateTime.Now);
        }
+
+       private void hideTrackersButton_Click(object sender, EventArgs e)
+       {
+           _vista.hide_trackers = !_vista.hide_trackers;
+       }
+
+       private void ValidateLicense()
+       {
+            try
+        {
+            license = ExtendedLicenseManager.GetLicense(typeof(TrafficCounter), this, "<RSAKeyValue><Modulus>uHfytqHYNN+1mYDeocM6fjotTwmQgGphb4XaMtrADk3+oa03ZWMXkIFZyL7mzG/hPpd/Q+waSWiklL7QR4k1XujCbcLNngY0gz4qaKFq/LqCSHzX7zHQ3N1Lyg368XK+uLtAxX9fGF9vOgloIPnDb/4Jol6nohouKODSZc+rf43D2q6mYWApWPrBFrhGyeO9mF3khYkFiJTXnCDku8WbJBdwK963RmYkI5p+jyoDi0Uy5a2+TmU9jnzK7zyRybjd4f1o7bfFQlBouSCrwVzU0n8PmtrU5boSh45RbDuy5FRYknxBM9djQvewydLTVHztZWjeQ0Q3JxH03/6DIY0Lsw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"); 
+		
+            // Check if we're activated, and every 90 days verify it with
+            // the activation servers. 
+            GenuineResult result = license.IsGenuineEx();
+
+            isActivated = result == GenuineResult.Genuine ||
+                          // an internet error means the user is activated but
+                          // IPManager failed to contact the LicenseSpot servers
+                          result == GenuineResult.InternetError;
+
+            if (result == GenuineResult.InternetError)
+            {
+                //TODO: give the user the option to retry the genuine checking
+                //      immediately. For example a dialog box. In the dialog
+                //      call IsGenuineEx() to retry immediately.
+            }
+
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Failed to check if activated: " + ex.Message);
+        }
+       }
+
+       private void activateLicenseButton_Click(object sender, EventArgs e)
+       {
+           license.Activate("F884-F8BB-9ED0-4CC7-ACEF-E385-2641");
+       }
+
+
    }
 }

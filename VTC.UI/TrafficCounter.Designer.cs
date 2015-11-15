@@ -36,7 +36,6 @@ namespace VTC
             this.updateSamplePoint = new System.Windows.Forms.Button();
             this.saveRGBSamplesCheckBox = new System.Windows.Forms.CheckBox();
             this.rgbCoordinateTextbox = new System.Windows.Forms.TextBox();
-            this.exportTrainingImagesButton = new System.Windows.Forms.Button();
             this.timeActiveTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
@@ -58,10 +57,11 @@ namespace VTC
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
             this.MoGcheckBox = new System.Windows.Forms.CheckBox();
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
-            this.exportDatasetTimer = new System.Windows.Forms.Timer(this.components);
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
             this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
+            this.hideTrackersButton = new System.Windows.Forms.Button();
+            this.activateLicenseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -78,7 +78,6 @@ namespace VTC
             this.updateSamplePoint.TabIndex = 69;
             this.updateSamplePoint.Text = "Update";
             this.updateSamplePoint.UseVisualStyleBackColor = true;
-            this.updateSamplePoint.Click += new System.EventHandler(this.updateSamplePoint_Click);
             // 
             // saveRGBSamplesCheckBox
             // 
@@ -96,16 +95,6 @@ namespace VTC
             this.rgbCoordinateTextbox.Name = "rgbCoordinateTextbox";
             this.rgbCoordinateTextbox.Size = new System.Drawing.Size(100, 20);
             this.rgbCoordinateTextbox.TabIndex = 67;
-            // 
-            // exportTrainingImagesButton
-            // 
-            this.exportTrainingImagesButton.Location = new System.Drawing.Point(261, 125);
-            this.exportTrainingImagesButton.Name = "exportTrainingImagesButton";
-            this.exportTrainingImagesButton.Size = new System.Drawing.Size(196, 23);
-            this.exportTrainingImagesButton.TabIndex = 66;
-            this.exportTrainingImagesButton.Text = "Export training images";
-            this.exportTrainingImagesButton.UseVisualStyleBackColor = true;
-            this.exportTrainingImagesButton.Click += new System.EventHandler(this.exportTrainingImagesButton_Click);
             // 
             // timeActiveTextBox
             // 
@@ -126,9 +115,9 @@ namespace VTC
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(261, 323);
+            this.button1.Location = new System.Drawing.Point(261, 297);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(196, 23);
+            this.button1.Size = new System.Drawing.Size(196, 22);
             this.button1.TabIndex = 63;
             this.button1.Text = "Resample background";
             this.button1.UseVisualStyleBackColor = true;
@@ -169,7 +158,7 @@ namespace VTC
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(463, 238);
+            this.label7.Location = new System.Drawing.Point(463, 212);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(63, 13);
             this.label7.TabIndex = 58;
@@ -177,7 +166,7 @@ namespace VTC
             // 
             // serverUrlTextBox
             // 
-            this.serverUrlTextBox.Location = new System.Drawing.Point(262, 235);
+            this.serverUrlTextBox.Location = new System.Drawing.Point(262, 209);
             this.serverUrlTextBox.Name = "serverUrlTextBox";
             this.serverUrlTextBox.Size = new System.Drawing.Size(195, 20);
             this.serverUrlTextBox.TabIndex = 57;
@@ -194,7 +183,7 @@ namespace VTC
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(463, 212);
+            this.label4.Location = new System.Drawing.Point(463, 186);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(76, 13);
             this.label4.TabIndex = 55;
@@ -202,16 +191,16 @@ namespace VTC
             // 
             // intersectionIDTextBox
             // 
-            this.intersectionIDTextBox.Location = new System.Drawing.Point(261, 209);
+            this.intersectionIDTextBox.Location = new System.Drawing.Point(261, 183);
             this.intersectionIDTextBox.Name = "intersectionIDTextBox";
             this.intersectionIDTextBox.Size = new System.Drawing.Size(196, 20);
             this.intersectionIDTextBox.TabIndex = 53;
             // 
             // SaveParametersBtn
             // 
-            this.SaveParametersBtn.Location = new System.Drawing.Point(261, 294);
+            this.SaveParametersBtn.Location = new System.Drawing.Point(261, 268);
             this.SaveParametersBtn.Name = "SaveParametersBtn";
-            this.SaveParametersBtn.Size = new System.Drawing.Size(196, 23);
+            this.SaveParametersBtn.Size = new System.Drawing.Size(196, 22);
             this.SaveParametersBtn.TabIndex = 52;
             this.SaveParametersBtn.Text = "Save Parameters";
             this.SaveParametersBtn.UseVisualStyleBackColor = true;
@@ -250,7 +239,7 @@ namespace VTC
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(463, 186);
+            this.label10.Location = new System.Drawing.Point(463, 160);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(82, 13);
             this.label10.TabIndex = 48;
@@ -258,7 +247,7 @@ namespace VTC
             // 
             // trackCountBox
             // 
-            this.trackCountBox.Location = new System.Drawing.Point(262, 183);
+            this.trackCountBox.Location = new System.Drawing.Point(262, 157);
             this.trackCountBox.Name = "trackCountBox";
             this.trackCountBox.Size = new System.Drawing.Size(195, 20);
             this.trackCountBox.TabIndex = 47;
@@ -268,7 +257,7 @@ namespace VTC
             this.pushStateCheckbox.AutoSize = true;
             this.pushStateCheckbox.Checked = true;
             this.pushStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.pushStateCheckbox.Location = new System.Drawing.Point(262, 261);
+            this.pushStateCheckbox.Location = new System.Drawing.Point(262, 235);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
             this.pushStateCheckbox.Size = new System.Drawing.Size(117, 17);
             this.pushStateCheckbox.TabIndex = 46;
@@ -290,23 +279,17 @@ namespace VTC
             // delayProcessingCheckbox
             // 
             this.delayProcessingCheckbox.AutoSize = true;
-            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 381);
+            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 355);
             this.delayProcessingCheckbox.Name = "delayProcessingCheckbox";
             this.delayProcessingCheckbox.Size = new System.Drawing.Size(107, 17);
             this.delayProcessingCheckbox.TabIndex = 71;
             this.delayProcessingCheckbox.Text = "Delay processing";
             this.delayProcessingCheckbox.UseVisualStyleBackColor = true;
             // 
-            // exportDatasetTimer
-            // 
-            this.exportDatasetTimer.Enabled = true;
-            this.exportDatasetTimer.Interval = 10000;
-            this.exportDatasetTimer.Tick += new System.EventHandler(this.exportDatasetTimer_Tick);
-            // 
             // exportDatasetsCheckbox
             // 
             this.exportDatasetsCheckbox.AutoSize = true;
-            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 154);
+            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 128);
             this.exportDatasetsCheckbox.Name = "exportDatasetsCheckbox";
             this.exportDatasetsCheckbox.Size = new System.Drawing.Size(154, 17);
             this.exportDatasetsCheckbox.TabIndex = 72;
@@ -315,9 +298,9 @@ namespace VTC
             // 
             // btnToggleVideoMux
             // 
-            this.btnToggleVideoMux.Location = new System.Drawing.Point(261, 352);
+            this.btnToggleVideoMux.Location = new System.Drawing.Point(261, 326);
             this.btnToggleVideoMux.Name = "btnToggleVideoMux";
-            this.btnToggleVideoMux.Size = new System.Drawing.Size(196, 23);
+            this.btnToggleVideoMux.Size = new System.Drawing.Size(196, 22);
             this.btnToggleVideoMux.TabIndex = 63;
             this.btnToggleVideoMux.Text = "Toggle Video Mux";
             this.btnToggleVideoMux.UseVisualStyleBackColor = true;
@@ -329,18 +312,39 @@ namespace VTC
             this.watchdogTimer.Interval = 5000;
             this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
             // 
+            // hideTrackersButton
+            // 
+            this.hideTrackersButton.Location = new System.Drawing.Point(261, 379);
+            this.hideTrackersButton.Name = "hideTrackersButton";
+            this.hideTrackersButton.Size = new System.Drawing.Size(196, 22);
+            this.hideTrackersButton.TabIndex = 73;
+            this.hideTrackersButton.Text = "Hide trackers";
+            this.hideTrackersButton.UseVisualStyleBackColor = true;
+            this.hideTrackersButton.Click += new System.EventHandler(this.hideTrackersButton_Click);
+            // 
+            // activateLicenseButton
+            // 
+            this.activateLicenseButton.Location = new System.Drawing.Point(17, 203);
+            this.activateLicenseButton.Name = "activateLicenseButton";
+            this.activateLicenseButton.Size = new System.Drawing.Size(100, 23);
+            this.activateLicenseButton.TabIndex = 74;
+            this.activateLicenseButton.Text = "Activate License";
+            this.activateLicenseButton.UseVisualStyleBackColor = true;
+            this.activateLicenseButton.Click += new System.EventHandler(this.activateLicenseButton_Click);
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(576, 427);
+            this.ClientSize = new System.Drawing.Size(563, 416);
+            this.Controls.Add(this.activateLicenseButton);
+            this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
             this.Controls.Add(this.updateSamplePoint);
             this.Controls.Add(this.saveRGBSamplesCheckBox);
             this.Controls.Add(this.rgbCoordinateTextbox);
-            this.Controls.Add(this.exportTrainingImagesButton);
             this.Controls.Add(this.timeActiveTextBox);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnToggleVideoMux);
@@ -378,7 +382,6 @@ namespace VTC
       private Button updateSamplePoint;
       private CheckBox saveRGBSamplesCheckBox;
       private TextBox rgbCoordinateTextbox;
-      private Button exportTrainingImagesButton;
       private TextBox timeActiveTextBox;
       private Label label11;
       private Button button1;
@@ -400,10 +403,11 @@ namespace VTC
       private CheckBox pushStateCheckbox;
       private CheckBox MoGcheckBox;
       private CheckBox delayProcessingCheckbox;
-      private Timer exportDatasetTimer;
       private CheckBox exportDatasetsCheckbox;
 	  private Button btnToggleVideoMux;
       private Timer watchdogTimer;
+      private Button hideTrackersButton;
+      private Button activateLicenseButton;
 
 
    }

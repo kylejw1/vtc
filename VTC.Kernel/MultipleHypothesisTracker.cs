@@ -17,6 +17,7 @@ namespace VTC.Kernel
         private readonly IMultipleHypothesisSettings _settings;
         private HypothesisTree _hypothesisTree = null;
         public VelocityField VelocityField { get; private set; }
+        public List<TrajectoryFade> Trajectories; 
 
         public int ValidationRegionDeviation
         {
@@ -57,6 +58,7 @@ namespace VTC.Kernel
             _hypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
             VelocityField = velocityField;
+            Trajectories = new List<TrajectoryFade>();   
         }
 
         /// <summary>
@@ -76,9 +78,6 @@ namespace VTC.Kernel
                     _hypothesisTree.Prune(1);
                     _hypothesisTree = _hypothesisTree.GetChild(0);
                 }
-
-                //To do: save deleted
-                //hypothesis_tree.SaveDeleted(file path, length threshold);
             }
 
             List<Node<StateHypothesis>> childNodeList = _hypothesisTree.GetLeafNodes();
@@ -114,7 +113,6 @@ namespace VTC.Kernel
 
             }
 
-
             // Insert velocities of current vehicles into the velocity field for later use when adding new vehicles
             var pointVelocityDic = new Dictionary<Point, VelocityField.Velocity>();
             foreach (var v in CurrentVehicles)
@@ -127,6 +125,8 @@ namespace VTC.Kernel
             }
 
             VelocityField.TryInsertVelocitiesAsync(pointVelocityDic);
+
+            updateTrajectoriesList();
         }
 
         /// <summary>
@@ -357,5 +357,28 @@ namespace VTC.Kernel
             }
             return ambiguityMatrix;
         }
+
+        private void updateTrajectoriesList()
+        {
+            //Eliminate stale trajectories
+            foreach (var t in Trajectories.ToList())
+                if (t.exitTime < DateTime.Now - TimeSpan.FromSeconds(3))
+                    Trajectories.Remove(t);
+
+            //Add new trajectories
+            foreach (var v in DeletedVehicles)
+            {
+                var t = new TrajectoryFade();
+                t.exitTime = DateTime.Now;
+                t.stateEstimates = v.StateHistory;
+                Trajectories.Add(t);
+            }
+        }
+    }
+
+    public struct TrajectoryFade
+    {
+        public DateTime exitTime;
+        public List<StateEstimate> stateEstimates;
     }
 }

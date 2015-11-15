@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ using VTC.Kernel;
 
 namespace VTC.ExportTrainingSet
 {
-    public partial class ExportTrainingSet : Form
+    public class ExportTrainingSet
     {
         private readonly AppSettings _settings;
         private Image<Bgr, float> _frame;
@@ -29,14 +30,15 @@ namespace VTC.ExportTrainingSet
         private List<Vehicle> _vehicles;
         private SortedList<CvBlob, int> _blobsWithArea;
 
-        int _unpaddedX;
-        int _unpaddedY;
+        private int _unpaddedX;
+        private int _unpaddedY;
 
-        public ExportTrainingSet(AppSettings settings, Image<Bgr, float> bgImage, List<Vehicle> currentVehicles, Image<Gray, byte> movementMask)
+        public ExportTrainingSet(AppSettings settings, Image<Bgr, float> bgImage, List<Vehicle> currentVehicles,
+            Image<Gray, byte> movementMask)
         {
             _settings = settings;
             _vehicles = new List<Vehicle>();
-            foreach(Vehicle v in currentVehicles)
+            foreach (Vehicle v in currentVehicles)
                 _vehicles.Add(v);
 
             _unpaddedX = bgImage.Width;
@@ -48,57 +50,19 @@ namespace VTC.ExportTrainingSet
             _movementMask = new Image<Gray, byte>(paddedWidth, paddedHeight);
             CopySubimage(bgImage, _frame);
             CopySubimage(movementMask, _movementMask);
-            
+
 
             _picture.Width = _frame.Width;
             _picture.Height = _frame.Height;
             _picture.Image = _frame.ToBitmap();
-
-            InitializeComponent();
-
-            subimagePanel.Width = _settings.ClassifierSubframeWidth;
-            subimagePanel.Height = _settings.ClassifierSubframeHeight;
-
-            imagePanel.MaximumSize = _picture.Size;
-            imagePanel.MinimumSize = _picture.Size;
-            imagePanel.Size = _picture.Size;
-            System.Diagnostics.Debug.WriteLine("Size is " + _picture.Size);
-            imagePanel.Controls.Add(_picture);
-            CreateClassRadioButtons();
-
-            _picture.MouseClick += imagePanel_MouseClick;
-        }
-
-        private void CreateClassRadioButtons()
-        {
-            int lastRadioButtonPosition = 0;
-
-            foreach(string classString in _settings.Classes)
-        {
-            RadioButton classRadioButton = new RadioButton();
-            lastRadioButtonPosition = lastRadioButtonPosition + classRadioButton.Height + 5;          
-            objectClassGroupBox.Controls.Add(classRadioButton);
-            classRadioButton.AutoSize = true;
-            classRadioButton.Location = new Point(6,lastRadioButtonPosition);
-            classRadioButton.Name = classString+"RadioButton";
-            classRadioButton.Size = TextRenderer.MeasureText(classString, classRadioButton.Font);
-            classRadioButton.TabIndex = 0;
-            classRadioButton.TabStop = true;
-            classRadioButton.Text = classString;
-            classRadioButton.UseVisualStyleBackColor = true;
-            classRadioButton.MouseClick += radioButton_CheckedChanged;
-            classRadioButtons.Add(classRadioButton);
-                
-        }
-            
         }
 
         private void CopySubimage(Image<Bgr, float> source, Image<Bgr, float> destination)
         {
-            int x_offset = (destination.Width - source.Width) / 2 - 1;
-            int y_offset = (destination.Height - source.Height) / 2 - 1;
-            for(int i=0; i<source.Width;i++)
-                for(int j=0; j<source.Height; j++)
+            int x_offset = (destination.Width - source.Width)/2 - 1;
+            int y_offset = (destination.Height - source.Height)/2 - 1;
+            for (int i = 0; i < source.Width; i++)
+                for (int j = 0; j < source.Height; j++)
                 {
                     destination.Data[j + y_offset, i + x_offset, 0] = source.Data[j, i, 0];
                     destination.Data[j + y_offset, i + x_offset, 1] = source.Data[j, i, 1];
@@ -108,53 +72,21 @@ namespace VTC.ExportTrainingSet
 
         private void CopySubimage(Image<Gray, byte> source, Image<Gray, byte> destination)
         {
-            int x_offset = (destination.Width - source.Width) / 2 - 1;
-            int y_offset = (destination.Height - source.Height) / 2 - 1;
+            int x_offset = (destination.Width - source.Width)/2 - 1;
+            int y_offset = (destination.Height - source.Height)/2 - 1;
             for (int i = 0; i < source.Width; i++)
                 for (int j = 0; j < source.Height; j++)
                 {
-                    destination.Data[j + y_offset, i + x_offset,0] = source.Data[j, i,0];
+                    destination.Data[j + y_offset, i + x_offset, 0] = source.Data[j, i, 0];
                 }
         }
 
-        private void imagePanel_MouseClick(object sender, MouseEventArgs e)
+        private Image<Bgr, float> extractSubImage(CvBlob blob)
         {
-            int minX = _settings.ClassifierSubframeWidth/2;
-            int maxX = _picture.Width - _settings.ClassifierSubframeWidth / 2 - 1;
-            int minY = _settings.ClassifierSubframeHeight / 2;
-            int maxY = _picture.Height - _settings.ClassifierSubframeHeight / 2 - 1;
-            if (e.X >= minX && e.X <= maxX && e.Y >= minY && e.Y <= maxY)
-            {
-                int subimageWidth = _settings.ClassifierSubframeWidth;
-                int subimageHeight = _settings.ClassifierSubframeHeight;
-                int x = e.X - subimageWidth / 2;
-                int y = e.Y - subimageHeight / 2;
-                Image<Bgr, float> subimage = _frame.GetSubRect(new Rectangle(x, y, subimageWidth, subimageHeight));
-
-                _subimage.Size = subimage.Size;
-                _subimage.Image = subimage.ToBitmap();
-
-                subimagePanel.Width = _settings.ClassifierSubframeWidth;
-                subimagePanel.Height = _settings.ClassifierSubframeHeight;
-
-                subimagePanel.Controls.Add(_subimage);
-                subimagePanel.Refresh();
-            }
-            else
-                infoBox.AppendText("Error: cannot select padded outline. Click inside the training image. " + Environment.NewLine);
-
-            foreach(RadioButton radioButton in classRadioButtons)
-                radioButton.Checked = false;
-            
-            
-        }
-
-        private Image<Bgr, float> extractSubImage(int x, int y)
-        {
-            int subimageWidth = _settings.ClassifierSubframeWidth;
-            int subimageHeight = _settings.ClassifierSubframeHeight;
-            //Image<Bgr, float> subimage = _frame.GetSubRect(new Rectangle(x+subimageWidth/2, y+subimageHeight/2, subimageWidth, subimageHeight));
-            Image<Bgr, float> subimage = _frame.GetSubRect(new Rectangle(x, y, subimageWidth, subimageHeight));
+            Debug.WriteLine("Exporting image with blob info:" );
+            Debug.WriteLine(blob.Centroid.ToString());
+            Debug.WriteLine(blob.BoundingBox.ToString());
+            Image<Bgr, float> subimage = _frame.GetSubRect(blob.BoundingBox);
             return subimage;
         }
 
@@ -169,33 +101,47 @@ namespace VTC.ExportTrainingSet
             return subimage;
         }
 
-        private void radioButton_CheckedChanged(object sender, EventArgs e)
+        private Image<Gray, byte> extractScaledSubMask(CvBlob blob)
         {
-            //Get class string
-            RadioButton rb = (RadioButton)sender;
-            string classString = rb.Text;
-            infoBox.AppendText("Class: " + classString + " saved." + Environment.NewLine);
-            string examplePath = constructExamplePath(classString);
-            _subimage.Image.Save(examplePath);
+            int subimageWidth = _settings.ClassifierSubframeWidth;
+            int subimageHeight = _settings.ClassifierSubframeHeight;
+
+            Image<Gray, byte> subimageUnscaled = _movementMask.GetSubRect(blob.BoundingBox);
+            Image<Gray, byte> subimage = subimageUnscaled.Resize(subimageWidth, subimageHeight, Inter.Area);
+
+            return subimage;
         }
 
-        private void saveExampleImage(Image<Bgr,float> image, string classString)
+        private Image<Gray, byte> extractSubMask(CvBlob blob)
+        {
+            Image<Gray, byte> subimageUnscaled = _movementMask.GetSubRect(blob.BoundingBox);
+            return subimageUnscaled;
+        }
+
+        private void saveExampleImage(Image<Bgr, float> image, string classString)
         {
             string examplePath = constructExamplePath(classString);
-            if(exportMonoTrainingSamples.Checked)
-                image.Convert<Gray, Byte>().Save(examplePath);
-            else
-                image.Save(examplePath);
+            image.Save(examplePath);
+        }
+
+        private void saveExampleImage(Image<Gray, byte> image, string classString)
+        {
+            string examplePath = constructExamplePath(classString);
+            image.Save(examplePath);
         }
 
         private static string constructExamplePath(string classString)
         {
             string examplesDirectory = createExamplesDirectoryIfNotExists();
             string classDirectory = createClassDirectoryIfNotExists(classString, examplesDirectory);
-            List<Int16> filenamesToNumbers = Directory.GetFiles(classDirectory).ToList<String>().Select(s => Convert.ToInt16(System.IO.Path.GetFileNameWithoutExtension(s))).ToList();
+            List<Int16> filenamesToNumbers =
+                Directory.GetFiles(classDirectory)
+                    .ToList<String>()
+                    .Select(s => Convert.ToInt16(System.IO.Path.GetFileNameWithoutExtension(s)))
+                    .ToList();
             filenamesToNumbers.Add(0);
             filenamesToNumbers.Sort();
-            int newExampleNum = filenamesToNumbers.Last() +1;
+            int newExampleNum = filenamesToNumbers.Last() + 1;
             string examplePath = classDirectory + "\\" + newExampleNum + ".bmp";
             return examplePath;
         }
@@ -205,7 +151,7 @@ namespace VTC.ExportTrainingSet
             string classDirectory = examplesDirectory + "\\" + classString;
             Boolean classDirectoryExists = Directory.Exists(classDirectory);
             if (!classDirectoryExists)
-               Directory.CreateDirectory(classDirectory);
+                Directory.CreateDirectory(classDirectory);
 
             return classDirectory;
         }
@@ -217,46 +163,6 @@ namespace VTC.ExportTrainingSet
             if (!examplesDirectoryExists)
                 Directory.CreateDirectory(examplesDirectory);
             return examplesDirectory;
-        }
-
-        private void autoExportButton_Click(object sender, EventArgs e)
-        {
-            ExportPositives();   
-            ExportNegatives();
-        }
-
-        private void ExportNegatives()
-        {
-            int sampleStepSize = 5;
-            int samplePadding = 15;
-            for (int i = 0; i < _unpaddedX; i += sampleStepSize)
-                for (int j = 0; j < _unpaddedY; j += sampleStepSize)
-                {
-
-                    bool vehicleIsNearby = false;
-                    foreach (Vehicle v in _vehicles)
-                    {
-                        int vehicleX = (int)v.StateHistory.Last().X;
-                        int vehicleY = (int)v.StateHistory.Last().Y;
-                        if (i < vehicleX + samplePadding && i > vehicleX - samplePadding && j < vehicleY + samplePadding && j > vehicleY - samplePadding)
-                        {
-                            vehicleIsNearby = true;
-                            break;
-                        }
-                    }
-
-                    if (!vehicleIsNearby)
-                    {
-                        Image<Bgr, float> subimage = extractSubImage(i, j);
-                        saveExampleImage(subimage, "Other"); //TODO: Make path a configuration item
-                    }
-
-                }
-        }
-
-        private void autoExportPositives_Click(object sender, EventArgs e)
-        {
-            ExportPositives();
         }
 
         public void autoExportScaledPositives()
@@ -273,37 +179,101 @@ namespace VTC.ExportTrainingSet
                 if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
                     Console.WriteLine("Bad blob!");
 
+                if (blobWithArea.Key.Area > 10000 ||
+                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+                    Console.WriteLine("Bad blob!");
+
                 Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
                 saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-            }   
+            }
         }
 
-        private void ExportPositives()
+        public void autoExportScaledMasks()
         {
-            if (scaleBlobsCheckbox.Checked)
+            var bf = new BlobFinder();
+            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+
+            foreach (var blobWithArea in blobsWithSizes)
+                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+                    Console.WriteLine("Bad blob!");
+
+            foreach (var blobWithArea in blobsWithSizes)
             {
-                var bf = new BlobFinder();
-                var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
-                foreach (var blobWithArea in blobsWithSizes)
-                {
-                    Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
-                    saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-                }    
-            }
-            else
-            {
-                foreach (Vehicle v in _vehicles)
-                {
-                    int vehicleX = (int)v.StateHistory.Last<StateEstimate>().X;
-                    int vehicleY = (int)v.StateHistory.Last<StateEstimate>().Y;
-                    if (vehicleX > _settings.ClassifierSubframeWidth && vehicleX < _frame.Width - _settings.ClassifierSubframeWidth && vehicleY > _settings.ClassifierSubframeHeight && vehicleY < _frame.Height - _settings.ClassifierSubframeHeight)
-                    {
-                        Image<Bgr, float> subimage = extractSubImage(vehicleX, vehicleY);
-                        saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-                    }
-                }    
+                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+                    Console.WriteLine("Bad blob!");
+
+                if (blobWithArea.Key.Area > 10000 ||
+                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+                    Console.WriteLine("Bad blob!");
+
+                Image<Gray, byte> subimage = extractScaledSubMask(blobWithArea.Key);
+                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
             }
         }
 
+        public void autoExportMasks()
+        {
+            var bf = new BlobFinder();
+            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+
+            foreach (var blobWithArea in blobsWithSizes)
+                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+                    Console.WriteLine("Bad blob!");
+
+            foreach (var blobWithArea in blobsWithSizes)
+            {
+                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+                    Console.WriteLine("Bad blob!");
+
+                if (blobWithArea.Key.Area > 10000 ||
+                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+                    Console.WriteLine("Bad blob!");
+
+                Image<Gray, byte> subimage = extractSubMask(blobWithArea.Key);
+                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
+            }
+        }
+
+        public void autoExportDualImages()
+        {
+            var bf = new BlobFinder();
+            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+
+            foreach (var blobWithArea in blobsWithSizes)
+            {
+                bool bad = false;
+
+                if (blobWithArea.Key.BoundingBox.Width <= 0 || blobWithArea.Key.BoundingBox.Width >= 640)
+                    bad = true;
+
+                if (blobWithArea.Key.BoundingBox.Height <= 0 || blobWithArea.Key.BoundingBox.Height >= 480)
+                    bad = true;
+
+                if (blobWithArea.Key.BoundingBox.X <= 0 || blobWithArea.Key.BoundingBox.X >= 640)
+                    bad = true;
+
+                if (blobWithArea.Key.BoundingBox.Y <= 0 || blobWithArea.Key.BoundingBox.Y >= 480)
+                    bad = true;
+
+                if (!bad)
+                {
+                    Image<Bgr, float> subimage2 = extractSubImage(blobWithArea.Key);
+                    Image<Bgr, float> subimage = extractSubMask(blobWithArea.Key).Convert<Bgr, float>();
+                    Image<Bgr, float> joined = new Image<Bgr, float>(
+                        subimage.Width + subimage2.Width, subimage.Height);
+                    joined.ROI = new Rectangle(0, 0, subimage.Width, subimage.Height);
+                    subimage.CopyTo(joined);
+                    joined.ROI = new Rectangle(subimage.Width, 0, subimage2.Width, subimage.Height);
+                    subimage2.CopyTo(joined);
+                    joined.ROI = new Rectangle(0, 0, subimage.Width + subimage2.Width, joined.Height);
+
+                    saveExampleImage(joined, "Car"); //TODO: Make path a configuration item    
+                }
+                else
+                    Debug.WriteLine("Skipped export on bad bounding box.");
+            }
+        }
     }
 }
+    
+
