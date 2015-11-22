@@ -41,6 +41,7 @@ namespace VTC
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
        private VideoDisplay _3DPointsDisplay;
+       private VideoDisplay _opticalFlowDisplay;
 	   private VideoMux _videoMux;
 
        private readonly DateTime _applicationStartTime;
@@ -165,6 +166,7 @@ namespace VTC
       }
 
 
+       //TODO: Move this to the Render Frames (??) function where everything else is drawn. 
        private void OnTick(object sender, EventArgs eventArgs)
        {
            if (_vista != null)
@@ -188,6 +190,7 @@ namespace VTC
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _3DPointsDisplay = new VideoDisplay("3D Points", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
+           _opticalFlowDisplay = new VideoDisplay("Optical Flow", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
 		   
 		   
 		    _videoMux = new VideoMux();
@@ -199,6 +202,7 @@ namespace VTC
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
             _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
+            _videoMux.AddDisplay(_opticalFlowDisplay.ImageBox, _opticalFlowDisplay.LayerName);
 			_videoMux.Show();
        }
 
@@ -452,6 +456,7 @@ namespace VTC
                   Image<Bgr, Byte> frameForRendering = frame.Clone();
 
                   // Send the new image frame to the vista for processing
+                  _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
                   _vista.Update(frameForProcessing);
 
                   // Update image boxes
@@ -480,6 +485,7 @@ namespace VTC
            Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage(frame);
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
            Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundUpdateMoG;
+           var opticalFlowImage = RenderOpticalFlowImage();
 
            //Render 3D points
            Image<Bgr, byte> pointsImage = Render3DPoints();
@@ -488,6 +494,7 @@ namespace VTC
            _backgroundDisplay.Update(backgroundImage);
            _mixtureDisplay.Update(mogImage);
            _3DPointsDisplay.Update(pointsImage);
+           _opticalFlowDisplay.Update(opticalFlowImage);
 
           if (_vista.Movement_Mask != null)
           {
@@ -501,6 +508,24 @@ namespace VTC
               _mixtureMovementDisplay.Update(movementTimesImageMoG);
           }
       }
+
+       private Image<Bgr, byte> RenderOpticalFlowImage()
+       {
+           Image<Bgr, byte> opticalFlowImage = new Image<Bgr, byte>(new Size(_vista._frame.Width, _vista._frame.Height));
+           if (!disableOpticalFlowCheckbox.Checked)
+           {
+               
+               //for (int i = 0; i < _vista._frame.Width; i++)
+               //    for (int j = 0; j < _vista._frame.Height; j++)
+               //    {
+               //        opticalFlowImage.Data[j, i, 0] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][0]));
+               //        opticalFlowImage.Data[j, i, 1] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][1]));
+               //    }
+               //opticalFlowImage = opticalFlowImage.Mul(15);
+               _vista.DrawVelocityField(opticalFlowImage, new Bgr(Color.White), 1, _vista.OpticalFlow); 
+           }
+           return opticalFlowImage;
+       }
 
        private Image<Bgr, byte> Render3DPoints()
        {
@@ -633,7 +658,7 @@ namespace VTC
            {
                    ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings,
                        frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
-                   //eT.autoExportScaledPositives();
+                   //eT.autoExportScaledPositives(); //TODO: Make this an option, not just commented out
                    //eT.autoExportScaledMasks();
                    //eT.autoExportMasks();
                    eT.autoExportDualImages();

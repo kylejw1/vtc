@@ -62,6 +62,7 @@ namespace VTC
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.hideTrackersButton = new System.Windows.Forms.Button();
             this.activateLicenseButton = new System.Windows.Forms.Button();
+            this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -332,11 +333,22 @@ namespace VTC
             this.activateLicenseButton.UseVisualStyleBackColor = true;
             this.activateLicenseButton.Click += new System.EventHandler(this.activateLicenseButton_Click);
             // 
+            // disableOpticalFlowCheckbox
+            // 
+            this.disableOpticalFlowCheckbox.AutoSize = true;
+            this.disableOpticalFlowCheckbox.Location = new System.Drawing.Point(261, 407);
+            this.disableOpticalFlowCheckbox.Name = "disableOpticalFlowCheckbox";
+            this.disableOpticalFlowCheckbox.Size = new System.Drawing.Size(122, 17);
+            this.disableOpticalFlowCheckbox.TabIndex = 75;
+            this.disableOpticalFlowCheckbox.Text = "Disable Optical Flow";
+            this.disableOpticalFlowCheckbox.UseVisualStyleBackColor = true;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(563, 416);
+            this.ClientSize = new System.Drawing.Size(563, 458);
+            this.Controls.Add(this.disableOpticalFlowCheckbox);
             this.Controls.Add(this.activateLicenseButton);
             this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
@@ -408,6 +420,7 @@ namespace VTC
       private Timer watchdogTimer;
       private Button hideTrackersButton;
       private Button activateLicenseButton;
+      private CheckBox disableOpticalFlowCheckbox;
 
 
    }

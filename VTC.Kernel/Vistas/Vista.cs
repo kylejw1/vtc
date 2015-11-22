@@ -10,6 +10,7 @@ using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
 using System.Collections;
 
+
 namespace VTC.Kernel.Vistas
 {
     /// <summary>
@@ -57,6 +58,13 @@ namespace VTC.Kernel.Vistas
         public Image<Gray, byte>[] WeightImages;
 
         public MoGBackground MoGBackgroundSingleton; 
+
+        //************* Optical flow variables ***************
+        public int[][][] OpticalFlow; // LxWx2. Vector field where each pixel represents optical flow direction.
+        private const int OpticalFlowDownsample = 10;
+        private const int OpticalFlowLimit = 8;
+        public Image<Bgr, byte> lastFrame; //For calculating single-frame optical flow 
+        public bool DisableOpticalFlow = false;
 
         //*************************** Image processing controls ***************************
         public bool EnableMoG; //If true, MoG background is used instead of rolling background
@@ -178,6 +186,14 @@ namespace VTC.Kernel.Vistas
             BlobsWithArea = new SortedList<CvBlob, int>();
 
             MeasurementArrayQueue = new Queue<Measurements[]>(900);
+            OpticalFlow = new int[_width][][];
+            for (int i = 0; i < _width; i++)
+            {
+                OpticalFlow[i] = new int[_height][];
+                for (int j = 0; j < _height; j++)
+                    OpticalFlow[i][j] = new int[2] { 0, 0 };
+            }
+                
         }
 
         public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
@@ -188,6 +204,16 @@ namespace VTC.Kernel.Vistas
                 return;
 
             MHT.VelocityField.Draw(image, color, thickness);
+        }
+
+        public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness, int[][][] field)
+            where TColor : struct, IColor
+            where TDepth : new()
+        {
+            if (null == MHT)
+                return;
+
+            MHT.VelocityField.Draw(image, color, thickness, field, OpticalFlowDownsample, OpticalFlowDownsample);
         }
 
         public Emgu.CV.Image<Gray, Byte> VelocityProjection()
@@ -230,6 +256,9 @@ namespace VTC.Kernel.Vistas
 
                 UpdateBackground(newFrame);
 
+                if(!DisableOpticalFlow)
+                UpdateOpticalFlow(newFrame);
+
                 if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0 && EnableMoG)
                     UpdateBackgroundMoGIncremental(newFrame);
 
@@ -248,6 +277,8 @@ namespace VTC.Kernel.Vistas
 
                 // Now update child class specific stats
                 UpdateChildClassStats(MHT.DeletedVehicles);
+
+                lastFrame = newFrame;
             }
         }
 
@@ -262,6 +293,32 @@ namespace VTC.Kernel.Vistas
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
                 Color_Background.AccumulateWeighted(BackgroundUpdate, Settings.Alpha);
+            }
+        }
+
+        private void UpdateOpticalFlow(Image<Bgr, Byte> frame)
+        {
+            if (lastFrame != null)
+            {
+                for (int i = 0; i < _width; i++)
+                    for (int j = 0; j < _height; j++)
+                        Array.Clear(OpticalFlow[i][j],0,2); 
+                    
+
+                for (int i = 0; i < _width; i += OpticalFlowDownsample)
+                    for (int j = 0; j < _height; j += OpticalFlowDownsample)
+                    {
+                        if (Movement_Mask.Data[j, i, 0] > 0)
+                        {
+                            if (i > OpticalFlowLimit && i < _width - OpticalFlowLimit)
+                                if (j > OpticalFlowLimit && j < _height - OpticalFlowLimit)
+                                {
+                                    OpticalFlow.OffsetSSEPair pair = Kernel.OpticalFlow.LowestSSEPair(frame, lastFrame, i, j, 1, 10, 20 );
+                                    OpticalFlow[i][j][0] = -pair.XOffset;
+                                    OpticalFlow[i][j][1] = -pair.YOffset;
+                                }
+                        }
+                    }
             }
         }
 
@@ -336,6 +393,8 @@ namespace VTC.Kernel.Vistas
         private Measurements[] FindClosedBlobCenters(Image<Bgr, Byte> frame)
         {
             Measurements[] coordinates;
+            var w_orig = frame.Width;
+            var h_orig = frame.Height;
 
             using (Image<Gray, Byte> tempMovementMask = Movement_Mask.Clone())
             {
@@ -355,30 +414,26 @@ namespace VTC.Kernel.Vistas
                     numWebcamBlobsFound = Settings.MaxTargets;
 
                 coordinates = new Measurements[numWebcamBlobsFound];
+                List<Measurements> coordinatesList = new List<Measurements>();
                 for(int i=0; i<numWebcamBlobsFound; i++)
                 {
                     if (i < Settings.MaxTargets)
                     {
                         CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
-                        double x = targetBlob.Centroid.X;
-                        double y = targetBlob.Centroid.Y;
-                        var colour = GetBlobColour(frame, x, y, 3.0);
-                        var coords = new Measurements()
+                        var measurements = BlobFinder.SplitAndFindCenterpoints(frame, tempMovementMask, targetBlob);
+                        foreach (var m in measurements)
                         {
-                            X = x,
-                            Y = y,
-                            Red = colour.Red,
-                            Green = colour.Green,
-                            Blue = colour.Blue
-                        };
-                        coordinates[i] = coords;
-
-                        //TODO: Move the blob centerpoint rendering somewhere else.
-                        //Do this last so that it doesn't interfere with color sampling
-                        //frame.Draw(new CircleF(new PointF((float)x, (float)y), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                            coordinatesList.Add(m);
+                            //TODO: Move the blob centerpoint rendering somewhere else.
+                            //Do this last so that it doesn't interfere with color sampling
+                            //frame.Draw(new CircleF(new PointF((float)m.X, (float)m.Y), 1), new Bgr(255.0, 255.0, 255.0), 1);
+                        }
                     }
-                } 
+                }
+
+                coordinates = coordinatesList.ToArray();
             }
+
             return coordinates;
         }
 

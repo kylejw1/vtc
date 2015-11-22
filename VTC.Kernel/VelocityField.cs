@@ -208,5 +208,54 @@ namespace VTC.Kernel
                 _updateMutex.ReleaseMutex();
             }
         }
+
+        public void Draw<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness, int[][][] field, int localSegmentWidth, int localSegmentHeight)
+            where TColor : struct, IColor
+            where TDepth : new()
+        {
+            int multiplier = 10;
+
+            _updateMutex.WaitOne();
+            try
+            {
+                var _localfieldWidth = field.GetLength(0);
+                var _localfieldHeight = field[0].GetLength(0);
+                //var segmentWidth = image.Width / _localfieldWidth;
+                //var segmentHeight = image.Height / _localfieldHeight;
+                //var segmentWidth = 10;  //TODO: Set this to Optical Flow downsample limit
+                //var segmentHeight = 10;
+
+                var cursorStart = new Point(localSegmentWidth / 2, localSegmentHeight / 2);
+
+                for (int x = 0; x < _localfieldWidth; x += localSegmentWidth)
+                {
+
+                    for (int y = 0; y < _localfieldHeight; y += localSegmentHeight)
+                    {
+                        var cursorEnd = new Point(
+                            (int)(cursorStart.X + multiplier * field[x][y][0]),
+                            (int)(cursorStart.Y + multiplier * field[x][y][1])
+                            );
+
+                        var line = new LineSegment2D(cursorStart, cursorEnd);
+
+                        if (line.Length > 1)
+                        {
+                            image.Draw(line, color, thickness);
+                            image.Draw(new CircleF(cursorStart, 1), color, thickness);
+                        }
+
+                        cursorStart.Y += localSegmentHeight;
+                    }
+
+                    cursorStart.Y = localSegmentHeight / 2;
+                    cursorStart.X += localSegmentWidth;
+                }
+            }
+            finally
+            {
+                _updateMutex.ReleaseMutex();
+            }
+        }
     } 
 }

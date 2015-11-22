@@ -74,6 +74,7 @@
     <Compile Include="MultipleHypothesisTracker.cs" />
     <Compile Include="NodeClass.cs" />
     <Compile Include="OptAssign.cs" />
+    <Compile Include="OpticalFlow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegionConfig\Polygon.cs" />
     <Compile Include="RegionConfig\RegionConfig.cs" />

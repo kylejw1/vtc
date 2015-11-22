@@ -68,24 +68,33 @@ namespace VTC.Kernel
         public double[][] Assignments;
         private int _numSamples;
 
-        private int _numDimensions = 3;
-        private const int NumComponents = 2;
-        private const int NumIterations = 2;
+        private int _numDimensions;
+        private int NumComponents;
+        private int NumIterations;
         private const double Alpha = 0.3;
 
         private const double _varianceMax = 50;
         private const double _varianceMin = 0.01;
 
-        public double[][] Means = new double[NumComponents][];
-        public double[][] Variances = new double[NumComponents][];
-        public double[] Weights = new double[NumComponents];
+        public double[][] Means;
+        public double[][] Variances;
+        public double[] Weights;
 
-        public MixtureModel(int[][] samplesIn)
+        public MixtureModel(int[][] samplesIn, int numComponents, int numIterations)
         {
+            NumComponents = numComponents;
+            NumIterations = numIterations;
+            
+            Means = new double[NumComponents][];
+            Variances = new double[NumComponents][];
+            Weights = new double[NumComponents];
+
             _samples = samplesIn;
             _numSamples = _samples.Length;
             _numDimensions = _samples[0].Length;
             Assignments = new double[NumComponents][];
+            for (int i = 0; i < NumComponents; i++)
+                Assignments[i] = new double[_numSamples];
 
             InitializeDistributionParameters();
         }
@@ -102,15 +111,14 @@ namespace VTC.Kernel
             for (int i = 0; i < NumComponents; i++)
             {
                 Means[i] = new double[_numDimensions];
-                int val = rnd.Next(0, 255);
-                Means[i][0] = val;
-                Means[i][1] = val;
-                Means[i][2] = val;
-
                 Variances[i] = new double[_numDimensions];
-                Variances[i][0] = _varianceMax;
-                Variances[i][1] = _varianceMax;
-                Variances[i][2] = _varianceMax;
+
+                int val = rnd.Next(0, 255);
+                for (int j = 0; j < _numDimensions; j++)
+                {
+                    Means[i][j] = val;
+                    Variances[i][j] = _varianceMax;
+                }
                 
                 Weights[i] = (double) 1/NumComponents;
             }
@@ -120,18 +128,17 @@ namespace VTC.Kernel
         {
             for (int i = 0; i < NumIterations; i++)
             {
-                // Calculate most likely assignments
                 CalculateAssignments();
-                // Update distribution parameters
                 UpdateParameters();
             }
 
-            ReorderByLikelihood();
+            //ReorderByLikelihood();
         }
 
+        //Note: this function is not adapted to handle cases other than dimensionality of 3 with 2 elements.
         private void ReorderByLikelihood()
         {
-//Ensure that the Gaussians are returned in order of weight/ (total variance)
+            //Ensure that the Gaussians are returned in order of weight/ (total variance)
             double sumOfVariances0 = Variances[0][0] + Variances[0][1] + Variances[0][2];
             double sumOfVariances1 = Variances[1][0] + Variances[1][1] + Variances[1][2];
 
@@ -186,30 +193,23 @@ namespace VTC.Kernel
                 {
                     assignmentMax = assignmentProbabilities[i];
                     mostLikelyGaussian = i;
-                }
+                }             
             }
-                
-            // *********************  Update Gaussians ***************************//
-            //Update means
-            // u_next = (1-alpha)u_prev + alpha(sample)
-            Means[mostLikelyGaussian][0] = (1 - Alpha) * (Means[mostLikelyGaussian][0]) + Alpha * rgb[0];
-            Means[mostLikelyGaussian][1] = (1 - Alpha) * (Means[mostLikelyGaussian][1]) + Alpha * rgb[1];
-            Means[mostLikelyGaussian][2] = (1 - Alpha) * (Means[mostLikelyGaussian][2]) + Alpha * rgb[2];
 
-            //Update variances
-            // ss_next = (1-alpha)ss + alpha(sample-u)(sample-u)
-            Variances[mostLikelyGaussian][0] = (1 - Alpha)*(Variances[mostLikelyGaussian][0]) +
-                                               Alpha*Math.Pow((rgb[0] - Means[mostLikelyGaussian][0]), 2);
-            Variances[mostLikelyGaussian][0] = (Variances[mostLikelyGaussian][0] < _varianceMin ) ? _varianceMin : Variances[mostLikelyGaussian][0];
+            for (int i = 0; i < _numDimensions; i++)
+            {
+                // *********************  Update Gaussians ***************************//
+                //Update means
+                // u_next = (1-alpha)u_prev + alpha(sample)
+                Means[mostLikelyGaussian][i] = (1 - Alpha) * (Means[mostLikelyGaussian][i]) + Alpha * rgb[i];
 
-            Variances[mostLikelyGaussian][1] = (1 - Alpha) * (Variances[mostLikelyGaussian][1]) +
-                                               Alpha * Math.Pow((rgb[1] - Means[mostLikelyGaussian][1]), 2);
-            Variances[mostLikelyGaussian][1] = (Variances[mostLikelyGaussian][1] < _varianceMin) ? _varianceMin : Variances[mostLikelyGaussian][1];
-
-            Variances[mostLikelyGaussian][2] = (1 - Alpha) * (Variances[mostLikelyGaussian][2]) +
-                                               Alpha * Math.Pow((rgb[2] - Means[mostLikelyGaussian][2]), 2);
-            Variances[mostLikelyGaussian][2] = (Variances[mostLikelyGaussian][2] < _varianceMin) ? _varianceMin : Variances[mostLikelyGaussian][2];
-
+                //Update variances
+                // ss_next = (1-alpha)ss + alpha(sample-u)(sample-u)
+                Variances[mostLikelyGaussian][i] = (1 - Alpha) * (Variances[mostLikelyGaussian][i]) +
+                                                   Alpha * Math.Pow((rgb[i] - Means[mostLikelyGaussian][i]), 2);
+                Variances[mostLikelyGaussian][i] = (Variances[mostLikelyGaussian][i] < _varianceMin) ? _varianceMin : Variances[mostLikelyGaussian][i];                
+            }
+            
             //Update weights
             //  w_next = (1-alpha)w_prev + alpha(M)
             // *M is 1 for the matching Gaussian and 0 otherwise
@@ -249,7 +249,7 @@ namespace VTC.Kernel
                     {
                         Means[j][m] = (double)sums[m] / (assignedToThisComponent);
                         if (Double.IsNaN(Means[j][m]))
-                            throw new Exception("Value is NaN");    
+                            throw new Exception("Value is NaN 1");    
                     }
                     
                     // Calculate variance
@@ -263,7 +263,7 @@ namespace VTC.Kernel
                     {
                         Variances[j][m] = Math.Sqrt(varianceSums[m] / (assignedToThisComponent));
                         if (Double.IsNaN(Variances[j][m]))
-                            throw new Exception("Value is NaN");
+                            throw new Exception("Value is NaN 2");
 
                         if (Variances[j][m] > _varianceMax)
                             Variances[j][m] = _varianceMax;
@@ -280,14 +280,14 @@ namespace VTC.Kernel
                     {
                         Weights[j] = 0.01;
                         if (Double.IsNaN(Weights[j]))
-                            throw new Exception("Value is NaN");
+                            throw new Exception("Value is NaN 3");
                     }
 
                 }
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Got exception");
+                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
             }
             
         }
@@ -315,14 +315,14 @@ namespace VTC.Kernel
                         Assignments[j][k] = probabilities[j];
                         
                         if (Double.IsNaN(Assignments[j][k]))
-                        throw new Exception("Value is NaN");
+                        throw new Exception("Value is NaN 4");
 
                     }
                 }
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Got exception");
+                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
             }
         }
 
@@ -347,7 +347,7 @@ namespace VTC.Kernel
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Got exception");
+                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
             }
             
             return probability;
@@ -372,7 +372,7 @@ namespace VTC.Kernel
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Got exception");
+                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
             }
 
             return probability;

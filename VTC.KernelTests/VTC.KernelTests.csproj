@@ -55,6 +55,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="MixtureModelTests.cs" />
+    <Compile Include="OpticalFlowTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
