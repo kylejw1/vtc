@@ -4,11 +4,14 @@ using System.Drawing;
 using VTC.Kernel;
 using System.Linq;
 using Emgu.CV;
+using Emgu.CV.Cuda;
 using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
 using System.Collections;
+using Emgu.CV.CvEnum;
+using MathNet.Numerics.Interpolation.Algorithms;
 
 
 namespace VTC.Kernel.Vistas
@@ -61,7 +64,7 @@ namespace VTC.Kernel.Vistas
 
         //************* Optical flow variables ***************
         public int[][][] OpticalFlow; // LxWx2. Vector field where each pixel represents optical flow direction.
-        private const int OpticalFlowDownsample = 10;
+        private const int OpticalFlowDownsample = 1;
         private const int OpticalFlowLimit = 8;
         public Image<Bgr, byte> lastFrame; //For calculating single-frame optical flow 
         public bool DisableOpticalFlow = false;
@@ -300,25 +303,54 @@ namespace VTC.Kernel.Vistas
         {
             if (lastFrame != null)
             {
-                for (int i = 0; i < _width; i++)
-                    for (int j = 0; j < _height; j++)
-                        Array.Clear(OpticalFlow[i][j],0,2); 
+                if (CudaInvoke.HasCuda)
+                {
                     
-
-                for (int i = 0; i < _width; i += OpticalFlowDownsample)
-                    for (int j = 0; j < _height; j += OpticalFlowDownsample)
+                    using (var of = new CudaBroxOpticalFlow())
                     {
-                        if (Movement_Mask.Data[j, i, 0] > 0)
+                        var singleChanFrame = frame.Convert<Gray, byte>();
+                        var singleChanLastFrame = lastFrame.Convert<Gray, byte>();
+                        Mat flow = new Mat();
+                        using (CudaImage<Gray, float> prevGpu = new CudaImage<Gray, float>(singleChanLastFrame.Convert<Gray, float>()))
+                        using (CudaImage<Gray, float> currGpu = new CudaImage<Gray, float>(singleChanFrame.Convert<Gray, float>()))
+                        using (GpuMat flowGpu = new GpuMat())
                         {
-                            if (i > OpticalFlowLimit && i < _width - OpticalFlowLimit)
-                                if (j > OpticalFlowLimit && j < _height - OpticalFlowLimit)
-                                {
-                                    OpticalFlow.OffsetSSEPair pair = Kernel.OpticalFlow.LowestSSEPair(frame, lastFrame, i, j, 1, 10, 20 );
-                                    OpticalFlow[i][j][0] = -pair.XOffset;
-                                    OpticalFlow[i][j][1] = -pair.YOffset;
-                                }
+                            of.Calc(prevGpu, currGpu, flowGpu);
+
+                            flowGpu.Download(flow);
                         }
+                        
+                        var channels = flow.Split();
+                        var ch1 = channels[0];
+                        var ch2 = channels[1];
+                        float[, ,] xarr = new float[frame.Height, frame.Width, 1];
+                        ch1.CopyTo(xarr);
+                        float[, ,] yarr = new float[frame.Height, frame.Width, 1];
+                        ch2.CopyTo(yarr);
+
+                        for (int i = 0; i < _width; i++)
+                            for (int j = 0; j < _height; j++)
+                                Array.Clear(OpticalFlow[i][j], 0, 2); 
+
+                        for (int i = 0; i < _width; i += OpticalFlowDownsample)
+                            for (int j = 0; j < _height; j += OpticalFlowDownsample)
+                            {
+                                if (Movement_Mask.Data[j, i, 0] > 0)
+                                {
+                                    if (i > OpticalFlowLimit && i < _width - OpticalFlowLimit)
+                                        if (j > OpticalFlowLimit && j < _height - OpticalFlowLimit)
+                                        {
+                                            var lsse = VTC.Kernel.OpticalFlow.LowestSSEPair(frame, lastFrame, i, j, 1,
+                                                18, 8);
+                                            OpticalFlow[i][j][0] = lsse.XOffset;
+                                            OpticalFlow[i][j][1] = lsse.YOffset;
+                                            //OpticalFlow[i][j][0] = (int)xarr[j, i, 0];
+                                            //OpticalFlow[i][j][1] = (int)yarr[j, i, 0];
+                                        }
+                                }
+                            }
                     }
+                }
             }
         }
 

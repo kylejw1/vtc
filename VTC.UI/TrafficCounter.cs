@@ -514,15 +514,15 @@ namespace VTC
            Image<Bgr, byte> opticalFlowImage = new Image<Bgr, byte>(new Size(_vista._frame.Width, _vista._frame.Height));
            if (!disableOpticalFlowCheckbox.Checked)
            {
-               
-               //for (int i = 0; i < _vista._frame.Width; i++)
-               //    for (int j = 0; j < _vista._frame.Height; j++)
-               //    {
-               //        opticalFlowImage.Data[j, i, 0] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][0]));
-               //        opticalFlowImage.Data[j, i, 1] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][1]));
-               //    }
+
+               for (int i = 0; i < _vista._frame.Width; i++)
+                   for (int j = 0; j < _vista._frame.Height; j++)
+                   {
+                       opticalFlowImage.Data[j, i, 0] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][0]));
+                       opticalFlowImage.Data[j, i, 1] = (byte)(Math.Abs(_vista.OpticalFlow[i][j][1]));
+                   }
                //opticalFlowImage = opticalFlowImage.Mul(15);
-               _vista.DrawVelocityField(opticalFlowImage, new Bgr(Color.White), 1, _vista.OpticalFlow); 
+               //_vista.DrawVelocityField(opticalFlowImage, new Bgr(Color.White), 1, _vista.OpticalFlow); 
            }
            return opticalFlowImage;
        }
