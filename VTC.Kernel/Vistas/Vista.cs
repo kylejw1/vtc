@@ -63,7 +63,7 @@ namespace VTC.Kernel.Vistas
         public MoGBackground MoGBackgroundSingleton; 
 
         //************* Optical flow variables ***************
-        public int[][][] OpticalFlow; // LxWx2. Vector field where each pixel represents optical flow direction.
+        public double[][][] OpticalFlow; // LxWx2. Vector field where each pixel represents optical flow direction.
         private const int OpticalFlowDownsample = 1;
         private const int OpticalFlowLimit = 8;
         public Image<Bgr, byte> lastFrame; //For calculating single-frame optical flow 
@@ -189,12 +189,12 @@ namespace VTC.Kernel.Vistas
             BlobsWithArea = new SortedList<CvBlob, int>();
 
             MeasurementArrayQueue = new Queue<Measurements[]>(900);
-            OpticalFlow = new int[_width][][];
+            OpticalFlow = new double[_width][][];
             for (int i = 0; i < _width; i++)
             {
-                OpticalFlow[i] = new int[_height][];
+                OpticalFlow[i] = new double[_height][];
                 for (int j = 0; j < _height; j++)
-                    OpticalFlow[i][j] = new int[2] { 0, 0 };
+                    OpticalFlow[i][j] = new double[2] { 0, 0 };
             }
                 
         }
@@ -306,7 +306,8 @@ namespace VTC.Kernel.Vistas
                 if (CudaInvoke.HasCuda)
                 {
                     
-                    using (var of = new CudaBroxOpticalFlow())
+                    //using (var of = new CudaBroxOpticalFlow(0.197D, 50D, 0.8D, 5, 150, 10))
+                    using(var of = new CudaFarnebackOpticalFlow())
                     {
                         var singleChanFrame = frame.Convert<Gray, byte>();
                         var singleChanLastFrame = lastFrame.Convert<Gray, byte>();
@@ -335,17 +336,17 @@ namespace VTC.Kernel.Vistas
                         for (int i = 0; i < _width; i += OpticalFlowDownsample)
                             for (int j = 0; j < _height; j += OpticalFlowDownsample)
                             {
-                                if (Movement_Mask.Data[j, i, 0] > 0)
+                                //if (Movement_Mask.Data[j, i, 0] > 0)
                                 {
                                     if (i > OpticalFlowLimit && i < _width - OpticalFlowLimit)
                                         if (j > OpticalFlowLimit && j < _height - OpticalFlowLimit)
                                         {
-                                            var lsse = VTC.Kernel.OpticalFlow.LowestSSEPair(frame, lastFrame, i, j, 1,
-                                                18, 8);
-                                            OpticalFlow[i][j][0] = lsse.XOffset;
-                                            OpticalFlow[i][j][1] = lsse.YOffset;
-                                            //OpticalFlow[i][j][0] = (int)xarr[j, i, 0];
-                                            //OpticalFlow[i][j][1] = (int)yarr[j, i, 0];
+                                            //var lsse = VTC.Kernel.OpticalFlow.LowestSSEPair(frame, lastFrame, i, j, 1,
+                                            //    20, 8);
+                                            //OpticalFlow[i][j][0] = lsse.XOffset;
+                                            //OpticalFlow[i][j][1] = lsse.YOffset;
+                                            OpticalFlow[i][j][0] = xarr[j, i, 0];
+                                            OpticalFlow[i][j][1] = yarr[j, i, 0];
                                         }
                                 }
                             }
