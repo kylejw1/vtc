@@ -667,8 +667,15 @@ namespace VTC
 
        private void watchdogTimer_Tick(object sender, EventArgs e)
        {
-           File.SetLastWriteTime("C:\\TrafficCounter\\heartbeat", DateTime.Now);
-       }
+            var heartbeatDirPath = ".\\";
+            var heartbeatFilePath = heartbeatDirPath + "heartbeat";
+
+            Directory.CreateDirectory(heartbeatDirPath);
+            if (!File.Exists(heartbeatFilePath))
+                File.Create(heartbeatFilePath).Close();
+
+            File.SetLastWriteTime(heartbeatFilePath, DateTime.Now);
+        }
 
        private void hideTrackersButton_Click(object sender, EventArgs e)
        {
