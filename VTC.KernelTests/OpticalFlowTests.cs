@@ -130,6 +130,13 @@ namespace VTC.Kernel.Tests
             float[, ,] yarr = new float[xflow.Height, xflow.Width, 1];
             ch2.CopyTo(yarr);
 
+            for(int i=0;i<xflow.Width;i++)
+                for (int j = 0; j < xflow.Height; j++)
+                {
+                    xflow.Data[j, i, 0] = xarr[j, i, 0];
+                    yflow.Data[j, i, 0] = yarr[j, i, 0];
+                }
+
             (new ImageViewer(prevImg)).ShowDialog();
             (new ImageViewer(currImg)).ShowDialog();
 
