@@ -674,8 +674,8 @@ namespace VTC
             if (!File.Exists(heartbeatFilePath))
                 File.Create(heartbeatFilePath).Close();
 
-            File.SetLastWriteTime(heartbeatFilePath, DateTime.Now);
-        }
+           File.SetLastWriteTime(heartbeatFilePath, DateTime.Now);
+       }
 
        private void hideTrackersButton_Click(object sender, EventArgs e)
        {
