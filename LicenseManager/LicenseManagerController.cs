@@ -16,20 +16,15 @@ namespace LicenseManager
             _view = view;
             _model = model;
 
-            _view.SetController(this);
+            if (null != view)
+                _view.SetController(this);
         }
 
-        public void SetLicenseKey(string key)
+        public bool TrySetLicenseKey(string key)
         {
             _model.SetLicenseKey(key);
 
-            if (_model.License.Validate())
-            {
-
-            } else
-            {
-
-            }
+            return _model.License.Validate();
         }
     }
 }
