@@ -33,16 +33,9 @@ namespace VTC
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrafficCounter));
             this.pushStateTimer = new System.Windows.Forms.Timer(this.components);
-            this.updateSamplePoint = new System.Windows.Forms.Button();
-            this.saveRGBSamplesCheckBox = new System.Windows.Forms.CheckBox();
-            this.rgbCoordinateTextbox = new System.Windows.Forms.TextBox();
             this.timeActiveTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.frameHeightBox = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.frameWidthBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.serverUrlTextBox = new System.Windows.Forms.TextBox();
             this.tbVistaStats = new System.Windows.Forms.TextBox();
@@ -71,52 +64,29 @@ namespace VTC
             this.pushStateTimer.Interval = 10000;
             this.pushStateTimer.Tick += new System.EventHandler(this.PushStateProcess);
             // 
-            // updateSamplePoint
-            // 
-            this.updateSamplePoint.Location = new System.Drawing.Point(126, 125);
-            this.updateSamplePoint.Name = "updateSamplePoint";
-            this.updateSamplePoint.Size = new System.Drawing.Size(75, 23);
-            this.updateSamplePoint.TabIndex = 69;
-            this.updateSamplePoint.Text = "Update";
-            this.updateSamplePoint.UseVisualStyleBackColor = true;
-            // 
-            // saveRGBSamplesCheckBox
-            // 
-            this.saveRGBSamplesCheckBox.AutoSize = true;
-            this.saveRGBSamplesCheckBox.Location = new System.Drawing.Point(21, 154);
-            this.saveRGBSamplesCheckBox.Name = "saveRGBSamplesCheckBox";
-            this.saveRGBSamplesCheckBox.Size = new System.Drawing.Size(87, 17);
-            this.saveRGBSamplesCheckBox.TabIndex = 68;
-            this.saveRGBSamplesCheckBox.Text = "Sample RGB";
-            this.saveRGBSamplesCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // rgbCoordinateTextbox
-            // 
-            this.rgbCoordinateTextbox.Location = new System.Drawing.Point(17, 127);
-            this.rgbCoordinateTextbox.Name = "rgbCoordinateTextbox";
-            this.rgbCoordinateTextbox.Size = new System.Drawing.Size(100, 20);
-            this.rgbCoordinateTextbox.TabIndex = 67;
-            // 
             // timeActiveTextBox
             // 
-            this.timeActiveTextBox.Location = new System.Drawing.Point(17, 177);
+            this.timeActiveTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.timeActiveTextBox.Location = new System.Drawing.Point(12, 458);
             this.timeActiveTextBox.Name = "timeActiveTextBox";
             this.timeActiveTextBox.ReadOnly = true;
-            this.timeActiveTextBox.Size = new System.Drawing.Size(100, 20);
+            this.timeActiveTextBox.Size = new System.Drawing.Size(100, 21);
             this.timeActiveTextBox.TabIndex = 65;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(123, 180);
+            this.label11.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(118, 461);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(62, 13);
+            this.label11.Size = new System.Drawing.Size(69, 15);
             this.label11.TabIndex = 64;
             this.label11.Text = "Time active";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(261, 297);
+            this.button1.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Location = new System.Drawing.Point(262, 419);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(196, 22);
             this.button1.TabIndex = 63;
@@ -124,104 +94,80 @@ namespace VTC
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.resampleBackgroundButton_Click);
             // 
-            // frameHeightBox
-            // 
-            this.frameHeightBox.Location = new System.Drawing.Point(364, 39);
-            this.frameHeightBox.Name = "frameHeightBox";
-            this.frameHeightBox.Size = new System.Drawing.Size(37, 20);
-            this.frameHeightBox.TabIndex = 62;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(407, 42);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(58, 13);
-            this.label6.TabIndex = 61;
-            this.label6.Text = "Height (px)";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(303, 42);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(55, 13);
-            this.label5.TabIndex = 60;
-            this.label5.Text = "Width (px)";
-            // 
-            // frameWidthBox
-            // 
-            this.frameWidthBox.Location = new System.Drawing.Point(262, 39);
-            this.frameWidthBox.Name = "frameWidthBox";
-            this.frameWidthBox.Size = new System.Drawing.Size(37, 20);
-            this.frameWidthBox.TabIndex = 59;
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.Location = new System.Drawing.Point(463, 212);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(63, 13);
+            this.label7.Size = new System.Drawing.Size(70, 15);
             this.label7.TabIndex = 58;
             this.label7.Text = "Server URL";
             // 
             // serverUrlTextBox
             // 
+            this.serverUrlTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.serverUrlTextBox.Location = new System.Drawing.Point(262, 209);
             this.serverUrlTextBox.Name = "serverUrlTextBox";
-            this.serverUrlTextBox.Size = new System.Drawing.Size(195, 20);
+            this.serverUrlTextBox.Size = new System.Drawing.Size(195, 21);
             this.serverUrlTextBox.TabIndex = 57;
             // 
             // tbVistaStats
             // 
-            this.tbVistaStats.Location = new System.Drawing.Point(14, 23);
+            this.tbVistaStats.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbVistaStats.Location = new System.Drawing.Point(14, 12);
             this.tbVistaStats.Multiline = true;
             this.tbVistaStats.Name = "tbVistaStats";
             this.tbVistaStats.ReadOnly = true;
-            this.tbVistaStats.Size = new System.Drawing.Size(240, 96);
+            this.tbVistaStats.Size = new System.Drawing.Size(240, 429);
             this.tbVistaStats.TabIndex = 54;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(463, 186);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(76, 13);
+            this.label4.Size = new System.Drawing.Size(86, 15);
             this.label4.TabIndex = 55;
             this.label4.Text = "Intersection ID";
             // 
             // intersectionIDTextBox
             // 
+            this.intersectionIDTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.intersectionIDTextBox.Location = new System.Drawing.Point(261, 183);
             this.intersectionIDTextBox.Name = "intersectionIDTextBox";
-            this.intersectionIDTextBox.Size = new System.Drawing.Size(196, 20);
+            this.intersectionIDTextBox.Size = new System.Drawing.Size(196, 21);
             this.intersectionIDTextBox.TabIndex = 53;
             // 
             // SaveParametersBtn
             // 
-            this.SaveParametersBtn.Location = new System.Drawing.Point(261, 268);
+            this.SaveParametersBtn.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SaveParametersBtn.Location = new System.Drawing.Point(262, 281);
             this.SaveParametersBtn.Name = "SaveParametersBtn";
             this.SaveParametersBtn.Size = new System.Drawing.Size(196, 22);
             this.SaveParametersBtn.TabIndex = 52;
-            this.SaveParametersBtn.Text = "Save Parameters";
+            this.SaveParametersBtn.Text = "Save Configuration";
             this.SaveParametersBtn.UseVisualStyleBackColor = true;
             this.SaveParametersBtn.Click += new System.EventHandler(this.SaveParametersBtn_Click);
             // 
             // CameraComboBox
             // 
             this.CameraComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CameraComboBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CameraComboBox.FormattingEnabled = true;
             this.CameraComboBox.Location = new System.Drawing.Point(261, 12);
             this.CameraComboBox.Name = "CameraComboBox";
-            this.CameraComboBox.Size = new System.Drawing.Size(196, 21);
+            this.CameraComboBox.Size = new System.Drawing.Size(196, 23);
             this.CameraComboBox.TabIndex = 51;
             this.CameraComboBox.SelectedIndexChanged += new System.EventHandler(this.CameraComboBox_SelectedIndexChanged);
             // 
             // btnConfigureRegions
             // 
-            this.btnConfigureRegions.Location = new System.Drawing.Point(261, 94);
+            this.btnConfigureRegions.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfigureRegions.Location = new System.Drawing.Point(261, 114);
             this.btnConfigureRegions.Name = "btnConfigureRegions";
-            this.btnConfigureRegions.Size = new System.Drawing.Size(196, 23);
+            this.btnConfigureRegions.Size = new System.Drawing.Size(196, 37);
             this.btnConfigureRegions.TabIndex = 50;
             this.btnConfigureRegions.Text = "Configure Regions";
             this.btnConfigureRegions.UseVisualStyleBackColor = true;
@@ -230,9 +176,10 @@ namespace VTC
             // showPolygonsCheckbox
             // 
             this.showPolygonsCheckbox.AutoSize = true;
-            this.showPolygonsCheckbox.Location = new System.Drawing.Point(262, 71);
+            this.showPolygonsCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.showPolygonsCheckbox.Location = new System.Drawing.Point(262, 91);
             this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
-            this.showPolygonsCheckbox.Size = new System.Drawing.Size(98, 17);
+            this.showPolygonsCheckbox.Size = new System.Drawing.Size(110, 19);
             this.showPolygonsCheckbox.TabIndex = 49;
             this.showPolygonsCheckbox.Text = "Show polygons";
             this.showPolygonsCheckbox.UseVisualStyleBackColor = true;
@@ -240,17 +187,19 @@ namespace VTC
             // label10
             // 
             this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.Location = new System.Drawing.Point(463, 160);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(82, 13);
+            this.label10.Size = new System.Drawing.Size(92, 15);
             this.label10.TabIndex = 48;
             this.label10.Text = "Objects tracked";
             // 
             // trackCountBox
             // 
+            this.trackCountBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.trackCountBox.Location = new System.Drawing.Point(262, 157);
             this.trackCountBox.Name = "trackCountBox";
-            this.trackCountBox.Size = new System.Drawing.Size(195, 20);
+            this.trackCountBox.Size = new System.Drawing.Size(195, 21);
             this.trackCountBox.TabIndex = 47;
             // 
             // pushStateCheckbox
@@ -258,9 +207,10 @@ namespace VTC
             this.pushStateCheckbox.AutoSize = true;
             this.pushStateCheckbox.Checked = true;
             this.pushStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.pushStateCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.pushStateCheckbox.Location = new System.Drawing.Point(262, 235);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
-            this.pushStateCheckbox.Size = new System.Drawing.Size(117, 17);
+            this.pushStateCheckbox.Size = new System.Drawing.Size(137, 19);
             this.pushStateCheckbox.TabIndex = 46;
             this.pushStateCheckbox.Text = "Push state samples";
             this.pushStateCheckbox.UseVisualStyleBackColor = true;
@@ -269,9 +219,10 @@ namespace VTC
             // MoGcheckBox
             // 
             this.MoGcheckBox.AutoSize = true;
-            this.MoGcheckBox.Location = new System.Drawing.Point(366, 71);
+            this.MoGcheckBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MoGcheckBox.Location = new System.Drawing.Point(262, 470);
             this.MoGcheckBox.Name = "MoGcheckBox";
-            this.MoGcheckBox.Size = new System.Drawing.Size(85, 17);
+            this.MoGcheckBox.Size = new System.Drawing.Size(93, 19);
             this.MoGcheckBox.TabIndex = 70;
             this.MoGcheckBox.Text = "Enable MoG";
             this.MoGcheckBox.UseVisualStyleBackColor = true;
@@ -280,9 +231,10 @@ namespace VTC
             // delayProcessingCheckbox
             // 
             this.delayProcessingCheckbox.AutoSize = true;
-            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 355);
+            this.delayProcessingCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 493);
             this.delayProcessingCheckbox.Name = "delayProcessingCheckbox";
-            this.delayProcessingCheckbox.Size = new System.Drawing.Size(107, 17);
+            this.delayProcessingCheckbox.Size = new System.Drawing.Size(122, 19);
             this.delayProcessingCheckbox.TabIndex = 71;
             this.delayProcessingCheckbox.Text = "Delay processing";
             this.delayProcessingCheckbox.UseVisualStyleBackColor = true;
@@ -290,16 +242,18 @@ namespace VTC
             // exportDatasetsCheckbox
             // 
             this.exportDatasetsCheckbox.AutoSize = true;
-            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 128);
+            this.exportDatasetsCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 258);
             this.exportDatasetsCheckbox.Name = "exportDatasetsCheckbox";
-            this.exportDatasetsCheckbox.Size = new System.Drawing.Size(154, 17);
+            this.exportDatasetsCheckbox.Size = new System.Drawing.Size(176, 19);
             this.exportDatasetsCheckbox.TabIndex = 72;
             this.exportDatasetsCheckbox.Text = "Export datasets periodically";
             this.exportDatasetsCheckbox.UseVisualStyleBackColor = true;
             // 
             // btnToggleVideoMux
             // 
-            this.btnToggleVideoMux.Location = new System.Drawing.Point(261, 326);
+            this.btnToggleVideoMux.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnToggleVideoMux.Location = new System.Drawing.Point(262, 363);
             this.btnToggleVideoMux.Name = "btnToggleVideoMux";
             this.btnToggleVideoMux.Size = new System.Drawing.Size(196, 22);
             this.btnToggleVideoMux.TabIndex = 63;
@@ -315,7 +269,8 @@ namespace VTC
             // 
             // hideTrackersButton
             // 
-            this.hideTrackersButton.Location = new System.Drawing.Point(261, 379);
+            this.hideTrackersButton.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hideTrackersButton.Location = new System.Drawing.Point(262, 391);
             this.hideTrackersButton.Name = "hideTrackersButton";
             this.hideTrackersButton.Size = new System.Drawing.Size(196, 22);
             this.hideTrackersButton.TabIndex = 73;
@@ -325,7 +280,8 @@ namespace VTC
             // 
             // activateLicenseButton
             // 
-            this.activateLicenseButton.Location = new System.Drawing.Point(17, 203);
+            this.activateLicenseButton.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.activateLicenseButton.Location = new System.Drawing.Point(12, 484);
             this.activateLicenseButton.Name = "activateLicenseButton";
             this.activateLicenseButton.Size = new System.Drawing.Size(100, 23);
             this.activateLicenseButton.TabIndex = 74;
@@ -336,9 +292,12 @@ namespace VTC
             // disableOpticalFlowCheckbox
             // 
             this.disableOpticalFlowCheckbox.AutoSize = true;
-            this.disableOpticalFlowCheckbox.Location = new System.Drawing.Point(261, 407);
+            this.disableOpticalFlowCheckbox.Checked = true;
+            this.disableOpticalFlowCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.disableOpticalFlowCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.disableOpticalFlowCheckbox.Location = new System.Drawing.Point(262, 447);
             this.disableOpticalFlowCheckbox.Name = "disableOpticalFlowCheckbox";
-            this.disableOpticalFlowCheckbox.Size = new System.Drawing.Size(122, 17);
+            this.disableOpticalFlowCheckbox.Size = new System.Drawing.Size(139, 19);
             this.disableOpticalFlowCheckbox.TabIndex = 75;
             this.disableOpticalFlowCheckbox.Text = "Disable Optical Flow";
             this.disableOpticalFlowCheckbox.UseVisualStyleBackColor = true;
@@ -347,24 +306,18 @@ namespace VTC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(563, 458);
+            this.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ClientSize = new System.Drawing.Size(563, 519);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
             this.Controls.Add(this.activateLicenseButton);
             this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
-            this.Controls.Add(this.updateSamplePoint);
-            this.Controls.Add(this.saveRGBSamplesCheckBox);
-            this.Controls.Add(this.rgbCoordinateTextbox);
             this.Controls.Add(this.timeActiveTextBox);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnToggleVideoMux);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.frameHeightBox);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.frameWidthBox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.serverUrlTextBox);
             this.Controls.Add(this.tbVistaStats);
@@ -391,16 +344,9 @@ namespace VTC
       #endregion
 
       private Timer pushStateTimer;
-      private Button updateSamplePoint;
-      private CheckBox saveRGBSamplesCheckBox;
-      private TextBox rgbCoordinateTextbox;
       private TextBox timeActiveTextBox;
       private Label label11;
       private Button button1;
-      private TextBox frameHeightBox;
-      private Label label6;
-      private Label label5;
-      private TextBox frameWidthBox;
       private Label label7;
       private TextBox serverUrlTextBox;
       private TextBox tbVistaStats;

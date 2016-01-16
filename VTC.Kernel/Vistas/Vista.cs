@@ -234,7 +234,7 @@ namespace VTC.Kernel.Vistas
 
         public virtual string GetStatString()
         {
-            return "Vehicles detected: " + TotalDeleted;               
+            return "Objects detected: " + TotalDeleted;               
         }
 
         private int numProcessedFrames = 0;
@@ -306,8 +306,8 @@ namespace VTC.Kernel.Vistas
                 if (CudaInvoke.HasCuda)
                 {
                     
-                    //using (var of = new CudaBroxOpticalFlow(0.197D, 50D, 0.8D, 5, 150, 10))
-                    using(var of = new CudaFarnebackOpticalFlow())
+                    //using (var of = new CudaFarnebackOpticalFlow())
+                    using (var of = new CudaBroxOpticalFlow())
                     {
                         var singleChanFrame = frame.Convert<Gray, byte>();
                         var singleChanLastFrame = lastFrame.Convert<Gray, byte>();

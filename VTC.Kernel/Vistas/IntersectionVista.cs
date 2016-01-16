@@ -103,8 +103,11 @@ namespace VTC.Kernel.Vistas
 
                 if (transition_event.Value != null)
                 {
-                    if (!TurnStats.ContainsKey(transition_event.Value)) TurnStats[transition_event.Value] = 0;
-                    TurnStats[transition_event.Value]++;
+                    string turnString = startRegion.Key + " to " + endRegion.Key;
+                    if (!TurnStats.ContainsKey(turnString)) TurnStats[turnString] = 0;
+                    TurnStats[turnString]++;
+                    //if (!TurnStats.ContainsKey(transition_event.Value)) TurnStats[transition_event.Value] = 0;
+                    //TurnStats[transition_event.Value]++;
 
                     //POST a new EventReport here
                     postTurnReport(transition_event.Value);

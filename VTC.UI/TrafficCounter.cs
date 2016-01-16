@@ -394,8 +394,8 @@ namespace VTC
           pushStateTimer.Interval = _settings.StateUploadIntervalMs;
           serverUrlTextBox.Text = _settings.ServerUrl;
 
-          frameHeightBox.Text = _settings.FrameHeight.ToString(CultureInfo.InvariantCulture);
-          frameWidthBox.Text = _settings.FrameWidth.ToString(CultureInfo.InvariantCulture);
+          //frameHeightBox.Text = _settings.FrameHeight.ToString(CultureInfo.InvariantCulture);
+          //frameWidthBox.Text = _settings.FrameWidth.ToString(CultureInfo.InvariantCulture);
       }
 
       /// <summary>
@@ -408,8 +408,8 @@ namespace VTC
               _settings.IntersectionID = intersectionIDTextBox.Text;
               _settings.ServerUrl = serverUrlTextBox.Text;
 
-              _settings.FrameHeight = double.Parse(frameHeightBox.Text);
-              _settings.FrameWidth = double.Parse(frameWidthBox.Text);
+              //_settings.FrameHeight = double.Parse(frameHeightBox.Text);
+              //_settings.FrameWidth = double.Parse(frameWidthBox.Text);
 
               _settings.Save();
           }
@@ -466,7 +466,7 @@ namespace VTC
                   trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
                   tbVistaStats.Text = _vista.GetStatString();
 
-                  Thread.Sleep((int)_settings.Timestep * 1000); //TODO: don't use a hardcoded wait here
+                  //Thread.Sleep((int)_settings.Timestep * 1000); 
                   TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
                   timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
