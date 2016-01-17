@@ -283,7 +283,7 @@ namespace VTC
             this.activateLicenseButton.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.activateLicenseButton.Location = new System.Drawing.Point(12, 484);
             this.activateLicenseButton.Name = "activateLicenseButton";
-            this.activateLicenseButton.Size = new System.Drawing.Size(100, 23);
+            this.activateLicenseButton.Size = new System.Drawing.Size(175, 23);
             this.activateLicenseButton.TabIndex = 74;
             this.activateLicenseButton.Text = "Activate License";
             this.activateLicenseButton.UseVisualStyleBackColor = true;
