@@ -9,5 +9,6 @@ namespace LicenseManager
     public interface ILicenseManagerView
     {
         void SetController(LicenseManagerController controller);
+        void SetKeyError(string errorMessage);
     }
 }

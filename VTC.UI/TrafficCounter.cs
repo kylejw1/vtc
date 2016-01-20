@@ -686,11 +686,16 @@ namespace VTC
        {
             try
         {
-            license = ExtendedLicenseManager.GetLicense(typeof(TrafficCounter), this, "<RSAKeyValue><Modulus>uHfytqHYNN+1mYDeocM6fjotTwmQgGphb4XaMtrADk3+oa03ZWMXkIFZyL7mzG/hPpd/Q+waSWiklL7QR4k1XujCbcLNngY0gz4qaKFq/LqCSHzX7zHQ3N1Lyg368XK+uLtAxX9fGF9vOgloIPnDb/4Jol6nohouKODSZc+rf43D2q6mYWApWPrBFrhGyeO9mF3khYkFiJTXnCDku8WbJBdwK963RmYkI5p+jyoDi0Uy5a2+TmU9jnzK7zyRybjd4f1o7bfFQlBouSCrwVzU0n8PmtrU5boSh45RbDuy5FRYknxBM9djQvewydLTVHztZWjeQ0Q3JxH03/6DIY0Lsw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"); 
-		
-            // Check if we're activated, and every 90 days verify it with
-            // the activation servers. 
-            GenuineResult result = license.IsGenuineEx();
+            license = ExtendedLicenseManager.GetLicense(typeof(TrafficCounter), this, "<RSAKeyValue><Modulus>sNNBll27qDwVY2taLYlVRz1qrEe1+xEMSKYDGXojI5znZqQ+VcABzWZbp5Cbjwmw2G5JlrjMMMdkxEPLEC1j5o+tKXGjcJ2M54wjwocudbLzhecby6ZuZLMF3V9IDgr/Nn1AraLPHx1hn9Re2Unzd6rMlxrc3YCxPL1vwjAbPE5vJeoBhTe1TvO0nFMjVqWSfVxH8kPW8xqrBSgOq7akp7fD293T8MdRzsyea6uZe4xy1mgckk8hUDW3J735ISB4QSIy2+f9NfJlju1x/HEz7Lv1bwUlFQNQ0gaquhUK5gmEnoauw7/Ebgc99w0J9gXziaB+Z++K5OJV4Y8RR3NI4Q==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>");
+
+                var valid = license.Validate();
+                var gen = license.IsGenuine();
+
+                var gen2 = license.IsGenuine(false, "7FB2-E092-B59A-49F8-9BA1-E4A4-1B6F");
+                
+                // Check if we're activated, and every 90 days verify it with
+                // the activation servers. 
+                GenuineResult result = license.IsGenuineEx();
 
             isActivated = result == GenuineResult.Genuine ||
                           // an internet error means the user is activated but
@@ -713,7 +718,12 @@ namespace VTC
 
        private void activateLicenseButton_Click(object sender, EventArgs e)
        {
-           license.Activate("F884-F8BB-9ED0-4CC7-ACEF-E385-2641");
+            try
+            {
+                license.Deactivate();
+            }
+            catch { }
+           license.Activate("7FB2-E092-B59A-49F8-9BA1-E4A4-1B6F");
        }
 
 

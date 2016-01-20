@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkyXoft.BusinessSolutions.LicenseManager.Protector;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,12 @@ namespace LicenseManager
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            var model = new LicenseModel(typeof(object), new object(), "", "");
+            var view = new LicenseManagerView();
+            var controller = new LicenseManagerController(model, view);
+
+            Application.Run(view);
         }
     }
 }
