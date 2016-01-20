@@ -8,10 +8,10 @@ namespace LicenseManager
 {
     public class LicenseManagerController
     {
-        LicenseManagerModel _model;
+        LicenseModel _model;
         ILicenseManagerView _view;
 
-        public LicenseManagerController(LicenseManagerModel model, ILicenseManagerView view)
+        public LicenseManagerController(LicenseModel model, ILicenseManagerView view)
         {
             _view = view;
             _model = model;
@@ -20,11 +20,22 @@ namespace LicenseManager
                 _view.SetController(this);
         }
 
-        public bool TrySetLicenseKey(string key)
+        public void ValidateAndSetKey(string key)
         {
-            _model.SetLicenseKey(key);
+            if (null == _model)
+                return;
 
-            return _model.License.Validate();
+            string message;
+            if (!_model.ValidateFormatAndSetKey(key, out message))
+            {
+                if (null != _view)
+                    _view.SetKeyError(message);
+            } else
+            {
+                _view.SetKeyError(string.Empty);
+            }
         }
+
+        
     }
 }
