@@ -13,27 +13,30 @@ namespace LicenseManager
 
         public LicenseManagerController(LicenseModel model, ILicenseManagerView view)
         {
+            if (null == model)
+                throw new ArgumentNullException("model");
+
+            if (null == view)
+                throw new ArgumentNullException("view");
+
             _view = view;
             _model = model;
 
-            if (null != view)
-                _view.SetController(this);
+            _view.SetController(this);
+            _view.SetMaxKeyLength(_model.MaxKeyLength);
+            _view.SetValidCharacterRegex(_model.ValidCharacterRegex);
         }
 
-        public void ValidateAndSetKey(string key)
+        public void Activate(string key)
         {
-            if (null == _model)
-                return;
-
             string message;
-            if (!_model.ValidateFormatAndSetKey(key, out message))
+            if (!_model.ValidateKeyFormat(key, out message))
             {
-                if (null != _view)
-                    _view.SetKeyError(message);
-            } else
-            {
-                _view.SetKeyError(string.Empty);
+                _view.SetKeyError(message);
+                return;
             }
+
+            _view.SetKeyError(string.Empty);
         }
 
         

@@ -16,10 +16,22 @@ namespace LicenseManager
     public partial class LicenseManagerView : Form, ILicenseManagerView
     {
         private LicenseManagerController _controller;
+        private int? _maxKeyLength;
+        private Regex _validCharacterRegex;
 
         public LicenseManagerView()
         {
             InitializeComponent();
+        }
+
+        public void SetMaxKeyLength(int? maxKeyLength)
+        {
+            _maxKeyLength = maxKeyLength;
+        }
+
+        public void SetValidCharacterRegex(Regex validCharacterRegex)
+        {
+            _validCharacterRegex = validCharacterRegex;
         }
 
         public void SetController(LicenseManagerController controller)
@@ -32,33 +44,35 @@ namespace LicenseManager
             lblKeyError.Text = errorMessage;
         }
 
-        private void tbKey_TextChanged(object sender, EventArgs e)
-        {
-            if (null != _controller)
-                _controller.ValidateAndSetKey(tbKey.Text);
-        }
-
-        private void tbKey_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-        int i = 0;
         private void tbKey_KeyPress(object sender, KeyPressEventArgs e)
         {
-            //TODO: Handle paste case specially
+            //TODO: Handle pasting invalid characters
+
+            var tb = sender as TextBox;
+            string text = null == tb ? "" : tb.Text;
 
             if (char.IsControl(e.KeyChar))
                 return;
 
-            if (Regex.IsMatch(e.KeyChar.ToString(), @"[\w\d]"))
+            if (_maxKeyLength.HasValue && text.Replace("-",String.Empty).Length >= _maxKeyLength.Value)
             {
-                tbKey.AppendText(e.KeyChar.ToString());
-                //var key = tbKey.Text + e.KeyChar;
-                //key = Regex.Replace(key, @".{4}(?!$)", "$0-");
-                //tbKey.Text = key;
+                e.Handled = true;
+                return;
             }
 
-            e.Handled = true;
+            if (null != _validCharacterRegex && !_validCharacterRegex.IsMatch(e.KeyChar.ToString()))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            e.KeyChar = char.ToUpperInvariant(e.KeyChar);
+        }
+
+        private void btnActivate_Click(object sender, EventArgs e)
+        {
+            if (null != _controller)
+                _controller.Activate(tbKey.Text);
         }
     }
 }

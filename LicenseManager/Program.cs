@@ -18,7 +18,7 @@ namespace LicenseManager
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var model = new LicenseModel(typeof(object), new object(), "", "");
+            var model = new LicenseModel(typeof(object), new object(), "");
             var view = new LicenseManagerView();
             var controller = new LicenseManagerController(model, view);
 
