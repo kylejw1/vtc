@@ -1,4 +1,4 @@
-﻿using SkyXoft.BusinessSolutions.LicenseManager.Protector;
+﻿    using SkyXoft.BusinessSolutions.LicenseManager.Protector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +11,12 @@ namespace LicenseManager
     public class LicenseModel
     {
         private readonly ExtendedLicense License;
-
         private string _key;
 
-        public LicenseModel(Type licensedObjectType, object licensedObjectInstance, string publicKey, string serialNumber)
+        public int? MaxKeyLength = 28;
+        public Regex ValidCharacterRegex = new Regex(@"[\w\d]");
+
+        public LicenseModel(Type licensedObjectType, object licensedObjectInstance, string publicKey)
         {
             try
             {
@@ -39,18 +41,18 @@ namespace LicenseManager
             catch (Exception ex)
             {
                 var message = String.Format("Failed to retrieve license. type={0} publicKey={1} serialNumber={2}",
-                    licensedObjectType, publicKey, serialNumber);
+                    licensedObjectType, publicKey);
                 throw new Exception(message, ex);
             }
 
             // TODO: In controller, only activate if nothing already activated?  Prompt for deactivate
         }
 
-        public bool ValidateFormatAndSetKey(string key, out string message)
+        public bool ValidateKeyFormat(string key, out string message)
         {
             if (Regex.IsMatch(key, @"[^\w\d-]"))
             {
-                message = "Key contains invalid characters";
+                message = "Key contains invalid characters." + Environment.NewLine + "Only letters, numbers, hyphens";
                 return false;
             }
 

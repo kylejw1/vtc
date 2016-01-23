@@ -40,7 +40,7 @@
             // btnLater
             // 
             this.btnLater.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLater.Location = new System.Drawing.Point(289, 197);
+            this.btnLater.Location = new System.Drawing.Point(289, 232);
             this.btnLater.Name = "btnLater";
             this.btnLater.Size = new System.Drawing.Size(107, 23);
             this.btnLater.TabIndex = 0;
@@ -73,18 +73,18 @@
             this.tbKey.Name = "tbKey";
             this.tbKey.Size = new System.Drawing.Size(282, 20);
             this.tbKey.TabIndex = 3;
-            this.tbKey.TextChanged += new System.EventHandler(this.tbKey_TextChanged);
             this.tbKey.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbKey_KeyPress);
             // 
             // btnActivate
             // 
             this.btnActivate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnActivate.Location = new System.Drawing.Point(176, 197);
+            this.btnActivate.Location = new System.Drawing.Point(176, 232);
             this.btnActivate.Name = "btnActivate";
             this.btnActivate.Size = new System.Drawing.Size(107, 23);
             this.btnActivate.TabIndex = 0;
             this.btnActivate.Text = "Activate";
             this.btnActivate.UseVisualStyleBackColor = true;
+            this.btnActivate.Click += new System.EventHandler(this.btnActivate_Click);
             // 
             // label3
             // 
@@ -110,7 +110,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(408, 232);
+            this.ClientSize = new System.Drawing.Size(408, 267);
             this.Controls.Add(this.lblKeyError);
             this.Controls.Add(this.tbKey);
             this.Controls.Add(this.label3);
