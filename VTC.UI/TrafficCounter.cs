@@ -119,7 +119,7 @@ namespace VTC
            else
                MessageBox.Show("License invalid");
 
-           _appArgument = appArgument;
+           _appArgument = appArgument; 
           InitializeComponent();
 
            _settings = settings;
@@ -271,6 +271,16 @@ namespace VTC
            CameraComboBox.Items.Add(camera.Name);
        }
 
+       public void WriteCountsToFile()
+        {
+            // Write the string to a file.
+            var pathString = "C:\\TrafficCounter\\Counts " + DateTime.Now.ToString("dd-MM-yyyy-mm-ss") + ".txt";
+            System.IO.StreamWriter file = new System.IO.StreamWriter(pathString);
+            file.WriteLine(tbVistaStats.Text);
+            file.Close();
+            Application.Exit();
+        }
+
        /// <summary>
        /// Method for initializing the camera selection combobox.
        /// </summary>
@@ -280,7 +290,9 @@ namespace VTC
           // Add video file as source, if provided
           if (UseLocalVideo(filename))
           {
-              AddCamera(new VideoFileCapture(filename));
+                var vfc = new VideoFileCapture(filename);
+                vfc.captureCompleteEvent += WriteCountsToFile;
+                AddCamera(vfc);
           }
 
           //List all video input devices.
@@ -444,10 +456,8 @@ namespace VTC
                   //Workaround - dispose and restart capture if camera starts returning null. 
                   //TODO: Investigate - why is this necessary?
                   if (frame == null)
-                  {
-                      
+                  {   
                       SelectedCamera = new VideoFileCapture(_appArgument);
-
                       Debug.WriteLine("Restarting camera: " + DateTime.Now);
                       return;
                   }

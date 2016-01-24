@@ -86,7 +86,7 @@ namespace VTC
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(262, 419);
+            this.button1.Location = new System.Drawing.Point(358, 419);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(196, 22);
             this.button1.TabIndex = 63;
@@ -98,7 +98,7 @@ namespace VTC
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(463, 212);
+            this.label7.Location = new System.Drawing.Point(282, 212);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(70, 15);
             this.label7.TabIndex = 58;
@@ -107,7 +107,7 @@ namespace VTC
             // serverUrlTextBox
             // 
             this.serverUrlTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverUrlTextBox.Location = new System.Drawing.Point(262, 209);
+            this.serverUrlTextBox.Location = new System.Drawing.Point(358, 209);
             this.serverUrlTextBox.Name = "serverUrlTextBox";
             this.serverUrlTextBox.Size = new System.Drawing.Size(195, 21);
             this.serverUrlTextBox.TabIndex = 57;
@@ -126,7 +126,7 @@ namespace VTC
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(463, 186);
+            this.label4.Location = new System.Drawing.Point(266, 186);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 15);
             this.label4.TabIndex = 55;
@@ -135,7 +135,7 @@ namespace VTC
             // intersectionIDTextBox
             // 
             this.intersectionIDTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.intersectionIDTextBox.Location = new System.Drawing.Point(261, 183);
+            this.intersectionIDTextBox.Location = new System.Drawing.Point(357, 183);
             this.intersectionIDTextBox.Name = "intersectionIDTextBox";
             this.intersectionIDTextBox.Size = new System.Drawing.Size(196, 21);
             this.intersectionIDTextBox.TabIndex = 53;
@@ -143,7 +143,7 @@ namespace VTC
             // SaveParametersBtn
             // 
             this.SaveParametersBtn.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SaveParametersBtn.Location = new System.Drawing.Point(262, 281);
+            this.SaveParametersBtn.Location = new System.Drawing.Point(358, 281);
             this.SaveParametersBtn.Name = "SaveParametersBtn";
             this.SaveParametersBtn.Size = new System.Drawing.Size(196, 22);
             this.SaveParametersBtn.TabIndex = 52;
@@ -156,7 +156,7 @@ namespace VTC
             this.CameraComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.CameraComboBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CameraComboBox.FormattingEnabled = true;
-            this.CameraComboBox.Location = new System.Drawing.Point(261, 12);
+            this.CameraComboBox.Location = new System.Drawing.Point(357, 12);
             this.CameraComboBox.Name = "CameraComboBox";
             this.CameraComboBox.Size = new System.Drawing.Size(196, 23);
             this.CameraComboBox.TabIndex = 51;
@@ -165,9 +165,9 @@ namespace VTC
             // btnConfigureRegions
             // 
             this.btnConfigureRegions.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfigureRegions.Location = new System.Drawing.Point(261, 114);
+            this.btnConfigureRegions.Location = new System.Drawing.Point(357, 122);
             this.btnConfigureRegions.Name = "btnConfigureRegions";
-            this.btnConfigureRegions.Size = new System.Drawing.Size(196, 37);
+            this.btnConfigureRegions.Size = new System.Drawing.Size(196, 29);
             this.btnConfigureRegions.TabIndex = 50;
             this.btnConfigureRegions.Text = "Configure Regions";
             this.btnConfigureRegions.UseVisualStyleBackColor = true;
@@ -177,7 +177,7 @@ namespace VTC
             // 
             this.showPolygonsCheckbox.AutoSize = true;
             this.showPolygonsCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.showPolygonsCheckbox.Location = new System.Drawing.Point(262, 91);
+            this.showPolygonsCheckbox.Location = new System.Drawing.Point(358, 97);
             this.showPolygonsCheckbox.Name = "showPolygonsCheckbox";
             this.showPolygonsCheckbox.Size = new System.Drawing.Size(110, 19);
             this.showPolygonsCheckbox.TabIndex = 49;
@@ -188,7 +188,7 @@ namespace VTC
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(463, 160);
+            this.label10.Location = new System.Drawing.Point(260, 160);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(92, 15);
             this.label10.TabIndex = 48;
@@ -197,7 +197,7 @@ namespace VTC
             // trackCountBox
             // 
             this.trackCountBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.trackCountBox.Location = new System.Drawing.Point(262, 157);
+            this.trackCountBox.Location = new System.Drawing.Point(358, 157);
             this.trackCountBox.Name = "trackCountBox";
             this.trackCountBox.Size = new System.Drawing.Size(195, 21);
             this.trackCountBox.TabIndex = 47;
@@ -208,7 +208,7 @@ namespace VTC
             this.pushStateCheckbox.Checked = true;
             this.pushStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pushStateCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.pushStateCheckbox.Location = new System.Drawing.Point(262, 235);
+            this.pushStateCheckbox.Location = new System.Drawing.Point(358, 235);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
             this.pushStateCheckbox.Size = new System.Drawing.Size(137, 19);
             this.pushStateCheckbox.TabIndex = 46;
@@ -220,7 +220,7 @@ namespace VTC
             // 
             this.MoGcheckBox.AutoSize = true;
             this.MoGcheckBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.MoGcheckBox.Location = new System.Drawing.Point(262, 470);
+            this.MoGcheckBox.Location = new System.Drawing.Point(358, 470);
             this.MoGcheckBox.Name = "MoGcheckBox";
             this.MoGcheckBox.Size = new System.Drawing.Size(93, 19);
             this.MoGcheckBox.TabIndex = 70;
@@ -232,7 +232,7 @@ namespace VTC
             // 
             this.delayProcessingCheckbox.AutoSize = true;
             this.delayProcessingCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.delayProcessingCheckbox.Location = new System.Drawing.Point(262, 493);
+            this.delayProcessingCheckbox.Location = new System.Drawing.Point(358, 493);
             this.delayProcessingCheckbox.Name = "delayProcessingCheckbox";
             this.delayProcessingCheckbox.Size = new System.Drawing.Size(122, 19);
             this.delayProcessingCheckbox.TabIndex = 71;
@@ -243,7 +243,7 @@ namespace VTC
             // 
             this.exportDatasetsCheckbox.AutoSize = true;
             this.exportDatasetsCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(262, 258);
+            this.exportDatasetsCheckbox.Location = new System.Drawing.Point(358, 258);
             this.exportDatasetsCheckbox.Name = "exportDatasetsCheckbox";
             this.exportDatasetsCheckbox.Size = new System.Drawing.Size(176, 19);
             this.exportDatasetsCheckbox.TabIndex = 72;
@@ -253,7 +253,7 @@ namespace VTC
             // btnToggleVideoMux
             // 
             this.btnToggleVideoMux.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnToggleVideoMux.Location = new System.Drawing.Point(262, 363);
+            this.btnToggleVideoMux.Location = new System.Drawing.Point(358, 363);
             this.btnToggleVideoMux.Name = "btnToggleVideoMux";
             this.btnToggleVideoMux.Size = new System.Drawing.Size(196, 22);
             this.btnToggleVideoMux.TabIndex = 63;
@@ -270,7 +270,7 @@ namespace VTC
             // hideTrackersButton
             // 
             this.hideTrackersButton.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.hideTrackersButton.Location = new System.Drawing.Point(262, 391);
+            this.hideTrackersButton.Location = new System.Drawing.Point(358, 391);
             this.hideTrackersButton.Name = "hideTrackersButton";
             this.hideTrackersButton.Size = new System.Drawing.Size(196, 22);
             this.hideTrackersButton.TabIndex = 73;
@@ -295,7 +295,7 @@ namespace VTC
             this.disableOpticalFlowCheckbox.Checked = true;
             this.disableOpticalFlowCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.disableOpticalFlowCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.disableOpticalFlowCheckbox.Location = new System.Drawing.Point(262, 447);
+            this.disableOpticalFlowCheckbox.Location = new System.Drawing.Point(358, 447);
             this.disableOpticalFlowCheckbox.Name = "disableOpticalFlowCheckbox";
             this.disableOpticalFlowCheckbox.Size = new System.Drawing.Size(139, 19);
             this.disableOpticalFlowCheckbox.TabIndex = 75;
@@ -307,7 +307,7 @@ namespace VTC
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.ClientSize = new System.Drawing.Size(563, 519);
+            this.ClientSize = new System.Drawing.Size(569, 519);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
             this.Controls.Add(this.activateLicenseButton);
             this.Controls.Add(this.hideTrackersButton);

@@ -39,6 +39,8 @@ namespace VTC.Kernel.RegionConfig
                 {
                     copy.Regions[kvp.Key].Add(new Point(pt.X, pt.Y));
                 }
+
+                copy.Regions[kvp.Key].Centroid = kvp.Value.Centroid;
             }
 
             return copy;
@@ -66,6 +68,12 @@ namespace VTC.Kernel.RegionConfig
                     if (pgr.ConfigVersion < CurrentConfigVersion)
                     {
                         return null;
+                    }
+
+                    foreach(var r in pgr.Regions)
+                    {
+                        if(r.Value.PolygonClosed)
+                        r.Value.UpdateCentroid();
                     }
 
                     return pgr;

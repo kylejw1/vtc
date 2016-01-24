@@ -71,24 +71,31 @@ namespace VTC.Kernel.Vistas
                 var startState = d.StateHistory.First();
                 var startPoint = new Point((int)startState.X, (int)startState.Y);
 
-                var startRegion = this.RegionConfiguration.Regions.FirstOrDefault(r => 
-                    {
-                        if (!r.Key.Contains(ApproachText)) return false;
+                //var startRegion = this.RegionConfiguration.Regions.FirstOrDefault(r =>
+                //    {
+                //        if (!r.Key.Contains(ApproachText)) return false;
 
-                        return startPoint.PolygonEnclosesPoint(r.Value);
-                    });
+                //        return startPoint.PolygonEnclosesPoint(r.Value);
+                //    });
+                var startRegion = RegionConfiguration.Regions.OrderBy(r => Math.Sqrt(Math.Pow(startPoint.X - r.Value.Centroid.X, 2) + Math.Pow(startPoint.Y - r.Value.Centroid.Y, 2))).FirstOrDefault();
 
                 if (null == startRegion.Key) continue;
 
                 var endState = d.StateHistory.Last();
                 var endPoint = new Point((int)endState.X, (int)endState.Y);
 
-                var endRegion = this.RegionConfiguration.Regions.FirstOrDefault(r =>
-                {
-                    if (!r.Key.Contains(ExitText)) return false;
+                //var endRegion = this.RegionConfiguration.Regions.FirstOrDefault(r =>
+                //{
+                //    if (!r.Key.Contains(ExitText)) return false;
 
-                    return endPoint.PolygonEnclosesPoint(r.Value);
-                });
+                //    return endPoint.PolygonEnclosesPoint(r.Value);
+                //});
+                for(int i=0; i<RegionConfiguration.Regions.Count();i++)
+                {
+                    var distance = Math.Sqrt(Math.Pow(endPoint.X - RegionConfiguration.Regions.ElementAt(i).Value.Centroid.X, 2) + Math.Pow(endPoint.Y - RegionConfiguration.Regions.ElementAt(i).Value.Centroid.Y, 2));
+                }
+                var byDistanceToExit = RegionConfiguration.Regions.OrderBy(r => Math.Sqrt(Math.Pow(endPoint.X - r.Value.Centroid.X, 2) + Math.Pow(endPoint.Y - r.Value.Centroid.Y, 2)));
+                var endRegion = RegionConfiguration.Regions.OrderBy(r => Math.Sqrt(Math.Pow(endPoint.X - r.Value.Centroid.X, 2) + Math.Pow(endPoint.Y - r.Value.Centroid.Y, 2))).FirstOrDefault();
 
                 if (null == endRegion.Key) continue;
 

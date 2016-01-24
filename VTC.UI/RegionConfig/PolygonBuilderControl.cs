@@ -10,6 +10,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using VTC.Kernel.Extensions;
 using VTC.Kernel.RegionConfig;
+using NetTopologySuite;
 
 namespace VTC
 {
@@ -225,6 +226,15 @@ namespace VTC
 
             // Close the polygon
             Coordinates.Add(Coordinates.First());
+
+            //Calculate centroid
+            //GeoAPI.Geometries.Coordinate[] points = new GeoAPI.Geometries.Coordinate[Coordinates.Count];
+            var points = Coordinates.Select(x => new GeoAPI.Geometries.Coordinate(x.X, x.Y)).ToArray();
+            NetTopologySuite.Geometries.LinearRing ring = new NetTopologySuite.Geometries.LinearRing(points);
+            NetTopologySuite.Geometries.Polygon ntsPoly = new NetTopologySuite.Geometries.Polygon(ring);
+            NetTopologySuite.Algorithm.Centroid ntsCentroid = new NetTopologySuite.Algorithm.Centroid(ntsPoly);
+            Coordinates.Centroid.X = (int) ntsCentroid.GetCentroid().X;
+            Coordinates.Centroid.Y = (int) ntsCentroid.GetCentroid().Y;
 
             return true;
         }

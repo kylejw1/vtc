@@ -5,6 +5,9 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using System.Runtime.Serialization;
+using NetTopologySuite;
+
 
 namespace VTC.Kernel.RegionConfig
 {
@@ -18,6 +21,19 @@ namespace VTC.Kernel.RegionConfig
 
                 return (this.First().Equals(this.Last()));
             }
+        }
+
+        public Point Centroid;
+
+        public void UpdateCentroid()
+        {
+            var points = this.Select(x => new GeoAPI.Geometries.Coordinate(x.X, x.Y)).ToArray();
+            NetTopologySuite.Geometries.LinearRing ring = new NetTopologySuite.Geometries.LinearRing(points);
+            NetTopologySuite.Geometries.Polygon ntsPoly = new NetTopologySuite.Geometries.Polygon(ring);
+            NetTopologySuite.Algorithm.Centroid ntsCentroid = new NetTopologySuite.Algorithm.Centroid(ntsPoly);
+            Centroid.X = (int)ntsCentroid.GetCentroid().X;
+            Centroid.Y = (int)ntsCentroid.GetCentroid().Y;
+            return;
         }
 
         public Image<Bgr, float> GetMask(int width, int height, Bgr fgColor)

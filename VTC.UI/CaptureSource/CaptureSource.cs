@@ -48,6 +48,9 @@ namespace VTC.CaptureSource
             _name = name;
         }
 
+        public delegate void OnCaptureComplete();
+        public OnCaptureComplete captureCompleteEvent;
+
         /// <summary>
         /// Get next frame from camera.
         /// </summary>
@@ -57,7 +60,7 @@ namespace VTC.CaptureSource
             var frame = _cameraCapture.QueryFrame();
             if (frame == null)
             {
-
+                captureCompleteEvent.Invoke();
                 _cameraCapture.Stop();
                 _cameraCapture.Start();
 
