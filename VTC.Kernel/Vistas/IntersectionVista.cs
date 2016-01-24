@@ -205,8 +205,7 @@ namespace VTC.Kernel.Vistas
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(base.GetStatString());
-            sb.AppendLine("Turn stats:");
+            //sb.AppendLine(base.GetStatString());
             foreach (var kvp in TurnStats) {
                 sb.AppendLine(kvp.Key + ":  " + kvp.Value);
             }

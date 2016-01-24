@@ -24,6 +24,7 @@ using VTC.Reporting.ReportItems;
 using VTC.Settings;
 using SkyXoft.BusinessSolutions.LicenseManager.Protector;
 
+
 namespace VTC
 {
    public partial class TrafficCounter : Form
@@ -273,12 +274,23 @@ namespace VTC
 
        public void WriteCountsToFile()
         {
-            // Write the string to a file.
-            var pathString = "C:\\TrafficCounter\\Counts " + DateTime.Now.ToString("dd-MM-yyyy-mm-ss") + ".txt";
-            System.IO.StreamWriter file = new System.IO.StreamWriter(pathString);
-            file.WriteLine(tbVistaStats.Text);
-            file.Close();
-            Application.Exit();
+            try
+            {
+                // Write the string to a file.
+
+                var pathString = "C:\\TrafficCounter\\Counts " + DateTime.Now.ToString("dd-MM-yyyy-hh-mm-ss") + ".txt";
+                System.IO.StreamWriter file = new System.IO.StreamWriter(pathString);
+                file.WriteLine(SelectedCamera.Name);
+                file.WriteLine("");
+                file.WriteLine("*** Movement count ***");
+                file.WriteLine(tbVistaStats.Text);
+                file.Close();
+                Application.Exit();
+            }
+            catch(Exception e)
+            {
+                Log(LogLevel.Error, e.ToString());
+            }
         }
 
        /// <summary>
