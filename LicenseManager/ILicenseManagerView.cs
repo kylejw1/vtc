@@ -10,8 +10,12 @@ namespace LicenseManager
     public interface ILicenseManagerView
     {
         void SetController(LicenseManagerController controller);
-        void SetKeyError(string errorMessage);
+        void SetStatusMessage(string errorMessage);
         void SetMaxKeyLength(int? keyLength);
         void SetValidCharacterRegex(Regex validCharacterRegex);
+        void ActivateLicense();
+        string GetLicenseKey();
+        void ShowActivationSuccess(string message);
+        void Close();
     }
 }

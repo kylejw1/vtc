@@ -20,32 +20,14 @@ namespace LicenseManager
         {
             try
             {
-                //var info = new LicenseValidationInfo()
-                //{
-                //    LicenseFile = new LicenseFile("license.xml")
-                //};
-                //var fileLic = ExtendedLicenseManager.GetLicense(licensedObjectType, licensedObjectInstance, info, serialNumber);
-
-                //var fileGen = fileLic.IsGenuineEx();
-
-                //var kyle = ExtendedLicenseManager.GetLicense(licensedObjectType, licensedObjectInstance, publicKey);
-
-                //var deact = kyle.Deactivate();
-                //var gen1 = kyle.IsGenuineEx();
-                //var act = kyle.Activate(serialNumber, false);
-                //var gen = kyle.IsGenuineEx();
-                //var gen2 = kyle.IsGenuine(false, publicKey);
-                //var valid = kyle.Validate();
-                //License = ExtendedLicenseManager.GetLicense(licensedObjectType, licensedObjectInstance, publicKey);
+                License = ExtendedLicenseManager.GetLicense(licensedObjectType, licensedObjectInstance, publicKey);
             }
             catch (Exception ex)
             {
-                var message = String.Format("Failed to retrieve license. type={0} publicKey={1} serialNumber={2}",
+                var message = String.Format("Failed to retrieve license. type={0} publicKey={1}",
                     licensedObjectType, publicKey);
                 throw new Exception(message, ex);
             }
-
-            // TODO: In controller, only activate if nothing already activated?  Prompt for deactivate
         }
 
         public bool ValidateKeyFormat(string key, out string message)
@@ -68,39 +50,55 @@ namespace LicenseManager
             return true;
         }
 
-        public bool IsActivated
+        public bool TryActivate(string key, out string message)
         {
-            get
+            try
             {
-                var result = License.IsGenuineEx();
+                string result = License.Activate(key);
 
-                return result == GenuineResult.Genuine;
+                message = String.Empty;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+
+                return false;
             }
         }
 
-        public bool IsGenuine
+        // TODO: This doesnt seem to work within the IPManager
+        //public void Deactivate()
+        //{
+        //    var result = License.Deactivate();
+        //}
+
+        public bool IsActivatedAndGenuine
         {
             get
             {
-                var result = License.IsGenuineEx();
+                GenuineResult result;
+
+                try
+                {
+                    var active = License.Validate();
+                    result = License.IsGenuineEx();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("License Genuine check failed: " + ex.Message, ex);
+                }
+
+                var retVal = false;
 
                 if (result == GenuineResult.InternetError)
                 {
-                    throw new Exception("Cannot contact validation servers.  Please verify connectivity and try again.");
+                    // TODO: Handle connection errors
                 }
 
-                return result == GenuineResult.Genuine;
+                return result == GenuineResult.Genuine || result == GenuineResult.InternetError;
             }
-        }
-
-        public void Activate(string serialNumber, bool saveFile)
-        {
-            string result = License.Activate(serialNumber, saveFile);
-        }
-
-        public void Deactivate()
-        {
-            var result = License.Deactivate();
         }
 
     }
