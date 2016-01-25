@@ -46,9 +46,7 @@ namespace VTC
 
        private readonly DateTime _applicationStartTime;
        private DateTime _lastDatasetExportTime;
-       ExtendedLicense license;
-       bool isActivated;
-
+       
 
       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
       private ICaptureSource _selectedCamera;
@@ -112,13 +110,6 @@ namespace VTC
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, string appArgument = null)
        {
-           ValidateLicense();
-
-           if (isActivated)
-               MessageBox.Show("License validated");
-           else
-               MessageBox.Show("License invalid");
-
            _appArgument = appArgument;
           InitializeComponent();
 
@@ -681,51 +672,6 @@ namespace VTC
        {
            _vista.hide_trackers = !_vista.hide_trackers;
        }
-
-       private void ValidateLicense()
-       {
-            try
-        {
-            license = ExtendedLicenseManager.GetLicense(typeof(TrafficCounter), this, "<RSAKeyValue><Modulus>sNNBll27qDwVY2taLYlVRz1qrEe1+xEMSKYDGXojI5znZqQ+VcABzWZbp5Cbjwmw2G5JlrjMMMdkxEPLEC1j5o+tKXGjcJ2M54wjwocudbLzhecby6ZuZLMF3V9IDgr/Nn1AraLPHx1hn9Re2Unzd6rMlxrc3YCxPL1vwjAbPE5vJeoBhTe1TvO0nFMjVqWSfVxH8kPW8xqrBSgOq7akp7fD293T8MdRzsyea6uZe4xy1mgckk8hUDW3J735ISB4QSIy2+f9NfJlju1x/HEz7Lv1bwUlFQNQ0gaquhUK5gmEnoauw7/Ebgc99w0J9gXziaB+Z++K5OJV4Y8RR3NI4Q==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>");
-
-                var valid = license.Validate();
-                var gen = license.IsGenuine();
-
-                var gen2 = license.IsGenuine(false, "7FB2-E092-B59A-49F8-9BA1-E4A4-1B6F");
-                
-                // Check if we're activated, and every 90 days verify it with
-                // the activation servers. 
-                GenuineResult result = license.IsGenuineEx();
-
-            isActivated = result == GenuineResult.Genuine ||
-                          // an internet error means the user is activated but
-                          // IPManager failed to contact the LicenseSpot servers
-                          result == GenuineResult.InternetError;
-
-            if (result == GenuineResult.InternetError)
-            {
-                //TODO: give the user the option to retry the genuine checking
-                //      immediately. For example a dialog box. In the dialog
-                //      call IsGenuineEx() to retry immediately.
-            }
-
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Failed to check if activated: " + ex.Message);
-        }
-       }
-
-       private void activateLicenseButton_Click(object sender, EventArgs e)
-       {
-            try
-            {
-                license.Deactivate();
-            }
-            catch { }
-           license.Activate("7FB2-E092-B59A-49F8-9BA1-E4A4-1B6F");
-       }
-
-
+        
    }
 }

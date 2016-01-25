@@ -18,7 +18,7 @@ namespace LicenseManager
         private LicenseManagerController _controller;
         private int? _maxKeyLength;
         private Regex _validCharacterRegex;
-
+        
         public LicenseManagerView()
         {
             InitializeComponent();
@@ -39,9 +39,26 @@ namespace LicenseManager
             _controller = controller;
         }
 
-        public void SetKeyError(string errorMessage)
+        public void SetStatusMessage(string errorMessage)
         {
             lblKeyError.Text = errorMessage;
+        }
+
+        public string GetLicenseKey()
+        {
+            return tbKey.Text;
+        }
+
+        public void ActivateLicense()
+        {
+            if (null != _controller)
+                _controller.Activate();
+        }
+
+        public void ShowActivationSuccess(string message)
+        {
+            MessageBox.Show(message, "Activation Successful");
+            this.Close();
         }
 
         private void tbKey_KeyPress(object sender, KeyPressEventArgs e)
@@ -54,7 +71,7 @@ namespace LicenseManager
             if (char.IsControl(e.KeyChar))
                 return;
 
-            if (_maxKeyLength.HasValue && text.Replace("-",String.Empty).Length >= _maxKeyLength.Value)
+            if (_maxKeyLength.HasValue && text.Replace("-", String.Empty).Length >= _maxKeyLength.Value)
             {
                 e.Handled = true;
                 return;
@@ -71,8 +88,12 @@ namespace LicenseManager
 
         private void btnActivate_Click(object sender, EventArgs e)
         {
-            if (null != _controller)
-                _controller.Activate(tbKey.Text);
+            ActivateLicense();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }

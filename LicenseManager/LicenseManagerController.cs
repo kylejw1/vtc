@@ -27,16 +27,29 @@ namespace LicenseManager
             _view.SetValidCharacterRegex(_model.ValidCharacterRegex);
         }
 
-        public void Activate(string key)
+        public void Activate()
         {
+            _view.SetStatusMessage("Activating...");
+
             string message;
+            string key = _view.GetLicenseKey();
+
             if (!_model.ValidateKeyFormat(key, out message))
             {
-                _view.SetKeyError(message);
+                _view.SetStatusMessage(message);
                 return;
             }
 
-            _view.SetKeyError(string.Empty);
+            if (!_model.TryActivate(_view.GetLicenseKey(), out message))
+            {
+                _view.SetStatusMessage(message);
+                return;
+            }
+
+            _view.SetStatusMessage(string.Empty);
+            _view.ShowActivationSuccess("Thank you for activating.");
+
+            _view.Close();
         }
 
         

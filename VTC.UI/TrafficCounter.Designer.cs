@@ -61,7 +61,6 @@ namespace VTC
             this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.hideTrackersButton = new System.Windows.Forms.Button();
-            this.activateLicenseButton = new System.Windows.Forms.Button();
             this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
@@ -323,16 +322,6 @@ namespace VTC
             this.hideTrackersButton.UseVisualStyleBackColor = true;
             this.hideTrackersButton.Click += new System.EventHandler(this.hideTrackersButton_Click);
             // 
-            // activateLicenseButton
-            // 
-            this.activateLicenseButton.Location = new System.Drawing.Point(17, 203);
-            this.activateLicenseButton.Name = "activateLicenseButton";
-            this.activateLicenseButton.Size = new System.Drawing.Size(100, 23);
-            this.activateLicenseButton.TabIndex = 74;
-            this.activateLicenseButton.Text = "Activate License";
-            this.activateLicenseButton.UseVisualStyleBackColor = true;
-            this.activateLicenseButton.Click += new System.EventHandler(this.activateLicenseButton_Click);
-            // 
             // disableOpticalFlowCheckbox
             // 
             this.disableOpticalFlowCheckbox.AutoSize = true;
@@ -349,7 +338,6 @@ namespace VTC
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(563, 458);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
-            this.Controls.Add(this.activateLicenseButton);
             this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
@@ -419,7 +407,6 @@ namespace VTC
 	  private Button btnToggleVideoMux;
       private Timer watchdogTimer;
       private Button hideTrackersButton;
-      private Button activateLicenseButton;
       private CheckBox disableOpticalFlowCheckbox;
 
 

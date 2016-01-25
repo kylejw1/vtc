@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnLater = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tbKey = new System.Windows.Forms.TextBox();
@@ -37,15 +37,16 @@
             this.lblKeyError = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // btnLater
+            // btnCancel
             // 
-            this.btnLater.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLater.Location = new System.Drawing.Point(289, 232);
-            this.btnLater.Name = "btnLater";
-            this.btnLater.Size = new System.Drawing.Size(107, 23);
-            this.btnLater.TabIndex = 0;
-            this.btnLater.Text = "Later";
-            this.btnLater.UseVisualStyleBackColor = true;
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.Location = new System.Drawing.Point(289, 232);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(107, 23);
+            this.btnCancel.TabIndex = 0;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // label1
             // 
@@ -117,7 +118,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnActivate);
-            this.Controls.Add(this.btnLater);
+            this.Controls.Add(this.btnCancel);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "LicenseManagerView";
@@ -130,7 +131,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnLater;
+        private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbKey;
