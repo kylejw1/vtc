@@ -3,36 +3,49 @@ using System.Reflection;
 using System.Windows.Forms;
 using NLog;
 using VTC.Settings;
+using LicenseManager;
 
 namespace VTC
 {
-   static class Program
-   {
-       private static readonly Logger _logger = LogManager.GetLogger("app.global");
+    static class Program
+    {
+        private static readonly Logger _logger = LogManager.GetLogger("app.global");
 
-      /// <summary>
-      /// The main entry point for the application.
-      /// </summary>
-      [STAThread]
-      static void Main(string[] args)
-      {
-         Application.EnableVisualStyles();
-         Application.SetCompatibleTextRenderingDefault(false);
-         Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
-         AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception) e.ExceptionObject, "Unhandled exception");
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main(string[] args)
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
 
-         _logger.Info("***** Start. v." + Assembly.GetExecutingAssembly().GetName().Version.ToString());
-         if (args.Length > 0)
-         {
-             _logger.Info("Arguments: " + string.Join(";", args));
-         }
+            _logger.Info("***** Start. v." + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            if (args.Length > 0)
+            {
+                _logger.Info("Arguments: " + string.Join(";", args));
+            }
 
-          string appArgument = null;
-         if (args.Length == 1) appArgument = args[0];
+            string appArgument = null;
+            if (args.Length == 1) appArgument = args[0];
 
-          var mainForm = new TrafficCounter(new AppSettings(), appArgument);
 
-          Application.Run(mainForm);
-      }
-   }
+            string publicKey = "<RSAKeyValue><Modulus>sNNBll27qDwVY2taLYlVRz1qrEe1+xEMSKYDGXojI5znZqQ+VcABzWZbp5Cbjwmw2G5JlrjMMMdkxEPLEC1j5o+tKXGjcJ2M54wjwocudbLzhecby6ZuZLMF3V9IDgr/Nn1AraLPHx1hn9Re2Unzd6rMlxrc3YCxPL1vwjAbPE5vJeoBhTe1TvO0nFMjVqWSfVxH8kPW8xqrBSgOq7akp7fD293T8MdRzsyea6uZe4xy1mgckk8hUDW3J735ISB4QSIy2+f9NfJlju1x/HEz7Lv1bwUlFQNQ0gaquhUK5gmEnoauw7/Ebgc99w0J9gXziaB+Z++K5OJV4Y8RR3NI4Q==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
+
+            var context = new LicensedFormContext(publicKey, CreateTrafficCounterForm, appArgument);
+            if (null != context.MainForm)
+                Application.Run(context);
+        }
+
+        private static Form CreateTrafficCounterForm(bool isLicensed, string args)
+        {
+            // TODO: Handle non-licensed case.  Either return null here, or return a disabled TrafficCounter
+            // Maybe one that resets stats every 5 minutes or something?
+
+            return new TrafficCounter(new AppSettings(), args);
+
+        }
+    }
 }

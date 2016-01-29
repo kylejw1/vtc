@@ -54,7 +54,6 @@ namespace VTC
             this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
             this.hideTrackersButton = new System.Windows.Forms.Button();
-            this.activateLicenseButton = new System.Windows.Forms.Button();
             this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
@@ -309,7 +308,6 @@ namespace VTC
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(569, 519);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
-            this.Controls.Add(this.activateLicenseButton);
             this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
@@ -365,7 +363,6 @@ namespace VTC
 	  private Button btnToggleVideoMux;
       private Timer watchdogTimer;
       private Button hideTrackersButton;
-      private Button activateLicenseButton;
       private CheckBox disableOpticalFlowCheckbox;
 
 
