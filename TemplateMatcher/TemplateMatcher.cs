@@ -4,7 +4,6 @@ using System.Data.Common;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;

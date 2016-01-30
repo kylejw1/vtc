@@ -111,12 +111,6 @@ namespace VTC
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, string appArgument = null)
        {
-           ValidateLicense();
-
-           if (isActivated)
-               MessageBox.Show("License validated");
-           else
-               MessageBox.Show("License invalid");
 
            _appArgument = appArgument; 
 
