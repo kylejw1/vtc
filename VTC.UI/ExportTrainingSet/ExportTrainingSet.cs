@@ -167,79 +167,100 @@ namespace VTC.ExportTrainingSet
 
         public void autoExportScaledPositives()
         {
-            var bf = new BlobFinder();
-            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+            //TODO: update commented code to call blob-finding directly, to avoid AccessViolationException
+            throw new NotImplementedException();
 
-            foreach (var blobWithArea in blobsWithSizes)
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //var bf = new BlobFinder();
+            //var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
 
-            foreach (var blobWithArea in blobsWithSizes)
-            {
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                if (blobWithArea.Key.Area > 10000 ||
-                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //{
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
-                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-            }
+            //    if (blobWithArea.Key.Area > 10000 ||
+            //        blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+            //        Console.WriteLine("Bad blob!");
+
+            //    Image<Bgr, float> subimage = extractScaledSubImage(blobWithArea.Key);
+            //    saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
+            //}
         }
 
         public void autoExportScaledMasks()
         {
-            var bf = new BlobFinder();
-            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+            //TODO: update commented code to call blob-finding directly, to avoid AccessViolationException
+            throw new NotImplementedException();
 
-            foreach (var blobWithArea in blobsWithSizes)
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //var bf = new BlobFinder();
+            //var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
 
-            foreach (var blobWithArea in blobsWithSizes)
-            {
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                if (blobWithArea.Key.Area > 10000 ||
-                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //{
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                Image<Gray, byte> subimage = extractScaledSubMask(blobWithArea.Key);
-                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-            }
+            //    if (blobWithArea.Key.Area > 10000 ||
+            //        blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+            //        Console.WriteLine("Bad blob!");
+
+            //    Image<Gray, byte> subimage = extractScaledSubMask(blobWithArea.Key);
+            //    saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
+            //}
         }
 
         public void autoExportMasks()
         {
-            var bf = new BlobFinder();
-            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+            //TODO: update commented code to call blob-finding directly, to avoid AccessViolationException
+            throw new NotImplementedException();
 
-            foreach (var blobWithArea in blobsWithSizes)
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //var bf = new BlobFinder();
+            //var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
 
-            foreach (var blobWithArea in blobsWithSizes)
-            {
-                if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                if (blobWithArea.Key.Area > 10000 ||
-                    blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
-                    Console.WriteLine("Bad blob!");
+            //foreach (var blobWithArea in blobsWithSizes)
+            //{
+            //    if (Single.IsNaN(blobWithArea.Key.Centroid.X) || Single.IsNaN(blobWithArea.Key.Centroid.Y))
+            //        Console.WriteLine("Bad blob!");
 
-                Image<Gray, byte> subimage = extractSubMask(blobWithArea.Key);
-                saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
-            }
+            //    if (blobWithArea.Key.Area > 10000 ||
+            //        blobWithArea.Key.Centroid.X > 640 | blobWithArea.Key.Centroid.Y > 480)
+            //        Console.WriteLine("Bad blob!");
+
+            //    Image<Gray, byte> subimage = extractSubMask(blobWithArea.Key);
+            //    saveExampleImage(subimage, "Car"); //TODO: Make path a configuration item
+            //}
         }
 
         public void autoExportDualImages()
         {
-            var bf = new BlobFinder();
-            var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
+            //var bf = new BlobFinder();
+            //var blobsWithSizes = bf.FindBlobs(_movementMask, _settings.MinObjectSize);
 
-            foreach (var blobWithArea in blobsWithSizes)
+            //The blob-detection code needs to be called directly in the scope of whatever function uses the blobs, due to issues in Emgu/OpenCV
+            //where the blobs are garbage-detected if the original set of CvBlobs is disposed.
+
+            var resultingImgBlobs = new CvBlobs();
+            var bDetect = new CvBlobDetector();
+            bDetect.Detect(_movementMask, resultingImgBlobs);
+
+            var areaComparer = new BlobAreaComparer();
+            var blobsWithArea = new SortedList<CvBlob, int>(areaComparer);
+            foreach (var targetBlob in resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area > _settings.MinObjectSize))
+                blobsWithArea.Add(targetBlob, targetBlob.Area);
+
+            foreach (var blobWithArea in blobsWithArea)
             {
                 bool bad = false;
 
@@ -260,7 +281,7 @@ namespace VTC.ExportTrainingSet
                     Image<Bgr, float> subimage2 = extractSubImage(blobWithArea.Key);
                     Image<Bgr, float> subimage = extractSubMask(blobWithArea.Key).Convert<Bgr, float>();
                     Image<Bgr, float> joined = new Image<Bgr, float>(
-                        subimage.Width + subimage2.Width, subimage.Height);
+                    subimage.Width + subimage2.Width, subimage.Height);
                     joined.ROI = new Rectangle(0, 0, subimage.Width, subimage.Height);
                     subimage.CopyTo(joined);
                     joined.ROI = new Rectangle(subimage.Width, 0, subimage2.Width, subimage.Height);

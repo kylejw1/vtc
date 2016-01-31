@@ -555,7 +555,7 @@ namespace VTC.Kernel.Vistas
     }
 }
 
-class BlobAreaComparer : IComparer<CvBlob>
+public class BlobAreaComparer : IComparer<CvBlob>
 {
      public int Compare(CvBlob x, CvBlob y)
      {
