@@ -43,6 +43,7 @@ namespace VTC.Kernel.Vistas
 
         //************* Main image variables ***************
         public Image<Bgr, Byte> _frame; //current Frame from camera
+        public Image<Bgr, Byte> _correctedFrame; //color-corrected current frame from camera (possibly rotation-corrected later)
         private Image<Bgr, float> _roiImage; //Area occupied by traffic
         private readonly int _width;
         private readonly int _height;
@@ -370,6 +371,69 @@ namespace VTC.Kernel.Vistas
 
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
+            //Adjust incoming frame by white-balancing to match background image
+            Image<Bgr, float> whiteBalancedFrame = new Image<Bgr, float>(frame.Width, frame.Height);
+            int numColorSamples = 20;
+            int sampleSpacing = (Math.Min(frame.Width, frame.Height) / numColorSamples) - 1;
+            double balanceMagnitudeThreshold = 0.5;
+            double bFactorAvg = 0;
+            double gFactorAvg = 0;
+            double rFactorAvg = 0;
+            int numGoodSamples = 0;
+            _correctedFrame = new Image<Bgr, byte>(frame.Width, frame.Height);
+      
+            for (int i = 0; i < numColorSamples; i++)
+            {
+                try
+                {
+                    double bFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 0] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 0]);
+                    double gFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 1] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 1]);
+                    double rFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 2] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 2]);
+                    double magnitude = Math.Sqrt(Math.Pow(Math.Abs(1.0 - bFactor), 2) + Math.Pow(Math.Abs(1.0 - gFactor), 2) + Math.Pow(Math.Abs(1.0 - rFactor), 2));
+                    if(! double.IsNaN(magnitude) && !double.IsInfinity(magnitude) && magnitude < balanceMagnitudeThreshold)
+                    {
+                        bFactorAvg += bFactor;
+                        gFactorAvg += gFactor;
+                        rFactorAvg += rFactor;
+                        numGoodSamples++;
+                    }
+                }
+                catch(DivideByZeroException)
+                {
+                    //No big deal
+                }
+            }
+
+            if (numGoodSamples >= 1)
+            {
+                bFactorAvg = (double) bFactorAvg / numGoodSamples;
+                gFactorAvg = (double) gFactorAvg / numGoodSamples;
+                rFactorAvg = (double) rFactorAvg / numGoodSamples;
+
+                double bCorrection = 1.0 / bFactorAvg;
+                double gCorrection = 1.0 / gFactorAvg;
+                double rCorrection = 1.0 / rFactorAvg;
+
+                for (int i = 0; i < frame.Width; i++)
+                    for (int j = 0; j < frame.Height; j++)
+                    {
+                        double adjustedB = frame.Data[j, i, 0] * bCorrection;
+                        double adjustedG = frame.Data[j, i, 1] * gCorrection;
+                        double adjustedR = frame.Data[j, i, 2] * rCorrection;
+                        double adjustedLimitedB = Math.Min(adjustedB, 255);
+                        double adjustedLimitedG = Math.Min(adjustedG, 255);
+                        double adjustedLimitedR = Math.Min(adjustedR, 255);
+                        frame.Data[j, i, 0] = Convert.ToByte(adjustedLimitedB);
+                        frame.Data[j, i, 1] = Convert.ToByte(adjustedLimitedG);
+                        frame.Data[j, i, 2] = Convert.ToByte(adjustedLimitedR);
+
+                        _correctedFrame.Data[j, i, 0] = Convert.ToByte(adjustedLimitedB);
+                        _correctedFrame.Data[j, i, 1] = Convert.ToByte(adjustedLimitedG);
+                        _correctedFrame.Data[j, i, 2] = Convert.ToByte(adjustedLimitedR);
+                    }
+            }
+            
+
             Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
             Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
             Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
@@ -453,14 +517,17 @@ namespace VTC.Kernel.Vistas
                     if (i < Settings.MaxTargets)
                     {
                         CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
-                        var measurements = BlobFinder.SplitAndFindCenterpoints(frame, tempMovementMask, targetBlob);
-                        foreach (var m in measurements)
-                        {
-                            coordinatesList.Add(m);
+                        var colour = GetBlobColour(frame, targetBlob.Centroid.X, targetBlob.Centroid.Y, 3.0);
+                        var coords = new Measurements() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
+                        coordinatesList.Add(coords);
+                        //var measurements = BlobFinder.SplitAndFindCenterpoints(frame, tempMovementMask, targetBlob);
+                        //foreach (var m in measurements)
+                        //{
+                        //    coordinatesList.Add(m);
                             //TODO: Move the blob centerpoint rendering somewhere else.
                             //Do this last so that it doesn't interfere with color sampling
                             //frame.Draw(new CircleF(new PointF((float)m.X, (float)m.Y), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                        }
+                        //}
                     }
                 }
 

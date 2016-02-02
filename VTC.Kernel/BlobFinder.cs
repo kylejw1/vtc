@@ -26,8 +26,11 @@ namespace VTC.Kernel
             return blobsWithArea;
         }
 
+
         public static Measurements[] SplitAndFindCenterpoints(Image<Bgr,byte> maskedBlobsImage, Image<Gray,byte> blobsImage, CvBlob cvblob)
         {
+            throw new NotImplementedException();    //This function sucks, needs improvement. The intention is to split overlapping blobs but it doesn't work well.
+
             int numMeasurements = Subitize(maskedBlobsImage, blobsImage, cvblob);
             Measurements[] measurements;
             if (numMeasurements > 1)

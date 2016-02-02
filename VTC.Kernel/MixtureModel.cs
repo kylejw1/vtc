@@ -7,6 +7,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace VTC.Kernel
 {
@@ -16,10 +17,16 @@ namespace VTC.Kernel
         public MixtureModel[,] mmImage; //2D array of mixture models
         public Image<Bgr, float> BackgroundUpdateMoG;
         private Mutex _updateMutex = new Mutex();
+        List<Image<Bgr, Byte>> inputImagesList;
+        private const int numberOfSamples = 50;
+        private int width, height;
 
         public MoGBackground(int Width, int Height)
         {
+            width = Width;
+            height = Height;
             BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
+            inputImagesList = new List<Image<Bgr, byte>>();
             mmImage = new MixtureModel[Width, Height];
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
@@ -28,7 +35,8 @@ namespace VTC.Kernel
 
         public void TryUpdatingBackgroundAsync(Image<Bgr, Byte> frame)
         {
-            Task.Factory.StartNew(() => UpdateBackgroundMoGIncremental(frame));
+            //Task.Factory.StartNew(() => UpdateBackgroundMoGIncremental(frame));
+            Task.Factory.StartNew(() => UpdateBackgroundMoGBatch(frame));
         }
 
         public void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
@@ -59,18 +67,58 @@ namespace VTC.Kernel
             }
             
         }
+
+        public void UpdateBackgroundMoGBatch(Image<Bgr, Byte> frame)
+        {
+            // If we're already busy updating background, just abort
+            if (!_updateMutex.WaitOne(0))
+            {
+                return;
+            }
+
+            try
+            {
+                inputImagesList.Insert(0, frame);
+                while (inputImagesList.Count > numberOfSamples)
+                    inputImagesList.Remove(inputImagesList.LastOrDefault());
+
+                for (int i = 0; i < width; i++)
+                    for (int j = 0; j < height; j++)
+                    {   
+                        var samplePoints = new int[inputImagesList.Count][];
+                        for(int k = 0; k < inputImagesList.Count; k++)
+                            samplePoints[k] = new int[] { inputImagesList.ElementAt(k).Data[j, i, 0], inputImagesList.ElementAt(k).Data[j, i, 1], inputImagesList.ElementAt(k).Data[j, i, 2] };
+
+                        mmImage[i, j]._samples = samplePoints;
+                        mmImage[i, j].NumComponents = 2;
+                        mmImage[i, j].NumIterations = 3;
+                        mmImage[i, j].Initialize();
+                        mmImage[i, j].Train();
+                        mmImage[i, j].ReorderByLikelihood();
+
+                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i, j].Means[0][0];
+                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i, j].Means[0][1];
+                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i, j].Means[0][2];
+                    }
+            }
+            finally
+            {
+                _updateMutex.ReleaseMutex();
+            }
+
+        }
     }
 
     public class MixtureModel
     {
 
-        private int[][] _samples; // _numSamples X _numDimensions
+        public int[][] _samples; // _numSamples X _numDimensions
         public double[][] Assignments;
         private int _numSamples;
 
         private int _numDimensions;
-        private int NumComponents;
-        private int NumIterations;
+        public int NumComponents;
+        public int NumIterations;
         private const double Alpha = 0.3;
 
         private const double _varianceMax = 50;
@@ -95,6 +143,21 @@ namespace VTC.Kernel
             Assignments = new double[NumComponents][];
             for (int i = 0; i < NumComponents; i++)
                 Assignments[i] = new double[_numSamples];
+
+            InitializeDistributionParameters();
+        }
+
+        public void Initialize()
+        {
+            _numSamples = _samples.Length;
+            _numDimensions = _samples[0].Length;
+            Assignments = new double[NumComponents][];
+            for (int i = 0; i < NumComponents; i++)
+                Assignments[i] = new double[_numSamples];
+
+            Means = new double[NumComponents][];
+            Variances = new double[NumComponents][];
+            Weights = new double[NumComponents];
 
             InitializeDistributionParameters();
         }
@@ -131,23 +194,31 @@ namespace VTC.Kernel
                 CalculateAssignments();
                 UpdateParameters();
             }
-
-            //ReorderByLikelihood();
         }
 
         //Note: this function is not adapted to handle cases other than dimensionality of 3 with 2 elements.
-        private void ReorderByLikelihood()
+        public void ReorderByLikelihood()
         {
             //Ensure that the Gaussians are returned in order of weight/ (total variance)
             double sumOfVariances0 = Variances[0][0] + Variances[0][1] + Variances[0][2];
             double sumOfVariances1 = Variances[1][0] + Variances[1][1] + Variances[1][2];
 
-            double likelihood0 = Weights[0]/sumOfVariances0;
-            double likelihood1 = Weights[1]/sumOfVariances1;
-            if (likelihood1 > likelihood0)
+            double likelihood0 = Weights[0] / sumOfVariances0;
+            double likelihood1 = Weights[1] / sumOfVariances1;
+
+            double assignments0 = 0;
+            for (int i = 0; i < _numSamples; i++)
+                assignments0 += Assignments[0][i];
+
+            double assignments1 = 0;
+            for (int i = 0; i < _numSamples; i++)
+                assignments1 += Assignments[1][i];
+
+            if ((likelihood1 > likelihood0 && assignments1 > 5.0) || assignments0 < 5.0)
             {
                 double[] tempVariance = new double[3];
                 double[] tempMean = new double[3];
+                double[] tempWeight = new double[2];
 
                 tempVariance[0] = Variances[0][0];
                 tempVariance[1] = Variances[0][1];
@@ -172,6 +243,13 @@ namespace VTC.Kernel
                 Means[1][0] = tempMean[0];
                 Means[1][1] = tempMean[1];
                 Means[1][2] = tempMean[2];
+
+                tempWeight[0] = Weights[0];
+                tempWeight[1] = Weights[1];
+
+                Weights[0] = tempWeight[1];
+                Weights[1] = tempWeight[0];
+                
             }
         }
 

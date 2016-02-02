@@ -43,7 +43,8 @@ namespace VTC
        private VideoDisplay _mixtureMovementDisplay;
        private VideoDisplay _3DPointsDisplay;
        private VideoDisplay _opticalFlowDisplay;
-	   private VideoMux _videoMux;
+        private VideoDisplay _correctedInputDisplay;
+        private VideoMux _videoMux;
 
        private readonly DateTime _applicationStartTime;
        private DateTime _lastDatasetExportTime;
@@ -185,9 +186,10 @@ namespace VTC
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _3DPointsDisplay = new VideoDisplay("3D Points", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
            _opticalFlowDisplay = new VideoDisplay("Optical Flow", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
-		   
-		   
-		    _videoMux = new VideoMux();
+            _correctedInputDisplay = new VideoDisplay("Corrected input video", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
+
+
+            _videoMux = new VideoMux();
             _videoMux.AddDisplay(_mainDisplay.ImageBox, _mainDisplay.LayerName);
 			_videoMux.AddDisplay(_movementDisplay.ImageBox, _movementDisplay.LayerName);
 			_videoMux.AddDisplay(_backgroundDisplay.ImageBox, _backgroundDisplay.LayerName);
@@ -197,6 +199,7 @@ namespace VTC
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
             _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
             _videoMux.AddDisplay(_opticalFlowDisplay.ImageBox, _opticalFlowDisplay.LayerName);
+            _videoMux.AddDisplay(_correctedInputDisplay.ImageBox, _correctedInputDisplay.LayerName);
 			_videoMux.Show();
        }
 
@@ -510,6 +513,7 @@ namespace VTC
            _mixtureDisplay.Update(mogImage);
            _3DPointsDisplay.Update(pointsImage);
            _opticalFlowDisplay.Update(opticalFlowImage);
+           _correctedInputDisplay.Update(_vista._correctedFrame);
 
           if (_vista.Movement_Mask != null)
           {
