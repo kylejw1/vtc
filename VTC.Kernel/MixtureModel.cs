@@ -8,6 +8,7 @@ using Emgu.CV.Structure;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace VTC.Kernel
 {
@@ -35,7 +36,6 @@ namespace VTC.Kernel
 
         public void TryUpdatingBackgroundAsync(Image<Bgr, Byte> frame)
         {
-            //Task.Factory.StartNew(() => UpdateBackgroundMoGIncremental(frame));
             Task.Factory.StartNew(() => UpdateBackgroundMoGBatch(frame));
         }
 
@@ -162,15 +162,28 @@ namespace VTC.Kernel
             InitializeDistributionParameters();
         }
 
+        /// <summary>
+        /// Default constructor for 2-component, 3-dimensional (2x RGB) Gaussians
+        /// </summary>
         public MixtureModel()
-        {            
-            InitializeDistributionParameters();
+        {
+            InitializeDefaultDistributionParameters();
+        }
+
+        private void InitializeDefaultDistributionParameters()
+        {
+            _numDimensions = 3;
+            NumComponents = 2;
+           InitializeDistributionParameters();
         }
 
         private void InitializeDistributionParameters()
         {
             int seed = (int) DateTime.Now.Ticks%int.MaxValue;
             Random rnd = new Random(seed);
+            Means = new double[NumComponents][];
+            Variances = new double[NumComponents][];
+            Weights = new double[NumComponents];
             for (int i = 0; i < NumComponents; i++)
             {
                 Means[i] = new double[_numDimensions];
@@ -182,7 +195,6 @@ namespace VTC.Kernel
                     Means[i][j] = val;
                     Variances[i][j] = _varianceMax;
                 }
-                
                 Weights[i] = (double) 1/NumComponents;
             }
         }
@@ -249,7 +261,6 @@ namespace VTC.Kernel
 
                 Weights[0] = tempWeight[1];
                 Weights[1] = tempWeight[0];
-                
             }
         }
 
@@ -378,8 +389,7 @@ namespace VTC.Kernel
                 {
                     double[] likelihoods = new double[NumComponents];
                     for (int j = 0; j < NumComponents; j++)
-                        likelihoods[j] = EvaluateProbability(j, k);
-                            // Likelihood of sample k being produced by component j
+                        likelihoods[j] = EvaluateLikelihood(j, k);
 
                     int argmax = 0;
                     for (int j = 0; j < NumComponents; j++)
@@ -389,13 +399,7 @@ namespace VTC.Kernel
                     double totalLikelihood = likelihoods.Aggregate((sum, next) => sum + next);
                     double[] probabilities = likelihoods.Select(l => l/totalLikelihood).ToArray();
                     for (int j = 0; j < NumComponents; j++)
-                    {
                         Assignments[j][k] = probabilities[j];
-                        
-                        if (Double.IsNaN(Assignments[j][k]))
-                        throw new Exception("Value is NaN 4");
-
-                    }
                 }
             }
             catch (Exception e)
@@ -405,31 +409,84 @@ namespace VTC.Kernel
         }
 
 
-
-        // Likelihood of sample k being produced by component j
-        private double EvaluateProbability(int j, int k)
+        /// <summary>
+        /// Likelihood of sample k being produced by component j
+        /// </summary>
+        /// <param name="j">component</param>
+        /// <param name="k">sample</param>
+        /// <returns></returns>
+        private double EvaluateLikelihood(int j, int k)
         {
-            double probability = 1;
+            double likelihood = 1;
             try
             {
                 for (int i = 0; i < _numDimensions; i++)
-                {
-                    var gaussianComponent = new Normal(Means[j][i], Variances[j][i]);
-                    double likelihood = gaussianComponent.Density(_samples[k][i]);
-                    if (Double.IsNaN(likelihood)) //When variance is 0, Normal returns NaN for probability
-                        likelihood = 0;
-
-                    probability = probability*likelihood;
-                }
-                //probability = Weights[j]*probability;
+                    likelihood = likelihood * SingleGaussianLikelihood(j, i, _samples[k]);   
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
             }
+
+            likelihood *= Weights[j];
             
-            return probability;
+            return likelihood;
         }
+
+        /// <summary>
+        /// Likelihood of a single-dimensional gaussian generating a sample point
+        /// </summary>
+        /// <param name="j">component</param>
+        /// <param name="i">dimension</param>
+        /// <param name="sample">sample vector</param>
+        /// <returns></returns>
+        private double SingleGaussianLikelihood(int j, int i, int[] sample)
+        {
+            if (Means?[j] == null || Variances?[j] == null)
+                return 0;
+
+            var mean = Means[j][i];
+            var variance = Variances[j][i];
+            Normal gaussianComponent = new Normal(mean, variance);
+            double likelihood = gaussianComponent.Density(sample[i]);
+            if (Double.IsNaN(likelihood)) //When variance is 0, Normal returns NaN for probability
+                likelihood = 0;
+
+            return likelihood;
+        }
+
+
+        /// <summary>
+        /// Likelihood of a multidimensional sample point having been generated by a single, multidimensional Gaussian
+        /// </summary>
+        /// <param name="j"></param>
+        /// <param name="sample"></param>
+        /// <returns></returns>
+        private double MultidimensionalGaussianLikelihood(int j, int[] sample)
+        {
+            if (Means == null || Variances == null)
+                return 0;
+
+            double likelihood = 1;
+            for (int i = 0; i < _numDimensions; i++)
+                likelihood = likelihood * SingleGaussianLikelihood(j, i, sample);
+            
+            return likelihood;
+        }
+
+        public bool IsForegroundSample(int[] sample)
+        {
+            double p0 = MultidimensionalGaussianLikelihood(0, sample);
+            double p1 = MultidimensionalGaussianLikelihood(1, sample);
+            //if (p1 > p0)
+            //    return true;
+
+            if (p1/p0 > 10)
+                return true;
+
+            return false;
+        }
+
 
         // Likelihood of sample k being produced by component j
         private double EvaluateProbability(int j, int[] rgb)
@@ -446,7 +503,6 @@ namespace VTC.Kernel
 
                     probability = probability * likelihood;
                 }
-                //probability = Weights[j]*probability;
             }
             catch (Exception e)
             {

@@ -250,13 +250,9 @@ namespace VTC.Kernel.Vistas
             }
             else
             {
-                if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
-                    Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
-
-                if (!EnableMoG)
-                    Movement_Mask = MovementMask(newFrame, Color_Background);
-                else
-                    Movement_Mask = Movement_MaskMoG;
+                //if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
+                //    Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
+                Movement_Mask = EnableMoG ? MovementMaskMoG(newFrame) : MovementMask(newFrame, Color_Background);
 
                 UpdateBackground(newFrame);
 
@@ -264,7 +260,7 @@ namespace VTC.Kernel.Vistas
                 UpdateOpticalFlow(newFrame);
 
                 if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0 && EnableMoG)
-                    UpdateBackgroundMoGIncremental(newFrame);
+                    UpdateBackgroundMoG(newFrame);
 
                 Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
@@ -356,7 +352,7 @@ namespace VTC.Kernel.Vistas
             }
         }
 
-        private void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
+        private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
         {
             MoGBackgroundSingleton.TryUpdatingBackgroundAsync(frame);
         }
@@ -369,28 +365,81 @@ namespace VTC.Kernel.Vistas
             }
         }
 
+        /// <summary>
+        /// Use Gaussian probabilities to decide whether a pixel is a sample from background or foreground model
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        private Image<Gray, Byte> MovementMaskMoG(Image<Bgr, Byte> frame)
+        {
+            //Evaluate current frame
+            Image<Gray, Byte> mogMask = new Image<Gray, Byte>(frame.Width, frame.Height);
+
+            ApplyColorCorrection(frame,MoGBackgroundSingleton.BackgroundUpdateMoG);
+
+            for (int i=0;i<frame.Width;i++)
+                for(int j=0; j<frame.Height; j++)
+                {
+                    var sample = new int[] { frame.Data[j, i, 0], frame.Data[j,i,1], frame.Data[j,i,2] };
+                    if(MoGBackgroundSingleton.mmImage[i, j].IsForegroundSample(sample))
+                        mogMask.Data[j,i,0] = byte.MaxValue;
+                    else
+                        mogMask.Data[j, i, 0] = 0;
+                }
+
+            return mogMask;
+        }
+
+
+        //TODO: Clea this function up, too many things happening
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
-            //Adjust incoming frame by white-balancing to match background image
+            ApplyColorCorrection(frame, background);
+
+            Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
+            Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
+            Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
+
+            movementMask._SmoothGaussian(5, 5, 1, 1);
+            movementMask._ThresholdBinary(_thresholdColor, CeilingColor);
+
+            return movementMask;
+        }
+
+
+        /// <summary>
+        /// Sample evenly-spaced points in image and compare to background. Determine average error in % on each channel (R,G,B). Apply inverse
+        /// tranform to bring corrected frame nearer to background. 
+        /// </summary>
+        /// <param name="frame">Input frame</param>
+        /// <param name="background">Reference for correction</param>
+        private void ApplyColorCorrection(Image<Bgr, byte> frame, Image<Bgr, float> background)
+        {
+        //Adjust incoming frame by white-balancing to match background image
             Image<Bgr, float> whiteBalancedFrame = new Image<Bgr, float>(frame.Width, frame.Height);
             int numColorSamples = 20;
-            int sampleSpacing = (Math.Min(frame.Width, frame.Height) / numColorSamples) - 1;
+            int sampleSpacing = (Math.Min(frame.Width, frame.Height)/numColorSamples) - 1;
             double balanceMagnitudeThreshold = 0.5;
             double bFactorAvg = 0;
             double gFactorAvg = 0;
             double rFactorAvg = 0;
             int numGoodSamples = 0;
             _correctedFrame = new Image<Bgr, byte>(frame.Width, frame.Height);
-      
+
             for (int i = 0; i < numColorSamples; i++)
             {
                 try
                 {
-                    double bFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 0] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 0]);
-                    double gFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 1] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 1]);
-                    double rFactor = (double) frame.Data[sampleSpacing * i, sampleSpacing * i, 2] / ((int)background.Data[sampleSpacing * i, sampleSpacing * i, 2]);
-                    double magnitude = Math.Sqrt(Math.Pow(Math.Abs(1.0 - bFactor), 2) + Math.Pow(Math.Abs(1.0 - gFactor), 2) + Math.Pow(Math.Abs(1.0 - rFactor), 2));
-                    if(! double.IsNaN(magnitude) && !double.IsInfinity(magnitude) && magnitude < balanceMagnitudeThreshold)
+                    double bFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 0]/
+                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 0]);
+                    double gFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 1]/
+                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 1]);
+                    double rFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 2]/
+                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 2]);
+                    double magnitude =
+                        Math.Sqrt(Math.Pow(Math.Abs(1.0 - bFactor), 2) + Math.Pow(Math.Abs(1.0 - gFactor), 2) +
+                                  Math.Pow(Math.Abs(1.0 - rFactor), 2));
+                    if (!double.IsNaN(magnitude) && !double.IsInfinity(magnitude) && magnitude < balanceMagnitudeThreshold)
                     {
                         bFactorAvg += bFactor;
                         gFactorAvg += gFactor;
@@ -398,7 +447,7 @@ namespace VTC.Kernel.Vistas
                         numGoodSamples++;
                     }
                 }
-                catch(DivideByZeroException)
+                catch (DivideByZeroException)
                 {
                     //No big deal
                 }
@@ -406,20 +455,20 @@ namespace VTC.Kernel.Vistas
 
             if (numGoodSamples >= 1)
             {
-                bFactorAvg = (double) bFactorAvg / numGoodSamples;
-                gFactorAvg = (double) gFactorAvg / numGoodSamples;
-                rFactorAvg = (double) rFactorAvg / numGoodSamples;
+                bFactorAvg = (double) bFactorAvg/numGoodSamples;
+                gFactorAvg = (double) gFactorAvg/numGoodSamples;
+                rFactorAvg = (double) rFactorAvg/numGoodSamples;
 
-                double bCorrection = 1.0 / bFactorAvg;
-                double gCorrection = 1.0 / gFactorAvg;
-                double rCorrection = 1.0 / rFactorAvg;
+                double bCorrection = 1.0/bFactorAvg;
+                double gCorrection = 1.0/gFactorAvg;
+                double rCorrection = 1.0/rFactorAvg;
 
                 for (int i = 0; i < frame.Width; i++)
                     for (int j = 0; j < frame.Height; j++)
                     {
-                        double adjustedB = frame.Data[j, i, 0] * bCorrection;
-                        double adjustedG = frame.Data[j, i, 1] * gCorrection;
-                        double adjustedR = frame.Data[j, i, 2] * rCorrection;
+                        double adjustedB = frame.Data[j, i, 0]*bCorrection;
+                        double adjustedG = frame.Data[j, i, 1]*gCorrection;
+                        double adjustedR = frame.Data[j, i, 2]*rCorrection;
                         double adjustedLimitedB = Math.Min(adjustedB, 255);
                         double adjustedLimitedG = Math.Min(adjustedG, 255);
                         double adjustedLimitedR = Math.Min(adjustedR, 255);
@@ -432,20 +481,6 @@ namespace VTC.Kernel.Vistas
                         _correctedFrame.Data[j, i, 2] = Convert.ToByte(adjustedLimitedR);
                     }
             }
-            
-
-            Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
-            Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
-            Image<Gray, Byte> movementMask = maskedDifference.Convert<Gray, Byte>();
-
-            //movementMask._Erode(1);
-            //movementMask._Dilate(1);
-            //movementMask._Erode(1);
-            //movementMask._Dilate(1);
-            movementMask._SmoothGaussian(5, 5, 1, 1);
-            movementMask._ThresholdBinary(_thresholdColor, CeilingColor);
-
-            return movementMask;
         }
 
         private Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
