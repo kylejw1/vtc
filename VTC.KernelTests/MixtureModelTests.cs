@@ -16,45 +16,40 @@ namespace VTC.Kernel.Tests
         [TestMethod()]
         public void MixtureModelTest()
         {
-            int numSamples = 10000;
-            double meanOne = 15;
-            double meanTwo = 100;
-            double errorThreshold = 3.0;
-            Normal componentOne = new Normal(meanOne, 5);
-            Normal componentTwo = new Normal(meanTwo, 25);
-            Random r = new Random();
-            double weightOne = r.NextDouble();
-            double weightTwo = 1 - weightOne;
-            int[][] samples = new int[numSamples][];
-            
-            for (int i = 0; i < numSamples; i++)
-            {
-                samples[i] = new int[5];
-                if (r.NextDouble() > weightOne)
-                {
-                    samples[i][0] = Convert.ToInt32(Math.Round(componentTwo.Sample()));
-                    samples[i][1] = Convert.ToInt32(Math.Round(componentTwo.Sample())+1);
-                    samples[i][2] = Convert.ToInt32(Math.Round(componentTwo.Sample())+2);
-                    samples[i][3] = Convert.ToInt32(Math.Round(componentTwo.Sample())+3);
-                    samples[i][4] = Convert.ToInt32(Math.Round(componentTwo.Sample())+4);
-                }
-                else
-                {
-                    samples[i][0] = Convert.ToInt32(Math.Round(componentOne.Sample()));
-                    samples[i][1] = Convert.ToInt32(Math.Round(componentOne.Sample())+2);
-                    samples[i][2] = Convert.ToInt32(Math.Round(componentOne.Sample())+4);
-                    samples[i][3] = Convert.ToInt32(Math.Round(componentOne.Sample())+6);
-                    samples[i][4] = Convert.ToInt32(Math.Round(componentOne.Sample())+8);
-                }
-            }
+            var mm = new MixtureModel();
+            mm.TrainIncremental(new int[] {50, 20, 10});
 
-            MixtureModel mix = new MixtureModel(samples,2,50);
-            mix.Train();
+            //Distribution is initialized correctly from the first sample
+            var background = mm.SampleBackground();
+            Assert.IsTrue(background[0] == 50);
+            Assert.IsTrue(background[1] == 20);
+            Assert.IsTrue(background[2] == 10);
 
-            double meansError = Math.Min(Math.Abs(mix.Means[0][0] - meanOne), Math.Abs(mix.Means[0][0] - meanTwo));
+            mm.TrainIncremental(new int[] { 51, 21, 11 });
+            mm.TrainIncremental(new int[] { 52, 22, 12 });
+            mm.TrainIncremental(new int[] { 53, 23, 13 });
+            mm.TrainIncremental(new int[] { 51, 21, 11 });
+            mm.TrainIncremental(new int[] { 52, 22, 12 });
+            mm.TrainIncremental(new int[] { 53, 23, 13 });
+            mm.TrainIncremental(new int[] { 51, 21, 11 });
+            mm.TrainIncremental(new int[] { 52, 22, 12 });
+            mm.TrainIncremental(new int[] { 53, 23, 13 });
+            background = mm.SampleBackground();
 
-            Assert.IsTrue(meansError < errorThreshold);
+            //Background is updated from similar incoming samples
+            Assert.IsTrue(background[0] > 50 && background[0] < 53);
+            Assert.IsTrue(background[1] > 20 && background[1] < 23);
+            Assert.IsTrue(background[2] > 10 && background[2] < 13);
 
+            mm.TrainIncremental(new int[] { 250, 250, 250 });
+            mm.TrainIncremental(new int[] { 250, 250, 250 });
+            mm.TrainIncremental(new int[] { 250, 250, 250 });
+            background = mm.SampleBackground();
+
+            //Background is not perturbed by dissimilar incoming (foreground) samples
+            Assert.IsTrue(background[0] > 50 && background[0] < 53);
+            Assert.IsTrue(background[1] > 20 && background[1] < 23);
+            Assert.IsTrue(background[2] > 10 && background[2] < 13);
         }
     }
 }

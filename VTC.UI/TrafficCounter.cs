@@ -502,7 +502,7 @@ namespace VTC
        {
            Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage(frame);
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-           Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundUpdateMoG;
+           Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundImage();
            var opticalFlowImage = RenderOpticalFlowImage();
 
            //Render 3D points

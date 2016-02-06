@@ -1,64 +1,58 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using MathNet.Numerics.Distributions;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 
 namespace VTC.Kernel
 {
-
+    /// <summary>
+    /// 2D array of Gaussian mixture models, used to identify foreground pixels in video
+    /// </summary>
     public class MoGBackground
     {
-        public MixtureModel[,] mmImage; //2D array of mixture models
-        public Image<Bgr, float> BackgroundUpdateMoG;
-        private Mutex _updateMutex = new Mutex();
-        List<Image<Bgr, Byte>> inputImagesList;
-        private const int numberOfSamples = 50;
-        private int width, height;
+        /// <summary>
+        /// 2D array of mixture models
+        /// </summary>
+        public readonly MixtureModel[,] MmImage;
+        private int Width => MmImage.GetLength(0);
+        private int Height => MmImage.GetLength(1);
 
-        public MoGBackground(int Width, int Height)
+        /// <summary>
+        /// A mutex to track asynchronous background updates
+        /// </summary>
+        private readonly Mutex _updateMutex = new Mutex();
+
+        public MoGBackground(int width, int height)
         {
-            width = Width;
-            height = Height;
-            BackgroundUpdateMoG = new Image<Bgr, float>(Width, Height);
-            inputImagesList = new List<Image<Bgr, byte>>();
-            mmImage = new MixtureModel[Width, Height];
-            for (int i = 0; i < Width; i++)
-                for (int j = 0; j < Height; j++)
-                    mmImage[i, j] = new MixtureModel();
+            MmImage = new MixtureModel[width, height];
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
+                    MmImage[i, j] = new MixtureModel();
         }
 
-        public void TryUpdatingBackgroundAsync(Image<Bgr, Byte> frame)
+        public void TryUpdatingAsync(Image<Bgr, Byte> frame)
         {
-            Task.Factory.StartNew(() => UpdateBackgroundMoGBatch(frame));
+            Task.Factory.StartNew(() => Update(frame));
         }
 
-        public void UpdateBackgroundMoGIncremental(Image<Bgr, Byte> frame)
+        private void Update(Image<Bgr, Byte> frame)
         {
             // If we're already busy updating background, just abort
             if (!_updateMutex.WaitOne(0))
-            {
                 return;
-            }
-
+            
             try
             {
-                Image<Bgr, float> newImageSample = frame.Convert<Bgr, float>();
-                for (int i = 0; i < newImageSample.Width; i++)
-                    for (int j = 0; j < newImageSample.Height; j++)
+                var newImageSample = frame.Convert<Bgr, float>();
+                for (var i = 0; i < newImageSample.Width; i++)
+                    for (var j = 0; j < newImageSample.Height; j++)
                     {
                         var samplePoint = new int[] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
-                        mmImage[i, j].TrainIncremental(samplePoint);
-
-                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i, j].Means[0][0];
-                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i, j].Means[0][1];
-                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i, j].Means[0][2];
+                        MmImage[i, j].TrainIncremental(samplePoint);
                     }
             }
             finally
@@ -68,45 +62,40 @@ namespace VTC.Kernel
             
         }
 
-        public void UpdateBackgroundMoGBatch(Image<Bgr, Byte> frame)
+        /// <summary>
+        /// An image representation of the MoG background model
+        /// </summary>
+        public Image<Bgr, float> BackgroundImage()
         {
-            // If we're already busy updating background, just abort
-            if (!_updateMutex.WaitOne(0))
-            {
-                return;
-            }
+            var background = new Image<Bgr, float>(Width, Height);
+            for(var i=0; i<Width;i++)
+                for (var j = 0; j < Height; j++)
+                {
+                    var pixel = MmImage[i, j].SampleBackground();
+                    background.Data[j, i, 0] = pixel[0];
+                    background.Data[j, i, 1] = pixel[1];
+                    background.Data[j, i, 2] = pixel[2];
+                }
 
-            try
-            {
-                inputImagesList.Insert(0, frame);
-                while (inputImagesList.Count > numberOfSamples)
-                    inputImagesList.Remove(inputImagesList.LastOrDefault());
-
-                for (int i = 0; i < width; i++)
-                    for (int j = 0; j < height; j++)
-                    {   
-                        var samplePoints = new int[inputImagesList.Count][];
-                        for(int k = 0; k < inputImagesList.Count; k++)
-                            samplePoints[k] = new int[] { inputImagesList.ElementAt(k).Data[j, i, 0], inputImagesList.ElementAt(k).Data[j, i, 1], inputImagesList.ElementAt(k).Data[j, i, 2] };
-
-                        mmImage[i, j]._samples = samplePoints;
-                        mmImage[i, j].NumComponents = 2;
-                        mmImage[i, j].NumIterations = 3;
-                        mmImage[i, j].Initialize();
-                        mmImage[i, j].Train();
-                        mmImage[i, j].ReorderByLikelihood();
-
-                        BackgroundUpdateMoG.Data[j, i, 0] = (float)mmImage[i, j].Means[0][0];
-                        BackgroundUpdateMoG.Data[j, i, 1] = (float)mmImage[i, j].Means[0][1];
-                        BackgroundUpdateMoG.Data[j, i, 2] = (float)mmImage[i, j].Means[0][2];
-                    }
-            }
-            finally
-            {
-                _updateMutex.ReleaseMutex();
-            }
-
+            return background;
         }
+
+        /// <summary>
+        /// An image representation of MoG foreground pixels
+        /// </summary>
+        public Image<Gray, bool> ForegroundMask(Image<Bgr, Byte> frame)
+        {
+            var foreground = new Image<Gray, bool>(Width, Height);
+            for (var i = 0; i < Width; i++)
+                for (var j = 0; j < Height; j++)
+                {
+                    var sample = new int[3] { frame.Data[j, i, 0] , frame.Data[j, i, 1] , frame.Data[j, i, 2] };
+                    foreground.Data[j, i, 0] = !MmImage[j, i].IsForegroundSample(sample);
+                }
+
+            return foreground;
+        }
+
     }
 
     /// <summary>
@@ -114,433 +103,234 @@ namespace VTC.Kernel
     /// </summary>
     public class GaussianComponent
     {
-        public readonly Normal[] gaussians; //One element for each dimension
-        public int dimensionality
-        {
-            get
-            {
-                return gaussians.Length;
-            }
-        }
+        /// <summary>
+        /// Single, multidimensional Gaussian
+        /// </summary>
+        private readonly Normal[] _mGaussian; 
+        public int Dimensionality => _mGaussian.Length;
+        public double Variance => Math.Sqrt(_mGaussian.Aggregate(0.0, (d, normal) => d + Math.Pow(normal.Variance, 2)));
 
         /// <summary>
-        /// Multidimensional Gaussian distribution
+        /// Multidimensional Gaussian distribution: use this constructor when distribution parameters are unknown
         /// </summary>
         /// <param name="numDimensions">Dimensionality of distribution</param>
         /// <param name="defaultMean">Initialization value for distribution mean</param>
         /// <param name="defaultVariance">Initialization value for distribution variance</param>
         public GaussianComponent(int numDimensions, double defaultMean, double defaultVariance)
         {
-            gaussians = new Normal[numDimensions];
-            for (int i = 0; i < numDimensions; i++)
-                gaussians[i] = new Normal(defaultMean, defaultVariance);
+            _mGaussian = new Normal[numDimensions];
+            for (var i = 0; i < numDimensions; i++)
+                _mGaussian[i] = new Normal(defaultMean, defaultVariance);
+        }
+
+        /// <summary>
+        /// Multidimensional Gaussian: use this constructor to create a component based on a sample
+        /// </summary>
+        /// <param name="sample">sample from which to extract initialization means</param>
+        /// <param name="defaultVariance"></param>
+        public GaussianComponent(double[] sample, double defaultVariance)
+        {
+            _mGaussian = new Normal[sample.Length];
+            for (var i = 0; i < sample.Length; i++)
+                _mGaussian[i] = new Normal(sample[i], defaultVariance);
         }
 
         /// <summary>
         /// Percentage of observations accounted for by this component
         /// </summary>
-        public double weight;
+        public double Weight { get; private set; }
 
         /// <summary>
-        /// Update distribution properties based on sample observation
+        /// Update distribution properties assuming that this sample originated from this Gaussian
+        /// </summary>
+        /// <param name="sample">Pixel RGB values</param>
+        /// <param name="alpha">Update rate</param>
+        public void UpdateParameters(double[] sample, double alpha)
+        {
+            var gaussianWithSampleValues = AssociateDimensionsWithSamples(sample);
+            //var p = alpha*SampleProbability(sample);
+            var p = alpha; // Deviating from the Stauffer and Grimson implementation. Need to update faster.
+
+            foreach (var gaussianWithSample in gaussianWithSampleValues)
+            {
+                var singleDimSample = gaussianWithSample.Item1;
+                var singleDimMean = gaussianWithSample.Item2.Mean;
+                var singleDimVariance = gaussianWithSample.Item2.Variance;
+
+                gaussianWithSample.Item2.Mean = (1 - p)* singleDimMean + p * singleDimSample;
+                gaussianWithSample.Item2.Variance = (1 - p)*singleDimVariance +
+                                                    p*(singleDimSample - singleDimMean)*
+                                                    (singleDimSample - singleDimMean);
+
+
+            }
+
+            Weight = (1 - alpha) * Weight + alpha;
+        }
+
+        /// <summary>
+        /// Calculate probability density of Gaussian for this sample point
         /// </summary>
         /// <param name="sample"></param>
-        public void UpdateParameters(double[] sample)
+        /// <returns>Probability</returns>
+        private double SampleProbability(double[] sample)
         {
-            //Calculate assignment
-            //Update means
-            //Update variances
+            var gaussianWithSampleValues = AssociateDimensionsWithSamples(sample);
+            var probability = gaussianWithSampleValues.Aggregate(1.0, (p, tuple) => p*tuple.Item2.Density(tuple.Item1));
+            return probability;
+        }
+
+        /// <summary>
+        /// Zip a multidimensional sample to the Gaussian distribution for dimension
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <returns></returns>
+        private List<Tuple<double, Normal>> AssociateDimensionsWithSamples(double[] sample)
+        {
+            var sampleList = sample.ToList();
+            return sampleList.Zip(_mGaussian, (d, normal) => new Tuple<double, Normal>(d, normal)).ToList();
+        }
+
+        /// <summary>
+        /// Check if a sample is within some mahalanobis distance from this distribution
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <param name="stdDevThreshold"></param>
+        /// <returns></returns>
+        public bool SampleMatch(double[] sample, double stdDevThreshold = 2.5)
+        {
+           var mahalanobis = AssociateDimensionsWithSamples(sample).Aggregate(0.0, (p, tuple) => p + (tuple.Item1 - tuple.Item2.Mean)/tuple.Item2.StdDev )/sample.Length;
+            if (mahalanobis > stdDevThreshold)
+                return false;
+
+            return true;
+        }
+
+        public int[] Sample()
+        {
+            return _mGaussian.Select(x => (int) x.Mean).ToArray();
         }
     }
 
+    /// <summary>
+    /// A distribution composed of K Gaussians. Used to model pixel-process RGB values in order to perform background subtraction.
+    /// </summary>
     public class MixtureModel
     {
+        /// <summary>
+        /// List of gaussian components present in the mixture
+        /// </summary>
+        private readonly List<GaussianComponent> _components = new List<GaussianComponent>();
+        private int NumComponents => _components.Count;
+        private int Dimensionality => _components.First().Dimensionality;
+
+        /// <summary>
+        /// Update rate for learning
+        /// </summary>
         private const double Alpha = 0.3;
-        private const double _varianceMax = 50;
-        private const double _varianceMin = 0.01;
 
-        public MixtureModel(int[][] samplesIn, int numComponents, int numIterations)
+        /// <summary>
+        /// Minimum proportion of samples that should be accounted for by the background model
+        /// </summary>
+        private const double T = 0.5;
+
+        /// <summary>
+        /// Initial variance for components on first observation
+        /// </summary>
+        private const double DefaultVariance = 50;
+
+        /// <summary>
+        /// Online Mixture-of-Gaussians incremental calculation,  
+        /// taken from Stauffer and Grimson: "Adaptive background mixture models for real-time tracking"
+        /// </summary>
+        /// <param name="sample">Single multidimensional sample</param>
+        public void TrainIncremental(int[] sample)
         {
-            NumComponents = numComponents;
-            NumIterations = numIterations;
-            
-            Means = new double[NumComponents][];
-            Variances = new double[NumComponents][];
-            Weights = new double[NumComponents];
+            var dSample = sample.Select(Convert.ToDouble).ToArray();
 
-            _samples = samplesIn;
-            _numSamples = _samples.Length;
-            _numDimensions = _samples[0].Length;
-            Assignments = new double[NumComponents][];
-            for (int i = 0; i < NumComponents; i++)
-                Assignments[i] = new double[_numSamples];
-
-            InitializeDistributionParameters();
-        }
-
-        public void Initialize()
-        {
-            _numSamples = _samples.Length;
-            _numDimensions = _samples[0].Length;
-            Assignments = new double[NumComponents][];
-            for (int i = 0; i < NumComponents; i++)
-                Assignments[i] = new double[_numSamples];
-
-            Means = new double[NumComponents][];
-            Variances = new double[NumComponents][];
-            Weights = new double[NumComponents];
-
-            InitializeDistributionParameters();
+            if (MatchesAny(sample))
+                NearestMatchOrNull(sample).UpdateParameters(dSample, Alpha);
+            else
+                AddNewComponent(sample);
         }
 
         /// <summary>
-        /// Default constructor for 2-component, 3-dimensional (2x RGB) Gaussians
+        /// Determines whether a sample is likely to have originated from one of the background components
         /// </summary>
-        public MixtureModel()
-        {
-            InitializeDefaultDistributionParameters();
-        }
-
-        private void InitializeDefaultDistributionParameters()
-        {
-            _numDimensions = 3;
-            NumComponents = 2;
-           InitializeDistributionParameters();
-        }
-
-        private void InitializeDistributionParameters()
-        {
-            int seed = (int) DateTime.Now.Ticks%int.MaxValue;
-            Random rnd = new Random(seed);
-            Means = new double[NumComponents][];
-            Variances = new double[NumComponents][];
-            Weights = new double[NumComponents];
-            for (int i = 0; i < NumComponents; i++)
-            {
-                Means[i] = new double[_numDimensions];
-                Variances[i] = new double[_numDimensions];
-
-                int val = rnd.Next(0, 255);
-                for (int j = 0; j < _numDimensions; j++)
-                {
-                    Means[i][j] = val;
-                    Variances[i][j] = _varianceMax;
-                }
-                Weights[i] = (double) 1/NumComponents;
-            }
-        }
-
-        public void Train()
-        {
-            for (int i = 0; i < NumIterations; i++)
-            {
-                CalculateAssignments();
-                UpdateParameters();
-            }
-        }
-
-        //Note: this function is not adapted to handle cases other than dimensionality of 3 with 2 elements.
-        public void ReorderByLikelihood()
-        {
-            //Ensure that the Gaussians are returned in order of weight/ (total variance)
-            double sumOfVariances0 = Variances[0][0] + Variances[0][1] + Variances[0][2];
-            double sumOfVariances1 = Variances[1][0] + Variances[1][1] + Variances[1][2];
-
-            double likelihood0 = Weights[0] / sumOfVariances0;
-            double likelihood1 = Weights[1] / sumOfVariances1;
-
-            double assignments0 = 0;
-            for (int i = 0; i < _numSamples; i++)
-                assignments0 += Assignments[0][i];
-
-            double assignments1 = 0;
-            for (int i = 0; i < _numSamples; i++)
-                assignments1 += Assignments[1][i];
-
-            if ((likelihood1 > likelihood0 && assignments1 > 5.0) || assignments0 < 5.0)
-            {
-                double[] tempVariance = new double[3];
-                double[] tempMean = new double[3];
-                double[] tempWeight = new double[2];
-
-                tempVariance[0] = Variances[0][0];
-                tempVariance[1] = Variances[0][1];
-                tempVariance[2] = Variances[0][2];
-
-                Variances[0][0] = Variances[1][0];
-                Variances[0][1] = Variances[1][1];
-                Variances[0][2] = Variances[1][2];
-
-                Variances[1][0] = tempVariance[0];
-                Variances[1][1] = tempVariance[1];
-                Variances[1][2] = tempVariance[2];
-
-                tempMean[0] = Means[0][0];
-                tempMean[1] = Means[0][1];
-                tempMean[2] = Means[0][2];
-
-                Means[0][0] = Means[1][0];
-                Means[0][1] = Means[1][1];
-                Means[0][2] = Means[1][2];
-
-                Means[1][0] = tempMean[0];
-                Means[1][1] = tempMean[1];
-                Means[1][2] = tempMean[2];
-
-                tempWeight[0] = Weights[0];
-                tempWeight[1] = Weights[1];
-
-                Weights[0] = tempWeight[1];
-                Weights[1] = tempWeight[0];
-            }
-        }
-
-
-        // Online Mixture-of-Gaussians incremental calculation, 
-        // taken from Stauffer and Grimson: "Adaptive background mixture models for real-time tracking"
-        public void TrainIncremental(int[] rgb)
-        {
-            // Assign sample to Gaussian
-            //Calculate probability of assignment to each Gaussian
-            //Search array for max
-            double[] assignmentProbabilities = new double[NumComponents];
-            double assignmentMax = 0;
-            int mostLikelyGaussian = 0;
-            for (int i = 0; i < NumComponents; i++)
-            {
-                assignmentProbabilities[i] = EvaluateProbability(i, rgb);
-                if (assignmentProbabilities[i] > assignmentMax)
-                {
-                    assignmentMax = assignmentProbabilities[i];
-                    mostLikelyGaussian = i;
-                }             
-            }
-
-            for (int i = 0; i < _numDimensions; i++)
-            {
-                // *********************  Update Gaussians ***************************//
-                //Update means
-                // u_next = (1-alpha)u_prev + alpha(sample)
-                Means[mostLikelyGaussian][i] = (1 - Alpha) * (Means[mostLikelyGaussian][i]) + Alpha * rgb[i];
-
-                //Update variances
-                // ss_next = (1-alpha)ss + alpha(sample-u)(sample-u)
-                Variances[mostLikelyGaussian][i] = (1 - Alpha) * (Variances[mostLikelyGaussian][i]) +
-                                                   Alpha * Math.Pow((rgb[i] - Means[mostLikelyGaussian][i]), 2);
-                Variances[mostLikelyGaussian][i] = (Variances[mostLikelyGaussian][i] < _varianceMin) ? _varianceMin : Variances[mostLikelyGaussian][i];                
-            }
-            
-            //Update weights
-            //  w_next = (1-alpha)w_prev + alpha(M)
-            // *M is 1 for the matching Gaussian and 0 otherwise
-            for (int i = 0; i < NumComponents; i++)
-            {
-                if (i == mostLikelyGaussian)
-                {
-                    Weights[i] = (1 - Alpha)*Weights[i] + Alpha;
-                }
-                else
-                {
-                    Weights[i] = (1 - Alpha) * Weights[i];
-                }
-            }
-
-            ReorderByLikelihood();
-
-        }
-
-        private void UpdateParameters()
-        {
-            try
-            {
-                for (int j = 0; j < NumComponents; j++)
-                {
-                    // Calculate mean
-                    double assignedToThisComponent = 0;
-                    for (int i = 0; i < _numSamples; i++)
-                        assignedToThisComponent += Assignments[j][i];
-
-                    double[] sums = new double[_numDimensions];
-                    for (int k = 0; k < _numSamples; k++)
-                        for (int m = 0; m < _numDimensions; m++)
-                            sums[m] = sums[m] + Assignments[j][k]*_samples[k][m];
-
-                    for (int m = 0; m < _numDimensions; m++)
-                    {
-                        Means[j][m] = (double)sums[m] / (assignedToThisComponent);
-                        if (Double.IsNaN(Means[j][m]))
-                            throw new Exception("Value is NaN 1");    
-                    }
-                    
-                    // Calculate variance
-                    double[] varianceSums = new double[_numDimensions];
-                    for (int k = 0; k < _numSamples; k++)
-                        for (int m = 0; m < _numDimensions; m++)
-                            varianceSums[m] = varianceSums[m] +
-                                              Assignments[j][k]*Math.Pow((_samples[k][m] - Means[j][m]), 2);
-
-                    for (int m = 0; m < _numDimensions; m++)
-                    {
-                        Variances[j][m] = Math.Sqrt(varianceSums[m] / (assignedToThisComponent));
-                        if (Double.IsNaN(Variances[j][m]))
-                            throw new Exception("Value is NaN 2");
-
-                        if (Variances[j][m] > _varianceMax)
-                            Variances[j][m] = _varianceMax;
-                        if (Variances[j][m] < _varianceMin)
-                            Variances[j][m] = _varianceMin;    
-                    }
-
-                    double thisComponentWeight = 0;
-                    for (int i = 0; i < _numSamples; i++)
-                        thisComponentWeight += Assignments[j][i] / _numSamples;
-
-                    Weights[j] = thisComponentWeight;
-                    if (Weights[j] == 0.0) // Prevent divide-by-zero errors
-                    {
-                        Weights[j] = 0.01;
-                        if (Double.IsNaN(Weights[j]))
-                            throw new Exception("Value is NaN 3");
-                    }
-
-                }
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
-            }
-            
-        }
-
-        private void CalculateAssignments()
-        {
-            try
-            {
-                for (int k = 0; k < _numSamples; k++)
-                {
-                    double[] likelihoods = new double[NumComponents];
-                    for (int j = 0; j < NumComponents; j++)
-                        likelihoods[j] = EvaluateLikelihood(j, k);
-
-                    int argmax = 0;
-                    for (int j = 0; j < NumComponents; j++)
-                        if (likelihoods[j] > likelihoods[argmax])
-                            argmax = j;
-
-                    double totalLikelihood = likelihoods.Aggregate((sum, next) => sum + next);
-                    double[] probabilities = likelihoods.Select(l => l/totalLikelihood).ToArray();
-                    for (int j = 0; j < NumComponents; j++)
-                        Assignments[j][k] = probabilities[j];
-                }
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
-            }
-        }
-
-
-        /// <summary>
-        /// Likelihood of sample k being produced by component j
-        /// </summary>
-        /// <param name="j">component</param>
-        /// <param name="k">sample</param>
-        /// <returns></returns>
-        private double EvaluateLikelihood(int j, int k)
-        {
-            double likelihood = 1;
-            try
-            {
-                for (int i = 0; i < _numDimensions; i++)
-                    likelihood = likelihood * SingleGaussianLikelihood(j, i, _samples[k]);   
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
-            }
-
-            likelihood *= Weights[j];
-            
-            return likelihood;
-        }
-
-        /// <summary>
-        /// Likelihood of a single-dimensional gaussian generating a sample point
-        /// </summary>
-        /// <param name="j">component</param>
-        /// <param name="i">dimension</param>
-        /// <param name="sample">sample vector</param>
-        /// <returns></returns>
-        private double SingleGaussianLikelihood(int j, int i, int[] sample)
-        {
-            if (Means?[j] == null || Variances?[j] == null)
-                return 0;
-
-            var mean = Means[j][i];
-            var variance = Variances[j][i];
-            Normal gaussianComponent = new Normal(mean, variance);
-            double likelihood = gaussianComponent.Density(sample[i]);
-            if (Double.IsNaN(likelihood)) //When variance is 0, Normal returns NaN for probability
-                likelihood = 0;
-
-            return likelihood;
-        }
-
-
-        /// <summary>
-        /// Likelihood of a multidimensional sample point having been generated by a single, multidimensional Gaussian
-        /// </summary>
-        /// <param name="j"></param>
         /// <param name="sample"></param>
         /// <returns></returns>
-        private double MultidimensionalGaussianLikelihood(int j, int[] sample)
-        {
-            if (Means == null || Variances == null)
-                return 0;
-
-            double likelihood = 1;
-            for (int i = 0; i < _numDimensions; i++)
-                likelihood = likelihood * SingleGaussianLikelihood(j, i, sample);
-            
-            return likelihood;
-        }
-
         public bool IsForegroundSample(int[] sample)
         {
-            double p0 = MultidimensionalGaussianLikelihood(0, sample);
-            double p1 = MultidimensionalGaussianLikelihood(1, sample);
-            //if (p1 > p0)
-            //    return true;
-
-            if (p1/p0 > 10)
-                return true;
-
-            return false;
+            var dSample = sample.Select(Convert.ToDouble).ToArray();
+            var bgComponents = BackgroundComponents();
+            return bgComponents.Any(c => c.SampleMatch(dSample));
         }
 
-
-        // Likelihood of sample k being produced by component j
-        private double EvaluateProbability(int j, int[] rgb)
+        /// <summary>
+        /// Determines whether a sample is likely to have originated from any of the model components
+        /// </summary>
+        /// <param name="sample"></param>
+        /// <returns></returns>
+        private bool MatchesAny(int[] sample)
         {
-            double probability = 1;
-            try
-            {
-                for (int i = 0; i < _numDimensions; i++)
-                {
-                    var gaussianComponent = new Normal(Means[j][i], Variances[j][i]);
-                    double likelihood = gaussianComponent.Density(rgb[i]);
-                    if (Double.IsNaN(likelihood)) //When variance is 0, Normal returns NaN for probability
-                        likelihood = 0;
+            var dSample = sample.Select(Convert.ToDouble).ToArray();
+            return _components.Any(c => c.SampleMatch(dSample));
+        }
 
-                    probability = probability * likelihood;
-                }
-            }
-            catch (Exception e)
+        private GaussianComponent NearestMatchOrNull(int[] sample)
+        {
+            var dSample = sample.Select(Convert.ToDouble).ToArray();
+            for(var i=0; i < _components.Count; i++)
+                if (_components.ElementAt(i).SampleMatch(dSample))
+                    return _components.ElementAt(i);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Model components heuristically determined to represent the background. 
+        /// </summary>
+        /// <returns>Components heuristically determined to represent the background</returns>
+        private List<GaussianComponent> BackgroundComponents()
+        {
+            _components.Sort(
+                 delegate (GaussianComponent a, GaussianComponent b)
+                 {
+                     if (a.Weight/a.Variance > b.Weight/b.Variance)
+                         return 1;
+                     else
+                         return -1;
+                 });
+            _components.Reverse(); //Sorted in order of decreasing background-ness
+
+            var bComponents = new List<GaussianComponent>();
+            var proportion = 0.0;
+            for (var i = 0; i < _components.Count; i++)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message + " " + e.TargetSite + " " + e.StackTrace);
+                proportion += _components.ElementAt(i).Weight;
+                bComponents.Add(_components.ElementAt(i));
+                if (proportion >= T)
+                    break;
             }
 
-            return probability;
+            return bComponents;
+        } 
+
+        /// <summary>
+        /// Create new multidimensional Gaussian distribution component based on a sample, add to components list
+        /// </summary>
+        /// <param name="sample"></param>
+        private void AddNewComponent(int[] sample)
+        {
+            var dSample = sample.Select(Convert.ToDouble).ToArray();
+            var newComponent = new GaussianComponent(dSample, DefaultVariance);
+            _components.Add(newComponent);
+        }
+
+        public int[] SampleBackground()
+        {
+            var dominantBackground = BackgroundComponents().First();
+            return dominantBackground.Sample();
         }
     }
 }

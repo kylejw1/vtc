@@ -354,7 +354,7 @@ namespace VTC.Kernel.Vistas
 
         private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
         {
-            MoGBackgroundSingleton.TryUpdatingBackgroundAsync(frame);
+            MoGBackgroundSingleton.TryUpdatingAsync(frame);
         }
        
         public void InitializeBackground(Image<Bgr, Byte> frame)
@@ -375,13 +375,13 @@ namespace VTC.Kernel.Vistas
             //Evaluate current frame
             Image<Gray, Byte> mogMask = new Image<Gray, Byte>(frame.Width, frame.Height);
 
-            ApplyColorCorrection(frame,MoGBackgroundSingleton.BackgroundUpdateMoG);
+            ApplyColorCorrection(frame,MoGBackgroundSingleton.BackgroundImage());
 
             for (int i=0;i<frame.Width;i++)
                 for(int j=0; j<frame.Height; j++)
                 {
                     var sample = new int[] { frame.Data[j, i, 0], frame.Data[j,i,1], frame.Data[j,i,2] };
-                    if(MoGBackgroundSingleton.mmImage[i, j].IsForegroundSample(sample))
+                    if(MoGBackgroundSingleton.MmImage[i, j].IsForegroundSample(sample))
                         mogMask.Data[j,i,0] = byte.MaxValue;
                     else
                         mogMask.Data[j, i, 0] = 0;
