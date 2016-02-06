@@ -109,24 +109,55 @@ namespace VTC.Kernel
         }
     }
 
+    /// <summary>
+    /// A multidimensional Gaussian distribution
+    /// </summary>
+    public class GaussianComponent
+    {
+        public readonly Normal[] gaussians; //One element for each dimension
+        public int dimensionality
+        {
+            get
+            {
+                return gaussians.Length;
+            }
+        }
+
+        /// <summary>
+        /// Multidimensional Gaussian distribution
+        /// </summary>
+        /// <param name="numDimensions">Dimensionality of distribution</param>
+        /// <param name="defaultMean">Initialization value for distribution mean</param>
+        /// <param name="defaultVariance">Initialization value for distribution variance</param>
+        public GaussianComponent(int numDimensions, double defaultMean, double defaultVariance)
+        {
+            gaussians = new Normal[numDimensions];
+            for (int i = 0; i < numDimensions; i++)
+                gaussians[i] = new Normal(defaultMean, defaultVariance);
+        }
+
+        /// <summary>
+        /// Percentage of observations accounted for by this component
+        /// </summary>
+        public double weight;
+
+        /// <summary>
+        /// Update distribution properties based on sample observation
+        /// </summary>
+        /// <param name="sample"></param>
+        public void UpdateParameters(double[] sample)
+        {
+            //Calculate assignment
+            //Update means
+            //Update variances
+        }
+    }
+
     public class MixtureModel
     {
-
-        public int[][] _samples; // _numSamples X _numDimensions
-        public double[][] Assignments;
-        private int _numSamples;
-
-        private int _numDimensions;
-        public int NumComponents;
-        public int NumIterations;
         private const double Alpha = 0.3;
-
         private const double _varianceMax = 50;
         private const double _varianceMin = 0.01;
-
-        public double[][] Means;
-        public double[][] Variances;
-        public double[] Weights;
 
         public MixtureModel(int[][] samplesIn, int numComponents, int numIterations)
         {
