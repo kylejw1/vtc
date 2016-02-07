@@ -41,11 +41,7 @@ namespace VTC
 
         private static Form CreateTrafficCounterForm(bool isLicensed, string args)
         {
-            // TODO: Handle non-licensed case.  Either return null here, or return a disabled TrafficCounter
-            // Maybe one that resets stats every 5 minutes or something?
-
-            return new TrafficCounter(new AppSettings(), args);
-
+            return new TrafficCounter(new AppSettings(), isLicensed, args);
         }
     }
 }

@@ -43,8 +43,8 @@ namespace VTC
        private VideoDisplay _mixtureMovementDisplay;
        private VideoDisplay _3DPointsDisplay;
        private VideoDisplay _opticalFlowDisplay;
-        private VideoDisplay _correctedInputDisplay;
-        private VideoMux _videoMux;
+       private VideoDisplay _correctedInputDisplay;
+       private VideoMux _videoMux;
 
        private readonly DateTime _applicationStartTime;
        private DateTime _lastDatasetExportTime;
@@ -54,9 +54,11 @@ namespace VTC
       private ICaptureSource _selectedCamera;
 
        private string _appArgument; //For debugging only, delete this later
+       private bool _isLicensed;
+       private TimeSpan TrialLicenseTimeLimit = TimeSpan.FromMinutes(2);
 
-        // unit tests has own settings, so need to store "pairs" (capture, settings)
-      private CaptureContext[] _testCaptureContexts;
+       // unit tests has own settings, so need to store "pairs" (capture, settings)
+       private CaptureContext[] _testCaptureContexts;
 
        /// <summary>
        /// Active camera.
@@ -110,7 +112,7 @@ namespace VTC
        /// </summary>
        /// <param name="settings">Application settings.</param>
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
-       public TrafficCounter(AppSettings settings, string appArgument = null)
+       public TrafficCounter(AppSettings settings, bool isLicensed, string appArgument = null)
        {
 
            _appArgument = appArgument; 
@@ -118,6 +120,7 @@ namespace VTC
           InitializeComponent();
 
            _settings = settings;
+           _isLicensed = isLicensed;
 
            // check if app should run in unit test visualization mode
            _unitTestsMode = false;
@@ -495,8 +498,20 @@ namespace VTC
                   if (delayProcessingCheckbox.Checked)
                       Thread.Sleep(500);
 
+                  if (activeTime > TrialLicenseTimeLimit && !_isLicensed)
+                      NotifyLicenseAndExit();
               }   
       }
+
+        /// <summary>
+        /// Use this function to terminate the application if a trial license timeout occurs
+        /// </summary>
+       private void NotifyLicenseAndExit()
+       {
+           MessageBox.Show(
+               "This is only a trial version! Please visit www.traffic-camera.com to use software longer than " + TrialLicenseTimeLimit.Minutes.ToString() + " minutes.");
+           Application.Exit();
+       }
 
        private void UpdateImageBoxes(Image<Bgr, Byte> frame)
        {
