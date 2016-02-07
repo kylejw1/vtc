@@ -250,12 +250,12 @@ namespace VTC.Kernel
         /// <summary>
         /// Update rate for learning
         /// </summary>
-        private const double Alpha = 0.01;
+        private const double Alpha = 0.05;
 
         /// <summary>
         /// Minimum proportion of samples that should be accounted for by the background model
         /// </summary>
-        private const double T = 0.9;
+        private const double T = 0.8;
 
         /// <summary>
         /// Initial variance for components on first observation

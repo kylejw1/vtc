@@ -34,12 +34,18 @@ namespace VTC.Kernel.Tests
             mm.TrainIncremental(new int[] { 51, 21, 11 });
             mm.TrainIncremental(new int[] { 52, 22, 12 });
             mm.TrainIncremental(new int[] { 53, 23, 13 });
+            mm.TrainIncremental(new int[] { 51, 21, 11 });
+            mm.TrainIncremental(new int[] { 52, 22, 12 });
+            mm.TrainIncremental(new int[] { 53, 23, 13 });
+            mm.TrainIncremental(new int[] { 51, 21, 11 });
+            mm.TrainIncremental(new int[] { 52, 22, 12 });
+            mm.TrainIncremental(new int[] { 53, 23, 13 });
             background = mm.SampleBackground();
 
             //Background is updated from similar incoming samples
-            Assert.IsTrue(background[0] > 50 && background[0] < 53);
-            Assert.IsTrue(background[1] > 20 && background[1] < 23);
-            Assert.IsTrue(background[2] > 10 && background[2] < 13);
+            Assert.IsTrue(background[0] >= 50 && background[0] <= 53);
+            Assert.IsTrue(background[1] >= 20 && background[1] <= 23);
+            Assert.IsTrue(background[2] >= 10 && background[2] <= 13);
 
             mm.TrainIncremental(new int[] { 250, 250, 250 });
             mm.TrainIncremental(new int[] { 250, 250, 250 });
@@ -47,9 +53,9 @@ namespace VTC.Kernel.Tests
             background = mm.SampleBackground();
 
             //Background is not perturbed by dissimilar incoming (foreground) samples
-            Assert.IsTrue(background[0] > 50 && background[0] < 53);
-            Assert.IsTrue(background[1] > 20 && background[1] < 23);
-            Assert.IsTrue(background[2] > 10 && background[2] < 13);
+            Assert.IsTrue(background[0] >= 50 && background[0] <= 53);
+            Assert.IsTrue(background[1] >= 20 && background[1] <= 23);
+            Assert.IsTrue(background[2] >= 10 && background[2] <= 13);
 
             Assert.IsTrue(mm.IsBackgroundSample(new int[] {51, 21, 11}));
             Assert.IsTrue(!mm.IsBackgroundSample(new int[] { 250, 250, 250 }));
