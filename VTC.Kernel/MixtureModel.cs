@@ -6,6 +6,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using MathNet.Numerics;
 
 namespace VTC.Kernel
 {
@@ -18,6 +19,7 @@ namespace VTC.Kernel
         /// 2D array of mixture models
         /// </summary>
         public readonly MixtureModel[,] MmImage;
+        public Image<Bgr, float> RoiImage; 
         private int Width => MmImage.GetLength(0);
         private int Height => MmImage.GetLength(1);
 
@@ -26,8 +28,9 @@ namespace VTC.Kernel
         /// </summary>
         private readonly Mutex _updateMutex = new Mutex();
 
-        public MoGBackground(int width, int height)
+        public MoGBackground(int width, int height, Image<Bgr, float> roiImage )
         {
+            RoiImage = roiImage;
             MmImage = new MixtureModel[width, height];
             for (int i = 0; i < width; i++)
                 for (int j = 0; j < height; j++)
@@ -39,7 +42,7 @@ namespace VTC.Kernel
             Task.Factory.StartNew(() => Update(frame));
         }
 
-        private void Update(Image<Bgr, Byte> frame)
+        public void Update(Image<Bgr, Byte> frame)
         {
             // If we're already busy updating background, just abort
             if (!_updateMutex.WaitOne(0))
@@ -51,8 +54,11 @@ namespace VTC.Kernel
                 for (var i = 0; i < newImageSample.Width; i++)
                     for (var j = 0; j < newImageSample.Height; j++)
                     {
-                        var samplePoint = new int[] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
-                        MmImage[i, j].TrainIncremental(samplePoint);
+                        if (RoiImage.Data[j, i, 0] != 0)
+                        {
+                            var samplePoint = new int[] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
+                            MmImage[i, j].TrainIncremental(samplePoint);
+                        }
                     }
             }
             finally
@@ -71,10 +77,14 @@ namespace VTC.Kernel
             for(var i=0; i<Width;i++)
                 for (var j = 0; j < Height; j++)
                 {
-                    var pixel = MmImage[i, j].SampleBackground();
-                    background.Data[j, i, 0] = pixel[0];
-                    background.Data[j, i, 1] = pixel[1];
-                    background.Data[j, i, 2] = pixel[2];
+                    if (RoiImage.Data[j, i, 0] != 0)
+                    {
+                        var pixel = MmImage[i, j].SampleBackground();
+                        background.Data[j, i, 0] = pixel[0];
+                        background.Data[j, i, 1] = pixel[1];
+                        background.Data[j, i, 2] = pixel[2];
+                    }
+                    
                 }
 
             return background;
@@ -83,14 +93,18 @@ namespace VTC.Kernel
         /// <summary>
         /// An image representation of MoG foreground pixels
         /// </summary>
-        public Image<Gray, bool> ForegroundMask(Image<Bgr, Byte> frame)
+        public Image<Gray, byte> ForegroundMask(Image<Bgr, Byte> frame)
         {
-            var foreground = new Image<Gray, bool>(Width, Height);
+            var foreground = new Image<Gray, byte>(Width, Height);
             for (var i = 0; i < Width; i++)
                 for (var j = 0; j < Height; j++)
                 {
-                    var sample = new int[3] { frame.Data[j, i, 0] , frame.Data[j, i, 1] , frame.Data[j, i, 2] };
-                    foreground.Data[j, i, 0] = !MmImage[j, i].IsForegroundSample(sample);
+                    if (RoiImage.Data[j, i, 0] != 0)
+                    {
+                        var sample = new int[3] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
+                        foreground.Data[j, i, 0] = (byte)(MmImage[i, j].IsBackgroundSample(sample) ? 0 : byte.MaxValue);
+                    }
+                    
                 }
 
             return foreground;
@@ -116,8 +130,10 @@ namespace VTC.Kernel
         /// <param name="numDimensions">Dimensionality of distribution</param>
         /// <param name="defaultMean">Initialization value for distribution mean</param>
         /// <param name="defaultVariance">Initialization value for distribution variance</param>
-        public GaussianComponent(int numDimensions, double defaultMean, double defaultVariance)
+        /// <param name="defaultWeight">Initialization value for weight</param>
+        public GaussianComponent(int numDimensions, double defaultMean, double defaultVariance, double defaultWeight)
         {
+            Weight = defaultWeight;
             _mGaussian = new Normal[numDimensions];
             for (var i = 0; i < numDimensions; i++)
                 _mGaussian[i] = new Normal(defaultMean, defaultVariance);
@@ -128,8 +144,10 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="sample">sample from which to extract initialization means</param>
         /// <param name="defaultVariance"></param>
-        public GaussianComponent(double[] sample, double defaultVariance)
+        /// <param name="defaultWeight">Initialization value for weight</param>
+        public GaussianComponent(double[] sample, double defaultVariance, double defaultWeight)
         {
+            Weight = defaultWeight;
             _mGaussian = new Normal[sample.Length];
             for (var i = 0; i < sample.Length; i++)
                 _mGaussian[i] = new Normal(sample[i], defaultVariance);
@@ -138,7 +156,7 @@ namespace VTC.Kernel
         /// <summary>
         /// Percentage of observations accounted for by this component
         /// </summary>
-        public double Weight { get; private set; }
+        public double Weight;
 
         /// <summary>
         /// Update distribution properties assuming that this sample originated from this Gaussian
@@ -165,7 +183,12 @@ namespace VTC.Kernel
 
             }
 
-            Weight = (1 - alpha) * Weight + alpha;
+            Weight = (1-alpha)*Weight + alpha;
+        }
+
+        public void DecreaseWeight(double alpha)
+        {
+            Weight = (1 - alpha) * Weight;
         }
 
         /// <summary>
@@ -199,7 +222,7 @@ namespace VTC.Kernel
         /// <returns></returns>
         public bool SampleMatch(double[] sample, double stdDevThreshold = 2.5)
         {
-           var mahalanobis = AssociateDimensionsWithSamples(sample).Aggregate(0.0, (p, tuple) => p + (tuple.Item1 - tuple.Item2.Mean)/tuple.Item2.StdDev )/sample.Length;
+           var mahalanobis = Math.Sqrt(AssociateDimensionsWithSamples(sample).Aggregate(0.0, (p, tuple) => p + (tuple.Item1 - tuple.Item2.Mean)* (tuple.Item1 - tuple.Item2.Mean)/tuple.Item2.StdDev ));
             if (mahalanobis > stdDevThreshold)
                 return false;
 
@@ -227,17 +250,24 @@ namespace VTC.Kernel
         /// <summary>
         /// Update rate for learning
         /// </summary>
-        private const double Alpha = 0.3;
+        private const double Alpha = 0.01;
 
         /// <summary>
         /// Minimum proportion of samples that should be accounted for by the background model
         /// </summary>
-        private const double T = 0.5;
+        private const double T = 0.9;
 
         /// <summary>
         /// Initial variance for components on first observation
         /// </summary>
-        private const double DefaultVariance = 50;
+        private const double DefaultVariance = 200;
+
+        /// <summary>
+        /// Initial weight for components on first observation
+        /// </summary>
+        private const double DefaultWeight = 0.01;
+
+        private const int MaxComponents = 3;
 
         /// <summary>
         /// Online Mixture-of-Gaussians incremental calculation,  
@@ -247,11 +277,26 @@ namespace VTC.Kernel
         public void TrainIncremental(int[] sample)
         {
             var dSample = sample.Select(Convert.ToDouble).ToArray();
-
             if (MatchesAny(sample))
-                NearestMatchOrNull(sample).UpdateParameters(dSample, Alpha);
+            {
+                var match = NearestMatchOrNull(sample);
+                foreach(var c in _components)
+                    if (c != match)
+                        c.DecreaseWeight(Alpha);
+
+                match.UpdateParameters(dSample, Alpha);
+            }
             else
                 AddNewComponent(sample);
+
+            RenormalizeWeights();
+        }
+
+        private void RenormalizeWeights()
+        {
+            var totalWeight = _components.Aggregate(0.0, (w, g) => w + g.Weight);
+            foreach (var c in _components)
+                c.Weight = c.Weight/totalWeight;
         }
 
         /// <summary>
@@ -259,7 +304,7 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="sample"></param>
         /// <returns></returns>
-        public bool IsForegroundSample(int[] sample)
+        public bool IsBackgroundSample(int[] sample)
         {
             var dSample = sample.Select(Convert.ToDouble).ToArray();
             var bgComponents = BackgroundComponents();
@@ -293,16 +338,7 @@ namespace VTC.Kernel
         /// <returns>Components heuristically determined to represent the background</returns>
         private List<GaussianComponent> BackgroundComponents()
         {
-            _components.Sort(
-                 delegate (GaussianComponent a, GaussianComponent b)
-                 {
-                     if (a.Weight/a.Variance > b.Weight/b.Variance)
-                         return 1;
-                     else
-                         return -1;
-                 });
-            _components.Reverse(); //Sorted in order of decreasing background-ness
-
+            SortComponents();
             var bComponents = new List<GaussianComponent>();
             var proportion = 0.0;
             for (var i = 0; i < _components.Count; i++)
@@ -314,7 +350,35 @@ namespace VTC.Kernel
             }
 
             return bComponents;
-        } 
+        }
+
+        /// <summary>
+        /// Model components heuristically sorted by likelihood
+        /// </summary>
+        /// <returns>Components heuristically sorted by likelihood</returns>
+        public void SortComponents()
+        {
+            if (_components.Count == 0)
+                return;
+
+            if (_components.Count == 1)
+                return;
+
+            _components.Sort(
+                 delegate (GaussianComponent a, GaussianComponent b)
+                 {
+                     if (a.Weight / a.Variance == b.Weight / b.Variance)
+                         return 0;
+
+                     if (a.Weight / a.Variance > b.Weight / b.Variance)
+                         return 1;
+
+                     return -1;
+                 });
+            _components.Reverse(); //Sorted in order of decreasing background-ness
+
+            return;
+        }
 
         /// <summary>
         /// Create new multidimensional Gaussian distribution component based on a sample, add to components list
@@ -322,15 +386,24 @@ namespace VTC.Kernel
         /// <param name="sample"></param>
         private void AddNewComponent(int[] sample)
         {
+            SortComponents();
+            if(_components.Count >= MaxComponents)
+                _components.RemoveAt(_components.Count-1);
             var dSample = sample.Select(Convert.ToDouble).ToArray();
-            var newComponent = new GaussianComponent(dSample, DefaultVariance);
+            var newComponent = new GaussianComponent(dSample, DefaultVariance, DefaultWeight);
             _components.Add(newComponent);
         }
 
-        public int[] SampleBackground()
+        public int[] SampleBackground(int expectedDimensionality=3)
         {
-            var dominantBackground = BackgroundComponents().First();
-            return dominantBackground.Sample();
+            var bgComponents = BackgroundComponents();
+            if (bgComponents != null && bgComponents.Count > 0)
+            {
+                var dominantBackground = bgComponents.First();
+                return dominantBackground.Sample();
+            }
+            
+            return new int[expectedDimensionality];
         }
     }
 }

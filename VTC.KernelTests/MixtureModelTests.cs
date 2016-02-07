@@ -50,6 +50,9 @@ namespace VTC.Kernel.Tests
             Assert.IsTrue(background[0] > 50 && background[0] < 53);
             Assert.IsTrue(background[1] > 20 && background[1] < 23);
             Assert.IsTrue(background[2] > 10 && background[2] < 13);
+
+            Assert.IsTrue(mm.IsBackgroundSample(new int[] {51, 21, 11}));
+            Assert.IsTrue(!mm.IsBackgroundSample(new int[] { 250, 250, 250 }));
         }
     }
 }

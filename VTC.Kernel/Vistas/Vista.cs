@@ -11,7 +11,11 @@ using VTC.Kernel.EventConfig;
 using VTC.Kernel.Settings;
 using System.Collections;
 using Emgu.CV.CvEnum;
+using GeoAPI.Geometries;
 using MathNet.Numerics.Interpolation.Algorithms;
+using NetTopologySuite.Algorithm;
+using NetTopologySuite.Geometries;
+using Point = System.Drawing.Point;
 
 
 namespace VTC.Kernel.Vistas
@@ -44,7 +48,7 @@ namespace VTC.Kernel.Vistas
         //************* Main image variables ***************
         public Image<Bgr, Byte> _frame; //current Frame from camera
         public Image<Bgr, Byte> _correctedFrame; //color-corrected current frame from camera (possibly rotation-corrected later)
-        private Image<Bgr, float> _roiImage; //Area occupied by traffic
+        public Image<Bgr, float> _roiImage; //Area occupied by traffic
         private readonly int _width;
         private readonly int _height;
 
@@ -53,9 +57,10 @@ namespace VTC.Kernel.Vistas
         public Queue<Measurements[]> MeasurementArrayQueue;
         
         public Image<Gray, byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
+        public Image<Gray, byte> MorphologyMask { get; private set; } //Filter for morphologically excluded blobs
         public Image<Gray, byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
-        public Image<Bgr, float> Color_Background { get; private set; } //Average Background being formed
-        public Image<Bgr, byte> Training_Image { get; private set; } //Image to be exported for training set
+        public Image<Bgr, float> ColorBackground { get; private set; } //Average Background being formed
+        public Image<Bgr, byte> TrainingImage { get; private set; } //Image to be exported for training set
 
         public Image<Bgr, byte>[] MeanImages; // Mixture of Gaussian parameters
         public Image<Gray, byte>[] VarianceImages; 
@@ -186,7 +191,7 @@ namespace VTC.Kernel.Vistas
             CarRadius = Settings.CarRadius;
             NoiseMass = Settings.NoiseMass;
 
-            MoGBackgroundSingleton = new MoGBackground(_width, _height);
+            MoGBackgroundSingleton = new MoGBackground(_width, _height, _roiImage);
             BlobsWithArea = new SortedList<CvBlob, int>();
 
             MeasurementArrayQueue = new Queue<Measurements[]>(900);
@@ -244,15 +249,15 @@ namespace VTC.Kernel.Vistas
             numProcessedFrames++;
             _frame = newFrame;
 
-            if (Color_Background == null) //we need at least one frame to initialize the background
+            if (ColorBackground == null) //we need at least one frame to initialize the background
             {
-                Color_Background = newFrame.Convert<Bgr, float>();
+                ColorBackground = newFrame.Convert<Bgr, float>();
             }
             else
             {
                 //if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
                 //    Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
-                Movement_Mask = EnableMoG ? MovementMaskMoG(newFrame) : MovementMask(newFrame, Color_Background);
+                Movement_Mask = EnableMoG ? MovementMaskMoG(newFrame) : MovementMask(newFrame, ColorBackground);
 
                 UpdateBackground(newFrame);
 
@@ -262,9 +267,8 @@ namespace VTC.Kernel.Vistas
                 if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0 && EnableMoG)
                     UpdateBackgroundMoG(newFrame);
 
-                Training_Image = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
+                TrainingImage = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
-                //var measurements = FindBlobCenters(newFrame, count);
                 MeasurementsArray = FindClosedBlobCenters(newFrame);
                 MeasurementArrayQueue.Enqueue(MeasurementsArray);
                 while (MeasurementArrayQueue.Count > 300)
@@ -292,7 +296,7 @@ namespace VTC.Kernel.Vistas
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
-                Color_Background.AccumulateWeighted(BackgroundUpdate, Settings.Alpha);
+                ColorBackground.AccumulateWeighted(BackgroundUpdate, Settings.Alpha);
             }
         }
 
@@ -354,14 +358,15 @@ namespace VTC.Kernel.Vistas
 
         private void UpdateBackgroundMoG(Image<Bgr, Byte> frame)
         {
-            MoGBackgroundSingleton.TryUpdatingAsync(frame);
+            //MoGBackgroundSingleton.TryUpdatingAsync(frame);
+            MoGBackgroundSingleton.Update(frame);
         }
        
         public void InitializeBackground(Image<Bgr, Byte> frame)
         {
             using (Image<Bgr, float> BackgroundUpdate = frame.Convert<Bgr, float>())
             {
-                Color_Background.AccumulateWeighted(BackgroundUpdate, 1.0);
+                ColorBackground.AccumulateWeighted(BackgroundUpdate, 1.0);
             }
         }
 
@@ -375,16 +380,20 @@ namespace VTC.Kernel.Vistas
             //Evaluate current frame
             Image<Gray, Byte> mogMask = new Image<Gray, Byte>(frame.Width, frame.Height);
 
-            ApplyColorCorrection(frame,MoGBackgroundSingleton.BackgroundImage());
+            //ApplyColorCorrection(frame,MoGBackgroundSingleton.BackgroundImage());
 
             for (int i=0;i<frame.Width;i++)
                 for(int j=0; j<frame.Height; j++)
                 {
-                    var sample = new int[] { frame.Data[j, i, 0], frame.Data[j,i,1], frame.Data[j,i,2] };
-                    if(MoGBackgroundSingleton.MmImage[i, j].IsForegroundSample(sample))
-                        mogMask.Data[j,i,0] = byte.MaxValue;
-                    else
-                        mogMask.Data[j, i, 0] = 0;
+                    if (_roiImage.Data[j, i,0] != 0)
+                    {
+                        var sample = new int[] { frame.Data[j, i, 0], frame.Data[j, i, 1], frame.Data[j, i, 2] };
+                        if (!MoGBackgroundSingleton.MmImage[i, j].IsBackgroundSample(sample))
+                            mogMask.Data[j, i, 0] = byte.MaxValue;
+                        else
+                            mogMask.Data[j, i, 0] = 0;
+                    }
+                    
                 }
 
             return mogMask;
@@ -394,7 +403,7 @@ namespace VTC.Kernel.Vistas
         //TODO: Clea this function up, too many things happening
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
-            ApplyColorCorrection(frame, background);
+            //ApplyColorCorrection(frame, background);
 
             Image<Bgr, float> colorDifference = background.AbsDiff(frame.Convert<Bgr, float>());
             Image<Bgr, float> maskedDifference = colorDifference.And(_roiImage);  
@@ -538,8 +547,17 @@ namespace VTC.Kernel.Vistas
 
                 var areaComparer = new BlobAreaComparer();
                 BlobsWithArea = new SortedList<CvBlob, int>(areaComparer);
-                foreach (var targetBlob in resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area > Settings.MinObjectSize))
+                foreach (
+                    var targetBlob in
+                        resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area >= Settings.MinObjectSize))
+                {
                     BlobsWithArea.Add(targetBlob, targetBlob.Area);
+                    Movement_Mask.FillConvexPoly(targetBlob.GetContour(), new Gray(255));
+                }
+
+                MorphologyMask = new Image<Gray, byte>(tempMovementMask.Width, tempMovementMask.Height,new Gray(255));
+                foreach (var targetBlob in resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area < Settings.MinObjectSize))
+                    MorphologyMask.FillConvexPoly(targetBlob.GetContour(),new Gray(0));
 
                 int numWebcamBlobsFound = BlobsWithArea.Count();
                 if (numWebcamBlobsFound > Settings.MaxTargets)
@@ -555,14 +573,6 @@ namespace VTC.Kernel.Vistas
                         var colour = GetBlobColour(frame, targetBlob.Centroid.X, targetBlob.Centroid.Y, 3.0);
                         var coords = new Measurements() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
                         coordinatesList.Add(coords);
-                        //var measurements = BlobFinder.SplitAndFindCenterpoints(frame, tempMovementMask, targetBlob);
-                        //foreach (var m in measurements)
-                        //{
-                        //    coordinatesList.Add(m);
-                            //TODO: Move the blob centerpoint rendering somewhere else.
-                            //Do this last so that it doesn't interfere with color sampling
-                            //frame.Draw(new CircleF(new PointF((float)m.X, (float)m.Y), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                        //}
                     }
                 }
 
@@ -578,13 +588,13 @@ namespace VTC.Kernel.Vistas
             {
                 Image<Bgr, float> Overlay = new Image<Bgr, float>(_width, _height, GreenColor);
                 Overlay = Overlay.And(_roiImage);
-                Overlay.Accumulate(Color_Background);
+                Overlay.Accumulate(ColorBackground);
 
                 return Overlay;
             }
             else
             {
-                return Color_Background;
+                return ColorBackground;
             }
 
         }
@@ -593,6 +603,7 @@ namespace VTC.Kernel.Vistas
         {
 
             var vehicles = MHT.CurrentVehicles;
+            Image<Bgr, byte> stateImage = frame.Clone();
 
             vehicles.ForEach(delegate(Vehicle vehicle)
             {
@@ -616,15 +627,15 @@ namespace VTC.Kernel.Vistas
                 {
                     if (render_clean)
                     {
-                        frame.Draw(new CircleF(new PointF(x, y), 10),
+                        stateImage.Draw(new CircleF(new PointF(x, y), 10),
                             new Bgr(vehicle.StateHistory.Last().Blue, vehicle.StateHistory.Last().Green,
                                 vehicle.StateHistory.Last().Red), 2);
-                        frame.Draw(new CircleF(new PointF(x, y), 2), StateColorGreen, 1);
+                        stateImage.Draw(new CircleF(new PointF(x, y), 2), StateColorGreen, 1);
                     }
                     else
                     {
-                        frame.Draw(new CircleF(new PointF(x, y), radius), StateColorGreen, 1);
-                        frame.Draw(
+                        stateImage.Draw(new CircleF(new PointF(x, y), radius), StateColorGreen, 1);
+                        stateImage.Draw(
                             new LineSegment2D(new Point((int) x, (int) y),
                                 new Point((int) (x + vx_render), (int) (y + vy_render))), StateColorRed, 1);
                     }
@@ -647,12 +658,12 @@ namespace VTC.Kernel.Vistas
                     double ageFactor = 1.0 - (double) (DateTime.Now - t.exitTime).Ticks / (TimeSpan.FromSeconds(3).Ticks);
                     Bgr trajectoryColor = new Bgr(0, 0, 200*ageFactor);
                     Point[] trajectoryRendering = t.stateEstimates.Select(s => new Point((int)s.X, (int)s.Y)).ToArray();
-                    frame.DrawPolyline(trajectoryRendering, false, trajectoryColor);    
+                    stateImage.DrawPolyline(trajectoryRendering, false, trajectoryColor);    
                 }
             }
                 
 
-            return frame;
+            return stateImage;
         }
     }
 }

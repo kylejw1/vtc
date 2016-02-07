@@ -447,7 +447,7 @@ namespace VTC
        /// <returns>Byte array containing the current frame in PNG format</returns>
       private Byte[] GetCameraFrameBytes()
       {
-           using (var bmp = _vista.Color_Background.ToBitmap())
+           using (var bmp = _vista.ColorBackground.ToBitmap())
            using (var stream = new MemoryStream())
            {
                bmp.Save(stream, ImageFormat.Png);
@@ -517,13 +517,14 @@ namespace VTC
 
           if (_vista.Movement_Mask != null)
           {
-              Image<Bgr, Byte> movementTimesImage = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>());
+              Image<Bgr, Byte> movementTimesImage = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr,byte>());
               _movementDisplay.Update(movementTimesImage);
           }
 
-          if (_vista.Movement_MaskMoG != null)
-          {
-              Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_MaskMoG.Convert<Bgr, byte>());
+          if (MoGcheckBox.Checked)
+          {     
+              //Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.MoGBackgroundSingleton.ForegroundMask(frame).Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr,byte>());
+              Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr, byte>());
               _mixtureMovementDisplay.Update(movementTimesImageMoG);
           }
       }
@@ -627,7 +628,7 @@ namespace VTC
 
       private void btnConfigureRegions_Click(object sender, EventArgs e)
       {
-          RegionEditor r = new RegionEditor(_vista.Color_Background, _vista.RegionConfiguration);
+          RegionEditor r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)
           {
               _vista.RegionConfiguration = r.RegionConfig;
