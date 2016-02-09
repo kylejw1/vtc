@@ -1,5 +1,5 @@
 using System;
-using VTC.Kernel.Settings;
+using VTC.Common;
 
 namespace OptAssignTest
 {
@@ -106,6 +106,11 @@ namespace OptAssignTest
         public string RegionConfigPath
         {
             get { return "config\regionConfig.xml"; }
+        }
+
+        public string LogfilePath
+        {
+            get { return "C:\\TrafficCamera"; }
         }
 
         public double Alpha

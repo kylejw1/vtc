@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
-using VTC.Kernel;
+using VTC.Common;
 
 namespace VTC.Reporting.ReportItems
 {

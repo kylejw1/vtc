@@ -1,4 +1,4 @@
-﻿using VTC.Kernel.Settings;
+﻿using VTC.Common;
 
 namespace VTC.Kernel.Video
 {

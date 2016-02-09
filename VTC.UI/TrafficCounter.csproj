@@ -261,6 +261,10 @@
       <Project>{65f06eac-770b-4ce9-88b4-d69297f83673}</Project>
       <Name>LicenseManager</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VTC.Common\VTC.Common.csproj">
+      <Project>{4c7016df-c1a1-485d-846c-22c7eabb4368}</Project>
+      <Name>VTC.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VTC.Kernel\VTC.Kernel.csproj">
       <Project>{d8a795d9-f343-4db5-a993-eb35d1a4c182}</Project>
       <Name>VTC.Kernel</Name>

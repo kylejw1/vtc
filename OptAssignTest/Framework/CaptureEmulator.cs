@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using VTC.Kernel.Settings;
 using VTC.Kernel.Video;
+using VTC.Common;
 
 namespace OptAssignTest.Framework
 {

@@ -1,6 +1,6 @@
 using System.Drawing;
+using VTC.Common;
 using VTC.Kernel.RegionConfig;
-using VTC.Kernel.Settings;
 using VTC.Kernel.Vistas;
 
 namespace OptAssignTest

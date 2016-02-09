@@ -5,28 +5,28 @@ using System.Windows.Forms;
 
 namespace VTC.Reporting
 {
-    public class ServerReporter
+    public class Reporter
     {
         private Timer ReportTimer;
         private List<ReportItem> ReportItems;
 
-        // Server reporter is a singleton as we don't want to have multiple instances all
+        // Reporter is a singleton as we don't want to have multiple instances all
         // reporting back on their own
-        private static ServerReporter _instance = null;
-        public static ServerReporter INSTANCE
+        private static Reporter _instance = null;
+        public static Reporter INSTANCE
         {
             get
             {
                 if (null == _instance)
                 {
-                    _instance = new ServerReporter();
+                    _instance = new Reporter();
                 }
 
                 return _instance;
             }
         }
 
-        private ServerReporter()
+        private Reporter()
         {
             ReportItems = new List<ReportItem>();
         }

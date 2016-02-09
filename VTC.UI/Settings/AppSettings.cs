@@ -1,8 +1,8 @@
 using System;
 using System.Configuration;
 using System.Globalization;
-using VTC.Kernel.Settings;
 using System.Linq;
+using VTC.Common;
 
 namespace VTC.Settings
 {
@@ -77,6 +77,7 @@ namespace VTC.Settings
         public String[] Classes { get; private set; }
 
         public string RegionConfigPath { get; private set; }
+        public string LogfilePath { get; private set; }
 
         /// <summary>
         /// Assembly with unit tests to visualize.
@@ -114,7 +115,6 @@ namespace VTC.Settings
             CarRadius = Convert.ToInt32(ConfigurationManager.AppSettings[CarRadiusKey]);
             MinObjectSize = Convert.ToInt32(ConfigurationManager.AppSettings["MinObjectSize"]);
             PerCarMinimum = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarMinKey], CultureInfo.InvariantCulture);
-            MaxObjectCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxObjCount"]);
             NoiseMass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"], CultureInfo.InvariantCulture);
             Timestep = Convert.ToDouble(ConfigurationManager.AppSettings["Timestep"], CultureInfo.InvariantCulture);
 
@@ -134,13 +134,14 @@ namespace VTC.Settings
             IntersectionID = ConfigurationManager.AppSettings[IntersectionIdKey];
 
             String[] classKeyStrings = ConfigurationManager.AppSettings.AllKeys;
-            Classes = classKeyStrings.Where(this_key => this_key.Contains("class")).Select(element => element.Substring(6,element.Length-6)).ToArray();
+            Classes = classKeyStrings.Where(thisKey => thisKey.Contains("class")).Select(element => element.Substring(6,element.Length-6)).ToArray();
             ClassifierSubframeWidth = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeWidth"]);
             ClassifierSubframeHeight = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeHeight"]);
 
             VelocityFieldResolution = Convert.ToInt16(ConfigurationManager.AppSettings["VelocityFieldResolution"]);
 
             RegionConfigPath = ConfigurationManager.AppSettings["RegionConfig"];
+            LogfilePath = ConfigurationManager.AppSettings["LogFilePath"];
 
             _config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
@@ -158,10 +159,6 @@ namespace VTC.Settings
             VehicleInitialCovB = Convert.ToDouble(ConfigurationManager.AppSettings["VehicleInitialCovB"]);
 
             CompensationGain = Convert.ToDouble(ConfigurationManager.AppSettings["CompensationGain"], CultureInfo.InvariantCulture);        
-
-            // some unused settings from TrafficCounter. Keeping it just in case.
-            double pruning_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["PruningRatio"]);    //Probability ratio at which hypotheses are pruned
-            
         }
 
         /// <summary>
@@ -174,7 +171,6 @@ namespace VTC.Settings
             _config.AppSettings.Settings[IntersectionIdKey].Value = IntersectionID;
             _config.AppSettings.Settings[FrameWidthKey].Value = FrameWidth.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[FrameHeightKey].Value = FrameHeight.ToString(CultureInfo.InvariantCulture);
-            
 
             _config.Save(ConfigurationSaveMode.Modified);
 

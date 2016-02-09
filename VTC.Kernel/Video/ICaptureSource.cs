@@ -1,6 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
-using VTC.Kernel.Settings;
+using VTC.Common;
 
 namespace VTC.Kernel.Video
 {

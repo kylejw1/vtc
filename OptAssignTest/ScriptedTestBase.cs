@@ -5,7 +5,7 @@ using System.Linq;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using OptAssignTest.Framework;
-using VTC.Kernel.Settings;
+using VTC.Common;
 using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 

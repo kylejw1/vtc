@@ -22,6 +22,7 @@ using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
+using VTC.Common;
 using SkyXoft.BusinessSolutions.LicenseManager.Protector;
 
 
@@ -60,6 +61,11 @@ namespace VTC
        // unit tests has own settings, so need to store "pairs" (capture, settings)
        private CaptureContext[] _testCaptureContexts;
 
+       public string GetVideoSource()
+       {
+           return SelectedCamera.Name;
+       }
+
        /// <summary>
        /// Active camera.
        /// </summary>
@@ -77,9 +83,9 @@ namespace VTC
 
               _selectedCamera = value;
               _selectedCamera.Init(_settings);
-
+                
               _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
-
+              _vista.GetCameraSource = GetVideoSource;
 
               // kind-of ugly... to refactor someday
               if (_unitTestsMode)
@@ -105,7 +111,7 @@ namespace VTC
       }
 
       //************* Multiple hypothesis tracking parameters ***************  
-      Vista _vista = null;
+      Vista _vista;
 
        /// <summary>
        /// Constructor.
@@ -221,7 +227,7 @@ namespace VTC
          Application.Idle += ProcessFrame;
 
          String intersectionImagePath = "ftp://"+ _settings.ServerUrl +"/intersection_" + _settings.IntersectionID + ".png";
-         ServerReporter.INSTANCE.AddReportItem(
+         Reporter.INSTANCE.AddReportItem(
              new FtpSendFileReportItem(
                  _settings.FrameUploadIntervalMinutes, 
                  new Uri(intersectionImagePath),
@@ -229,7 +235,7 @@ namespace VTC
                   GetCameraFrameBytes
                  ));
 
-         ServerReporter.INSTANCE.Start(); //TODO: Figure out a better way of synchronizing this state with UI (checkbox).
+         Reporter.INSTANCE.Start(); //TODO: Figure out a better way of synchronizing this state with UI (checkbox).
 
       }
 
@@ -276,7 +282,6 @@ namespace VTC
             try
             {
                 // Write the string to a file.
-
                 var pathString = "C:\\TrafficCounter\\Counts " + DateTime.Now.ToString("dd-MM-yyyy-hh-mm-ss") + ".txt";
                 System.IO.StreamWriter file = new System.IO.StreamWriter(pathString);
                 file.WriteLine(SelectedCamera.Name);
@@ -301,9 +306,7 @@ namespace VTC
           // Add video file as source, if provided
           if (UseLocalVideo(filename))
           {
-                var vfc = new VideoFileCapture(filename);
-                vfc.captureCompleteEvent += WriteCountsToFile;
-                AddCamera(vfc);
+                LoadCameraFromFilename(filename);
           }
 
           //List all video input devices.
@@ -336,6 +339,13 @@ namespace VTC
           }
 
       }
+
+       private void LoadCameraFromFilename(string filename)
+       {
+           var vfc = new VideoFileCapture(filename);
+           vfc.captureCompleteEvent += WriteCountsToFile;
+           AddCamera(vfc);
+       }
 
        /// <summary>
        /// Try to detect unit tests. Play unit tests (if detected).
@@ -493,7 +503,7 @@ namespace VTC
 
                   //Export training images
                   if(DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
-                  tryExportDataset(frameForProcessing);
+                  TryExportDataset(frameForProcessing);
 
                   if (delayProcessingCheckbox.Checked)
                       Thread.Sleep(500);
@@ -660,11 +670,11 @@ namespace VTC
       {
           if (pushStateCheckbox.Checked)
           {
-              ServerReporter.INSTANCE.Start();
+              Reporter.INSTANCE.Start();
           }
           else
           {
-              ServerReporter.INSTANCE.Stop();
+              Reporter.INSTANCE.Stop();
           }
       }
 
@@ -686,12 +696,12 @@ namespace VTC
            _vista.EnableMoG = MoGcheckBox.Checked;
        }
 
-       private void tryExportDataset(Image<Bgr,byte> frame)
+       private void TryExportDataset(Image<Bgr,byte> frame)
        {
            _lastDatasetExportTime = DateTime.Now;
            if (exportDatasetsCheckbox.Checked)
            {
-                   ExportTrainingSet.ExportTrainingSet eT = new ExportTrainingSet.ExportTrainingSet(_settings,
+                   var eT = new ExportTrainingSet.ExportTrainingSet(_settings,
                        frame.Convert<Bgr, float>(), _vista.CurrentVehicles, _vista.Movement_Mask);
                    //eT.autoExportScaledPositives(); //TODO: Make this an option, not just commented out
                    //eT.autoExportScaledMasks();
@@ -702,8 +712,8 @@ namespace VTC
 
        private void watchdogTimer_Tick(object sender, EventArgs e)
        {
-            var heartbeatDirPath = ".\\";
-            var heartbeatFilePath = heartbeatDirPath + "heartbeat";
+            const string heartbeatDirPath = ".\\";
+            const string heartbeatFilePath = heartbeatDirPath + "heartbeat";
 
             Directory.CreateDirectory(heartbeatDirPath);
             if (!File.Exists(heartbeatFilePath))
@@ -716,6 +726,21 @@ namespace VTC
        {
            _vista.hide_trackers = !_vista.hide_trackers;
        }
-        
-   }
+
+        private void SelectVideosButton_Click(object sender, EventArgs e)
+        {
+            var dr = selectVideoFilesDialog.ShowDialog();
+            if (dr == DialogResult.OK)
+                LoadVideosFromPath(selectVideoFilesDialog.FileNames.ToList());
+        }
+
+       private void LoadVideosFromPath(List<string> videosToProcess )
+       {
+           _cameras.Clear();
+           foreach (var p in videosToProcess)
+               LoadCameraFromFilename(p);
+
+           CameraComboBox_SelectedIndexChanged(null, null);
+       }
+    }
 }

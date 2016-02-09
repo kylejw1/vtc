@@ -8,13 +8,13 @@ using Emgu.CV.Cuda;
 using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
 using VTC.Kernel.EventConfig;
-using VTC.Kernel.Settings;
 using System.Collections;
 using Emgu.CV.CvEnum;
 using GeoAPI.Geometries;
 using MathNet.Numerics.Interpolation.Algorithms;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
+using VTC.Common;
 using Point = System.Drawing.Point;
 
 
@@ -29,6 +29,9 @@ namespace VTC.Kernel.Vistas
     public abstract class Vista
     {
         protected ISettings Settings { get; private set; }
+
+        public delegate string GetSource();
+        public GetSource GetCameraSource;
 
         #region Static colors
 
@@ -52,9 +55,9 @@ namespace VTC.Kernel.Vistas
         private readonly int _width;
         private readonly int _height;
 
-        public Measurements[] MeasurementsArray;
+        public Measurement[] MeasurementsArray;
         public SortedList<CvBlob, int> BlobsWithArea;
-        public Queue<Measurements[]> MeasurementArrayQueue;
+        public Queue<Measurement[]> MeasurementArrayQueue;
         
         public Image<Gray, byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
         public Image<Gray, byte> MorphologyMask { get; private set; } //Filter for morphologically excluded blobs
@@ -194,7 +197,7 @@ namespace VTC.Kernel.Vistas
             MoGBackgroundSingleton = new MoGBackground(_width, _height, _roiImage);
             BlobsWithArea = new SortedList<CvBlob, int>();
 
-            MeasurementArrayQueue = new Queue<Measurements[]>(900);
+            MeasurementArrayQueue = new Queue<Measurement[]>(900);
             OpticalFlow = new double[_width][][];
             for (int i = 0; i < _width; i++)
             {
@@ -502,12 +505,12 @@ namespace VTC.Kernel.Vistas
             return frame.GetAverage(mask);
         }
 
-        private Measurements[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
+        private Measurement[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
         {
-			Measurements[] coordinates;
+			Measurement[] coordinates;
             using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
             {
-                coordinates = new Measurements[count];
+                coordinates = new Measurement[count];
                 for (int detection_count = 0; detection_count < count; detection_count++)
                 {
                     double[] minValues;
@@ -521,7 +524,7 @@ namespace VTC.Kernel.Vistas
 					var x = maxLocation[0];
 					var y = maxLocation[1];
 					var colour = GetBlobColour(frame, x, y, 3.0);
-					var coords = new Measurements() { X = x, Y = y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
+					var coords = new Measurement() { X = x, Y = y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
 					coordinates[detection_count] = coords;
 
                     //Do this last so that it doesn't interfere with color sampling
@@ -531,9 +534,9 @@ namespace VTC.Kernel.Vistas
             return coordinates;
         }
 
-        private Measurements[] FindClosedBlobCenters(Image<Bgr, Byte> frame)
+        private Measurement[] FindClosedBlobCenters(Image<Bgr, Byte> frame)
         {
-            Measurements[] coordinates;
+            Measurement[] coordinates;
             var w_orig = frame.Width;
             var h_orig = frame.Height;
 
@@ -563,15 +566,15 @@ namespace VTC.Kernel.Vistas
                 if (numWebcamBlobsFound > Settings.MaxTargets)
                     numWebcamBlobsFound = Settings.MaxTargets;
 
-                coordinates = new Measurements[numWebcamBlobsFound];
-                List<Measurements> coordinatesList = new List<Measurements>();
+                coordinates = new Measurement[numWebcamBlobsFound];
+                List<Measurement> coordinatesList = new List<Measurement>();
                 for(int i=0; i<numWebcamBlobsFound; i++)
                 {
                     if (i < Settings.MaxTargets)
                     {
                         CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
                         var colour = GetBlobColour(frame, targetBlob.Centroid.X, targetBlob.Centroid.Y, 3.0);
-                        var coords = new Measurements() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
+                        var coords = new Measurement() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
                         coordinatesList.Add(coords);
                     }
                 }

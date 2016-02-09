@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra.Double;
-using VTC.Kernel.Settings;
 using System.Drawing;
+using VTC.Common;
 
 namespace VTC.Kernel
 {
@@ -66,7 +66,7 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="detections">Information about each detected item present in the latest readings.  This 
         /// list is assumed to be complete.</param>
-        public void Update(Measurements[] detections)
+        public void Update(Measurement[] detections)
         {
             int numDetections = detections.Length;
 
@@ -101,7 +101,7 @@ namespace VTC.Kernel
                     childHypothesisTree.PopulateSystemDynamicsMatrices(_settings.Q_position, _settings.Q_color, _settings.R_position, _settings.R_color, _settings.Timestep, _settings.CompensationGain);
 
                     childHypothesis.Probability = Math.Pow((1 - _settings.Pd), numExistingTargets);
-                    //Update states for vehicles without measurements
+                    //Update states for vehicles without Measurement
                     for (int j = 0; j < numExistingTargets; j++)
                     {
                         //Updating state for missed measurement
@@ -135,7 +135,7 @@ namespace VTC.Kernel
         /// <param name="detections">Coordinates of all detections present in the latest measurements.  This 
         /// list is assumed to be complete.</param>
         /// <param name="hypothesisNode">The node to build the new hypotheses from</param>
-        private void GenerateChildNodes(Measurements[] detections, Node<StateHypothesis> hypothesisNode)
+        private void GenerateChildNodes(Measurement[] detections, Node<StateHypothesis> hypothesisNode)
         {
             //Allocate matrix one column for each existing vehicle plus one column for new vehicles and one for false positives, one row for each object detection event
 
@@ -179,7 +179,7 @@ namespace VTC.Kernel
         /// <param name="hypothesisParent">Hypothesis node to add child hypotheses to</param>
         /// <param name="numExistingTargets">Number of currently detected targets</param>
         /// <param name="hypothesisExpanded">Hypothesis matrix</param>
-        private void GenerateChildHypotheses(Measurements[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesisExpanded)
+        private void GenerateChildHypotheses(Measurement[] coords, int numDetections, Node<StateHypothesis> hypothesisParent, int numExistingTargets, DenseMatrix hypothesisExpanded)
         {
             //Calculate K-best assignment using Murty's algorithm
             double[,] costs = hypothesisExpanded.ToArray();
@@ -300,7 +300,7 @@ namespace VTC.Kernel
         /// <param name="numExistingTargets">Number of currently detected targets</param>
         /// <param name="targetStateEstimates">Latest state estimates for each known target</param>
         /// <returns></returns>
-        private DenseMatrix GenerateAmbiguityMatrix(Measurements[] coordinates, int numExistingTargets, StateEstimate[] targetStateEstimates)
+        private DenseMatrix GenerateAmbiguityMatrix(Measurement[] coordinates, int numExistingTargets, StateEstimate[] targetStateEstimates)
         {
             // TODO:  Can't we get numExistingTargets from target_state_estimates Length?
 

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
-using VTC.Kernel.Settings;
+using VTC.Common;
 using VTC.Kernel.Video;
 
 namespace VTC.CaptureSource

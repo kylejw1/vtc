@@ -11,6 +11,7 @@ using VTC.Kernel;
 using VTC.Kernel.Vistas;
 using System.ServiceModel.Web;
 using System.Runtime.Serialization.Json;
+using VTC.Common;
 using VTC.Reporting.ReportItems;
 
 namespace OptAssignTest

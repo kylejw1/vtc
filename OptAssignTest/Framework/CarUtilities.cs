@@ -1,5 +1,5 @@
 ﻿using System;
-using VTC.Kernel.Settings;
+using VTC.Common;
 
 namespace OptAssignTest.Framework
 {
