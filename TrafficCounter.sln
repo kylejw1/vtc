@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LicenseManager", "LicenseMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTC.Common", "VTC.Common\VTC.Common.csproj", "{4C7016DF-C1A1-485D-846C-22C7EABB4368}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{07EBE1D6-7F79-4E84-AC86-1524083DED65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,8 @@ Global
 		{4C7016DF-C1A1-485D-846C-22C7EABB4368}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C7016DF-C1A1-485D-846C-22C7EABB4368}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C7016DF-C1A1-485D-846C-22C7EABB4368}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07EBE1D6-7F79-4E84-AC86-1524083DED65}.Debug|Any CPU.ActiveCfg = Debug
+		{07EBE1D6-7F79-4E84-AC86-1524083DED65}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
