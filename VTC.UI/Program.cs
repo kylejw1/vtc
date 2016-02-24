@@ -22,6 +22,10 @@ namespace VTC
             Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
 
+            int delayMs = 5000;
+            var ss = new SplashScreen(delayMs);
+            ss.Show();
+
             _logger.Info("***** Start. v." + Assembly.GetExecutingAssembly().GetName().Version.ToString());
             if (args.Length > 0)
             {

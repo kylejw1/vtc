@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using Emgu.CV;
@@ -84,8 +85,16 @@ namespace VTC.Kernel.RegionConfig
             var ioArray = image.GetInputOutputArray();
             var mask = new Image<Gray, byte>(new Size(image.Width + 2, image.Height + 2));
             IInputOutputArray iioMask = mask;
-            CvInvoke.FloodFill(iioArray, mask, new Point(0, 0), new MCvScalar(0, 0, 0), out rect, lo, up,
+            try
+            {
+                CvInvoke.FloodFill(iioArray, mask, new Point(0, 0), new MCvScalar(0, 0, 0), out rect, lo, up,
                 Connectivity.FourConnected, FloodFillType.Default);
+            }
+            catch(Emgu.CV.Util.CvException e)
+            {
+                Debug.WriteLine("Exception in GetMask:CvInvoke.FloodFill");
+            }
+            
 
             return image;
         }

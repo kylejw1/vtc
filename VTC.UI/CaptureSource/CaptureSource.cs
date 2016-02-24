@@ -60,11 +60,18 @@ namespace VTC.CaptureSource
             var frame = _cameraCapture.QueryFrame();
             if (frame == null)
             {
-                captureCompleteEvent.Invoke();
-                _cameraCapture.Stop();
-                _cameraCapture.Start();
+                if (_cameraCapture.CaptureSource == Capture.CaptureModuleType.Camera)
+                {
+                    _cameraCapture.Stop();
+                    _cameraCapture.Start();
+                    Debug.WriteLine("Restarting camera: " + DateTime.Now);
+                }
+                else
+                {
+                    //Video is finished
+                    captureCompleteEvent?.Invoke();
+                }
 
-                Debug.WriteLine("Restarting camera: " + DateTime.Now);
                 return null;
             }
             return frame.ToImage<Bgr,byte>();

@@ -51,12 +51,14 @@ namespace VTC
        private DateTime _lastDatasetExportTime;
        
 
-      private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
-      private ICaptureSource _selectedCamera;
+       private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
+       private ICaptureSource _selectedCamera;
+       private List<string> VideosToProcess;
+       private bool BatchMode;
 
        private string _appArgument; //For debugging only, delete this later
        private bool _isLicensed;
-       private TimeSpan TrialLicenseTimeLimit = TimeSpan.FromMinutes(2);
+       private TimeSpan TrialLicenseTimeLimit = TimeSpan.FromMinutes(30);
 
        // unit tests has own settings, so need to store "pairs" (capture, settings)
        private CaptureContext[] _testCaptureContexts;
@@ -87,8 +89,10 @@ namespace VTC
               _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
               _vista.GetCameraSource = GetVideoSource;
 
+              SetImageBoxesToVideoSize();
+
               // kind-of ugly... to refactor someday
-              if (_unitTestsMode)
+                if (_unitTestsMode)
               {
                   // create mask for the whole image
                   var polygon = new Polygon();
@@ -119,13 +123,12 @@ namespace VTC
        /// <param name="settings">Application settings.</param>
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, bool isLicensed, string appArgument = null)
-       {
-
+       {           
            _appArgument = appArgument; 
 
           InitializeComponent();
 
-           _settings = settings;
+            _settings = settings;
            _isLicensed = isLicensed;
 
            // check if app should run in unit test visualization mode
@@ -156,33 +159,39 @@ namespace VTC
           //Initialize parameters.
           LoadParameters();
 
-           System.Windows.Forms.Timer t = new System.Windows.Forms.Timer {Interval = 1000};
-           t.Tick += OnTick;
-           t.Start();
-
            //Create video windows
            CreateVideoWindows();
 
            _applicationStartTime = DateTime.Now;
            _lastDatasetExportTime = DateTime.Now;
-           
+
+            VideosToProcess = new List<string>();
+
+           DisableExperimental();
+
            Run();
       }
 
-
-       //TODO: Move this to the Render Frames (??) function where everything else is drawn. 
-       private void OnTick(object sender, EventArgs eventArgs)
+        //Hide UI for functionality under development when in release mode
+       private void DisableExperimental()
        {
-           if (_vista != null)
-           {
-               var image = new Image<Bgr, Byte>(800, 600);
-               _vista.DrawVelocityField(image, new Bgr(Color.White), 1);
-               _velocityFieldDisplay.Update(image);
-               Image<Gray, byte> pimage;
-               pimage = _vista.VelocityProjection();
-               _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
-           }
-       }
+#if DEBUG
+#endif
+
+#if !DEBUG
+           intersectionIDTextBox.Visible = false;
+           intersectionIDLabel.Visible = false;
+           serverURLLabel.Visible = false;
+           serverUrlTextBox.Visible = false;
+           pushStateCheckbox.Visible = false;
+           exportDatasetsCheckbox.Visible = false;
+           SaveParametersBtn.Visible = false;
+           hideTrackersButton.Visible = false;
+           disableOpticalFlowCheckbox.Visible = false;
+           MoGcheckBox.Visible = false;
+           delayProcessingCheckbox.Visible = false;
+#endif
+        }
 
        private void CreateVideoWindows()
        {
@@ -190,26 +199,29 @@ namespace VTC
            _movementDisplay = new VideoDisplay("Movement", new Point(50 + _mainDisplay.Width + _mainDisplay.Location.X, 25));
            _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
            _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
-           _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
+#if DEBUG
+            _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _3DPointsDisplay = new VideoDisplay("3D Points", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
            _opticalFlowDisplay = new VideoDisplay("Optical Flow", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
             _correctedInputDisplay = new VideoDisplay("Corrected input video", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
-
+#endif
 
             _videoMux = new VideoMux();
             _videoMux.AddDisplay(_mainDisplay.ImageBox, _mainDisplay.LayerName);
 			_videoMux.AddDisplay(_movementDisplay.ImageBox, _movementDisplay.LayerName);
 			_videoMux.AddDisplay(_backgroundDisplay.ImageBox, _backgroundDisplay.LayerName);
 			_videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
-			_videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
+#if DEBUG
+            _videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
             _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
             _videoMux.AddDisplay(_opticalFlowDisplay.ImageBox, _opticalFlowDisplay.LayerName);
             _videoMux.AddDisplay(_correctedInputDisplay.ImageBox, _correctedInputDisplay.LayerName);
-			_videoMux.Show();
+#endif
+            _videoMux.Show();
        }
 
        void Run()
@@ -277,26 +289,6 @@ namespace VTC
            CameraComboBox.Items.Add(camera.Name);
        }
 
-       public void WriteCountsToFile()
-        {
-            try
-            {
-                // Write the string to a file.
-                var pathString = "C:\\TrafficCounter\\Counts " + DateTime.Now.ToString("dd-MM-yyyy-hh-mm-ss") + ".txt";
-                System.IO.StreamWriter file = new System.IO.StreamWriter(pathString);
-                file.WriteLine(SelectedCamera.Name);
-                file.WriteLine("");
-                file.WriteLine("*** Movement count ***");
-                file.WriteLine(tbVistaStats.Text);
-                file.Close();
-                Application.Exit();
-            }
-            catch(Exception e)
-            {
-                Log(LogLevel.Error, e.ToString());
-            }
-        }
-
        /// <summary>
        /// Method for initializing the camera selection combobox.
        /// </summary>
@@ -340,11 +332,19 @@ namespace VTC
 
       }
 
-       private void LoadCameraFromFilename(string filename)
+       private VideoFileCapture LoadCameraFromFilename(string filename)
        {
            var vfc = new VideoFileCapture(filename);
-           vfc.captureCompleteEvent += WriteCountsToFile;
+           vfc.captureCompleteEvent += NotifyProcessingComplete;
            AddCamera(vfc);
+           return vfc;
+       }
+
+       private void NotifyProcessingComplete()
+       {
+           infoBox.AppendText("Video complete" + Environment.NewLine);
+           DequeueVideo();
+           return;
        }
 
        /// <summary>
@@ -404,10 +404,12 @@ namespace VTC
       private void CameraComboBox_SelectedIndexChanged(object sender, EventArgs e)
       {
         //Change the capture device.
-        SelectedCamera = _cameras[CameraComboBox.SelectedIndex];   
+        SelectedCamera = _cameras[CameraComboBox.SelectedIndex];
+        Application.Idle -= ProcessFrame;
+        Application.Idle += ProcessFrame;
 
-          // TODO: change settings if app in unit tests visualization mode
-      }
+            // TODO: change settings if app in unit tests visualization mode
+        }
 
       /// <summary>
       /// Method for refreshing the background.
@@ -474,43 +476,66 @@ namespace VTC
       {
               using (Image<Bgr, Byte> frame = SelectedCamera.QueryFrame())
               {
-                  //Workaround - dispose and restart capture if camera starts returning null. 
-                  //TODO: Investigate - why is this necessary?
-                  if (frame == null)
-                  {   
-                      SelectedCamera = new VideoFileCapture(_appArgument);
-                      Debug.WriteLine("Restarting camera: " + DateTime.Now);
-                      return;
+                  try
+                  {
+                      //Workaround - dispose and restart capture if camera starts returning null. 
+                      //TODO: Investigate - why is this necessary?
+                      if (frame == null)
+                      { 
+                        if(BatchMode)
+                        {
+                            if (VideosToProcess.Count > 0)
+                                DequeueVideo();
+                            else
+                                return;
+                        }
+                        else
+                        {
+                            SelectedCamera = new VideoFileCapture(_appArgument);
+                            Debug.WriteLine("Restarting camera: " + DateTime.Now);
+                            return;
+                        }
+                      }
+
+                      Image<Bgr, Byte> frameForProcessing = frame.Clone();
+                          // Necessary so that frame.Data becomes accessible
+                      Image<Bgr, Byte> frameForRendering = frame.Clone();
+
+                      // Send the new image frame to the vista for processing
+                      _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
+                      _vista.Update(frameForProcessing);
+
+                      // Update image boxes
+                      UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);
+
+                      // Update statistics
+                      trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
+                      tbVistaStats.Text = _vista.GetStatString();
+
+                      //Thread.Sleep((int)_settings.Timestep * 1000); 
+                      TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
+                      timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+
+                      //Export training images
+                      if (DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
+                          TryExportDataset(frameForProcessing);
+
+                      if (delayProcessingCheckbox.Checked)
+                          Thread.Sleep(500);
+
+                      if (activeTime > TrialLicenseTimeLimit && !_isLicensed)
+                          NotifyLicenseAndExit();
                   }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    throw;           
+#else
+                    _logger.Log(LogLevel.Error, "In Vista:Update(), " + ex.Message);
+#endif
+                }
 
-                  Image<Bgr, Byte> frameForProcessing = frame.Clone(); // Necessary so that frame.Data becomes accessible
-                  Image<Bgr, Byte> frameForRendering = frame.Clone();
-
-                  // Send the new image frame to the vista for processing
-                  _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
-                  _vista.Update(frameForProcessing);
-
-                  // Update image boxes
-                  UpdateImageBoxes(frameForRendering);
-
-                  // Update statistics
-                  trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
-                  tbVistaStats.Text = _vista.GetStatString();
-
-                  //Thread.Sleep((int)_settings.Timestep * 1000); 
-                  TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
-                  timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
-
-                  //Export training images
-                  if(DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
-                  TryExportDataset(frameForProcessing);
-
-                  if (delayProcessingCheckbox.Checked)
-                      Thread.Sleep(500);
-
-                  if (activeTime > TrialLicenseTimeLimit && !_isLicensed)
-                      NotifyLicenseAndExit();
-              }   
+            }   
       }
 
         /// <summary>
@@ -523,38 +548,85 @@ namespace VTC
            Application.Exit();
        }
 
-       private void UpdateImageBoxes(Image<Bgr, Byte> frame)
+       private void SetImageBoxesToVideoSize()
+       {
+            var videoSize = new Size(SelectedCamera.Width, SelectedCamera.Height);
+
+           _mainDisplay.Size = videoSize;
+            _mainDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _backgroundDisplay.Size = videoSize;
+
+            _movementDisplay.Size = videoSize;
+           
+
+#if DEBUG
+
+            _mixtureDisplay.Size = videoSize;
+            _mixtureDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _mixtureMovementDisplay.Size = videoSize;
+            _mixtureMovementDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _3DPointsDisplay.Size = videoSize;
+            _3DPointsDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _velocityFieldDisplay.Size = videoSize;
+            _velocityFieldDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _velocityProjectDisplay.Size = videoSize; 
+            _velocityProjectDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _opticalFlowDisplay.Size = videoSize; 
+            _opticalFlowDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+            _correctedInputDisplay.Size = videoSize; 
+            _correctedInputDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
+
+#endif
+        }
+
+        private void UpdateImageBoxes(Image<Bgr, Byte> frame, Image<Gray, byte> movementMask)
        {
            Image<Bgr, byte> stateImage = _vista.GetCurrentStateImage(frame);
            Image<Bgr, float> backgroundImage = _vista.GetBackgroundImage(showPolygonsCheckbox.Checked);
-           Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundImage();
-           var opticalFlowImage = RenderOpticalFlowImage();
-
-           //Render 3D points
-           Image<Bgr, byte> pointsImage = Render3DPoints();
 
            _mainDisplay.Update(stateImage);
            _backgroundDisplay.Update(backgroundImage);
-           _mixtureDisplay.Update(mogImage);
-           _3DPointsDisplay.Update(pointsImage);
-           _opticalFlowDisplay.Update(opticalFlowImage);
-           _correctedInputDisplay.Update(_vista._correctedFrame);
 
-          if (_vista.Movement_Mask != null)
-          {
-              Image<Bgr, Byte> movementTimesImage = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr,byte>());
-              _movementDisplay.Update(movementTimesImage);
-          }
+            Image<Bgr, Byte> movementTimesImage = frame.And(movementMask.Convert<Bgr, byte>());
+            _movementDisplay.Update(movementTimesImage);
 
-          if (MoGcheckBox.Checked)
-          {     
-              //Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.MoGBackgroundSingleton.ForegroundMask(frame).Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr,byte>());
-              Image<Bgr, Byte> movementTimesImageMoG = frame.And(_vista.Movement_Mask.Convert<Bgr, byte>()).And(_vista.MorphologyMask.Convert<Bgr, byte>());
-              _mixtureMovementDisplay.Update(movementTimesImageMoG);
-          }
-      }
+#if DEBUG
+            Image<Bgr, float> mogImage = _vista.MoGBackgroundSingleton.BackgroundImage();            
+            _mixtureDisplay.Update(mogImage);
 
-       private Image<Bgr, float> RenderOpticalFlowImage()
+            if (MoGcheckBox.Checked)
+            {
+                Image<Bgr, Byte> movementTimesImageMoG = frame.And(movementMask.Convert<Bgr, byte>());
+                _mixtureMovementDisplay.Update(movementTimesImageMoG);
+            }
+
+            if (_vista != null)
+            {
+                Image<Bgr, byte> pointsImage = Render3DPoints();
+                _3DPointsDisplay.Update(pointsImage);
+                var image = new Image<Bgr, Byte>(800, 600);
+                _vista.DrawVelocityField(image, new Bgr(Color.White), 1);
+                _velocityFieldDisplay.Update(image);
+                Image<Gray, byte> pimage;
+                pimage = _vista.VelocityProjection();
+                _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
+                var opticalFlowImage = RenderOpticalFlowImage();
+                _opticalFlowDisplay.Update(opticalFlowImage);
+                _correctedInputDisplay.Update(_vista._correctedFrame);
+            }
+#endif
+
+
+        }
+
+        private Image<Bgr, float> RenderOpticalFlowImage()
        {
            Image<Bgr, float> opticalFlowImage = new Image<Bgr, float>(new Size(_vista._frame.Width, _vista._frame.Height));
            if (!disableOpticalFlowCheckbox.Checked)
@@ -656,8 +728,9 @@ namespace VTC
           RegionEditor r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)
           {
+              string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\VTC\\regionConfig.xml";
               _vista.RegionConfiguration = r.RegionConfig;
-              _vista.RegionConfiguration.Save(_settings.RegionConfigPath);
+              _vista.RegionConfiguration.Save(configFilePath);
           }
       }
 
@@ -712,14 +785,17 @@ namespace VTC
 
        private void watchdogTimer_Tick(object sender, EventArgs e)
        {
-            const string heartbeatDirPath = ".\\";
-            const string heartbeatFilePath = heartbeatDirPath + "heartbeat";
 
-            Directory.CreateDirectory(heartbeatDirPath);
-            if (!File.Exists(heartbeatFilePath))
-                File.Create(heartbeatFilePath).Close();
+            var heartbeatPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\VTC\\heartbeat";
+            var heartbeatFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\VTC";
 
-           File.SetLastWriteTime(heartbeatFilePath, DateTime.Now);
+            if(!Directory.Exists(heartbeatFolderPath))
+                Directory.CreateDirectory(heartbeatFolderPath);
+
+            if (!File.Exists(heartbeatPath))
+                File.Create(heartbeatPath).Close();
+
+           File.SetLastWriteTime(heartbeatPath, DateTime.Now);
        }
 
        private void hideTrackersButton_Click(object sender, EventArgs e)
@@ -732,15 +808,33 @@ namespace VTC
             var dr = selectVideoFilesDialog.ShowDialog();
             if (dr == DialogResult.OK)
                 LoadVideosFromPath(selectVideoFilesDialog.FileNames.ToList());
+
+            Application.Idle -= ProcessFrame;
+            Application.Idle += ProcessFrame;
         }
 
        private void LoadVideosFromPath(List<string> videosToProcess )
        {
+           BatchMode = true;
            _cameras.Clear();
-           foreach (var p in videosToProcess)
-               LoadCameraFromFilename(p);
-
-           CameraComboBox_SelectedIndexChanged(null, null);
+           CameraComboBox.Items.Clear();
+           VideosToProcess = videosToProcess;
+           DequeueVideo();
        }
+
+       private void DequeueVideo()
+       {
+           if (VideosToProcess.Count > 0)
+           {
+               infoBox.AppendText("Loading video from batch" + Environment.NewLine);
+               SelectedCamera = LoadCameraFromFilename(VideosToProcess.First());
+               VideosToProcess.Remove(VideosToProcess.First());
+            }
+           else
+           {
+               infoBox.AppendText("Batch complete" + Environment.NewLine);
+               Application.Idle -= ProcessFrame;
+           }
+        }
     }
 }

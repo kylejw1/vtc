@@ -36,10 +36,10 @@ namespace VTC
             this.timeActiveTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
+            this.serverURLLabel = new System.Windows.Forms.Label();
             this.serverUrlTextBox = new System.Windows.Forms.TextBox();
             this.tbVistaStats = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.intersectionIDLabel = new System.Windows.Forms.Label();
             this.intersectionIDTextBox = new System.Windows.Forms.TextBox();
             this.SaveParametersBtn = new System.Windows.Forms.Button();
             this.CameraComboBox = new System.Windows.Forms.ComboBox();
@@ -57,6 +57,7 @@ namespace VTC
             this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SelectVideosButton = new System.Windows.Forms.Button();
             this.selectVideoFilesDialog = new System.Windows.Forms.OpenFileDialog();
+            this.infoBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -95,15 +96,15 @@ namespace VTC
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.resampleBackgroundButton_Click);
             // 
-            // label7
+            // serverURLLabel
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(401, 221);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(70, 15);
-            this.label7.TabIndex = 58;
-            this.label7.Text = "Server URL";
+            this.serverURLLabel.AutoSize = true;
+            this.serverURLLabel.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverURLLabel.Location = new System.Drawing.Point(401, 221);
+            this.serverURLLabel.Name = "serverURLLabel";
+            this.serverURLLabel.Size = new System.Drawing.Size(70, 15);
+            this.serverURLLabel.TabIndex = 58;
+            this.serverURLLabel.Text = "Server URL";
             // 
             // serverUrlTextBox
             // 
@@ -120,18 +121,18 @@ namespace VTC
             this.tbVistaStats.Multiline = true;
             this.tbVistaStats.Name = "tbVistaStats";
             this.tbVistaStats.ReadOnly = true;
-            this.tbVistaStats.Size = new System.Drawing.Size(240, 429);
+            this.tbVistaStats.Size = new System.Drawing.Size(240, 206);
             this.tbVistaStats.TabIndex = 54;
             // 
-            // label4
+            // intersectionIDLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(385, 171);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(86, 15);
-            this.label4.TabIndex = 55;
-            this.label4.Text = "Intersection ID";
+            this.intersectionIDLabel.AutoSize = true;
+            this.intersectionIDLabel.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.intersectionIDLabel.Location = new System.Drawing.Point(385, 171);
+            this.intersectionIDLabel.Name = "intersectionIDLabel";
+            this.intersectionIDLabel.Size = new System.Drawing.Size(86, 15);
+            this.intersectionIDLabel.TabIndex = 55;
+            this.intersectionIDLabel.Text = "Intersection ID";
             // 
             // intersectionIDTextBox
             // 
@@ -148,7 +149,7 @@ namespace VTC
             this.SaveParametersBtn.Name = "SaveParametersBtn";
             this.SaveParametersBtn.Size = new System.Drawing.Size(193, 22);
             this.SaveParametersBtn.TabIndex = 52;
-            this.SaveParametersBtn.Text = "Save Configuration";
+            this.SaveParametersBtn.Text = "Save configuration";
             this.SaveParametersBtn.UseVisualStyleBackColor = true;
             this.SaveParametersBtn.Click += new System.EventHandler(this.SaveParametersBtn_Click);
             // 
@@ -170,7 +171,7 @@ namespace VTC
             this.btnConfigureRegions.Name = "btnConfigureRegions";
             this.btnConfigureRegions.Size = new System.Drawing.Size(193, 29);
             this.btnConfigureRegions.TabIndex = 50;
-            this.btnConfigureRegions.Text = "Configure Regions";
+            this.btnConfigureRegions.Text = "Configure regions";
             this.btnConfigureRegions.UseVisualStyleBackColor = true;
             this.btnConfigureRegions.Click += new System.EventHandler(this.btnConfigureRegions_Click);
             // 
@@ -206,8 +207,6 @@ namespace VTC
             // pushStateCheckbox
             // 
             this.pushStateCheckbox.AutoSize = true;
-            this.pushStateCheckbox.Checked = true;
-            this.pushStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pushStateCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.pushStateCheckbox.Location = new System.Drawing.Point(279, 250);
             this.pushStateCheckbox.Name = "pushStateCheckbox";
@@ -258,7 +257,7 @@ namespace VTC
             this.btnToggleVideoMux.Name = "btnToggleVideoMux";
             this.btnToggleVideoMux.Size = new System.Drawing.Size(193, 22);
             this.btnToggleVideoMux.TabIndex = 63;
-            this.btnToggleVideoMux.Text = "Toggle Video Mux";
+            this.btnToggleVideoMux.Text = "Toggle video panel";
             this.btnToggleVideoMux.UseVisualStyleBackColor = true;
             this.btnToggleVideoMux.Click += new System.EventHandler(this.btnToggleVideoMux_Click);
             // 
@@ -299,7 +298,7 @@ namespace VTC
             this.SelectVideosButton.Name = "SelectVideosButton";
             this.SelectVideosButton.Size = new System.Drawing.Size(193, 22);
             this.SelectVideosButton.TabIndex = 76;
-            this.SelectVideosButton.Text = "Select Videos";
+            this.SelectVideosButton.Text = "Select video";
             this.SelectVideosButton.UseVisualStyleBackColor = true;
             this.SelectVideosButton.Click += new System.EventHandler(this.SelectVideosButton_Click);
             // 
@@ -309,12 +308,23 @@ namespace VTC
             this.selectVideoFilesDialog.Multiselect = true;
             this.selectVideoFilesDialog.Title = "Select videos to process";
             // 
+            // infoBox
+            // 
+            this.infoBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.infoBox.Location = new System.Drawing.Point(14, 224);
+            this.infoBox.Multiline = true;
+            this.infoBox.Name = "infoBox";
+            this.infoBox.ReadOnly = true;
+            this.infoBox.Size = new System.Drawing.Size(240, 206);
+            this.infoBox.TabIndex = 77;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(484, 530);
+            this.Controls.Add(this.infoBox);
             this.Controls.Add(this.SelectVideosButton);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
             this.Controls.Add(this.hideTrackersButton);
@@ -325,10 +335,10 @@ namespace VTC
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnToggleVideoMux);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.label7);
+            this.Controls.Add(this.serverURLLabel);
             this.Controls.Add(this.serverUrlTextBox);
             this.Controls.Add(this.tbVistaStats);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.intersectionIDLabel);
             this.Controls.Add(this.intersectionIDTextBox);
             this.Controls.Add(this.SaveParametersBtn);
             this.Controls.Add(this.CameraComboBox);
@@ -355,10 +365,10 @@ namespace VTC
       private TextBox timeActiveTextBox;
       private Label label11;
       private Button button1;
-      private Label label7;
+      private Label serverURLLabel;
       private TextBox serverUrlTextBox;
       private TextBox tbVistaStats;
-      private Label label4;
+      private Label intersectionIDLabel;
       private TextBox intersectionIDTextBox;
       private Button SaveParametersBtn;
       private ComboBox CameraComboBox;
@@ -376,5 +386,6 @@ namespace VTC
       private CheckBox disableOpticalFlowCheckbox;
         private Button SelectVideosButton;
         private OpenFileDialog selectVideoFilesDialog;
+        private TextBox infoBox;
     }
 }

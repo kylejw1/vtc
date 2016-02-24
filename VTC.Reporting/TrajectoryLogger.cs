@@ -70,8 +70,8 @@ namespace VTC.Reporting
                 logString += _movementType + " ";
 
                 string filename = "Movement Count " + SanitizeFilename(_source) + ".txt";
-                filename.Replace("file-", "");
-                string filepath = Path.Combine(_settings.LogfilePath, filename);
+                filename = filename.Replace("file-", "");
+                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), filename);
                 if (!File.Exists(filepath))
                     File.Create(filepath);
 

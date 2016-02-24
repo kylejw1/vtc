@@ -48,11 +48,6 @@ namespace OptAssignTest
             get { return 7; }
         }
 
-        public double LambdaX
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public double LambdaF
         {
             get { return 0.0000004; }
@@ -108,11 +103,6 @@ namespace OptAssignTest
             get { return "config\regionConfig.xml"; }
         }
 
-        public string LogfilePath
-        {
-            get { return "C:\\TrafficCamera"; }
-        }
-
         public double Alpha
         {
             get { return 0.001; }
@@ -123,19 +113,9 @@ namespace OptAssignTest
             get { return 40; }
         }
 
-        public double NoiseMass
-        {
-            get { return 0.0; }
-        }
-
         public int MaxObjectCount
         {
             get { return 20; }
-        }
-
-        public double PerCarMinimum
-        {
-            get { return 1000; }
         }
 
         public int CarRadius

@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Web;
+using NLog;
 using VTC.Common;
 using VTC.Kernel.EventConfig;
 using VTC.Kernel.RegionConfig;
@@ -35,7 +36,7 @@ namespace VTC.Kernel.Vistas
 
                 if (!this.RegionConfiguration.Regions.ContainsKey(exitName))
                     this.RegionConfiguration.Regions.Add(exitName, new Polygon());
-            }
+    }
 
 
             //Hard-coded configuration for a standard intersection. TODO: Load configuration from eventConfig.xml 

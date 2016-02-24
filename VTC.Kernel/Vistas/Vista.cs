@@ -16,6 +16,7 @@ using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using VTC.Common;
 using Point = System.Drawing.Point;
+using NLog;
 
 
 namespace VTC.Kernel.Vistas
@@ -29,6 +30,7 @@ namespace VTC.Kernel.Vistas
     public abstract class Vista
     {
         protected ISettings Settings { get; private set; }
+        private static readonly Logger _logger = LogManager.GetLogger("vista");
 
         public delegate string GetSource();
         public GetSource GetCameraSource;
@@ -56,12 +58,9 @@ namespace VTC.Kernel.Vistas
         private readonly int _height;
 
         public Measurement[] MeasurementsArray;
-        public SortedList<CvBlob, int> BlobsWithArea;
         public Queue<Measurement[]> MeasurementArrayQueue;
         
         public Image<Gray, byte> Movement_Mask { get; private set; } //Thresholded, b&w movement mask
-        public Image<Gray, byte> MorphologyMask { get; private set; } //Filter for morphologically excluded blobs
-        public Image<Gray, byte> Movement_MaskMoG { get; private set; } //Thresholded, b&w movement mask
         public Image<Bgr, float> ColorBackground { get; private set; } //Average Background being formed
         public Image<Bgr, byte> TrainingImage { get; private set; } //Image to be exported for training set
 
@@ -94,28 +93,9 @@ namespace VTC.Kernel.Vistas
             set
             {
                 _carRadius = value;
-
-                // update PerCar
-
-                    // The sum of moving area is calculated by adding all pixel values across the image 
-                    // in the movement/foreground image after multiplication by the intersection ROI
-                    // Total value for a white pixel = 3x255 = 765
-
-                PerCar = Math.PI * value * value * (3 * 255);
             }
         }
         private double _carRadius;
-
-        private double PerCar
-        {
-            set
-            {
-                _perCar = Math.Max(value, Settings.PerCarMinimum);
-            }
-        }
-        private double _perCar;
-
-        public double NoiseMass { get; set; }
 
         //************* Event detection parameters ***************
         private Dictionary<RegionTransition, string> Events;          //Map from region transitions to event types
@@ -177,7 +157,9 @@ namespace VTC.Kernel.Vistas
             _width = width;
             _height = height;
 
-            RegionConfiguration = RegionConfig.RegionConfig.Load(settings.RegionConfigPath);
+            string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                    "\\VTC\\regionConfig.xml";
+            RegionConfiguration = RegionConfig.RegionConfig.Load(configFilePath);
             if (null == RegionConfiguration)
                 RegionConfiguration = new RegionConfig.RegionConfig();
 
@@ -192,10 +174,8 @@ namespace VTC.Kernel.Vistas
             MHT = new MultipleHypothesisTracker(settings, vf);
 
             CarRadius = Settings.CarRadius;
-            NoiseMass = Settings.NoiseMass;
 
             MoGBackgroundSingleton = new MoGBackground(_width, _height, _roiImage);
-            BlobsWithArea = new SortedList<CvBlob, int>();
 
             MeasurementArrayQueue = new Queue<Measurement[]>(900);
             OpticalFlow = new double[_width][][];
@@ -208,6 +188,23 @@ namespace VTC.Kernel.Vistas
                 
         }
 
+        /// <summary>
+        /// Write log message.
+        /// </summary>
+        /// <param name="logLevel">Log message severity.</param>
+        /// <param name="format">Message format.</param>
+        /// <param name="args">Format argument.</param>
+        private static void Log(LogLevel logLevel, string format, params object[] args)
+        {
+            Console.WriteLine(format, args);
+            _logger.Log(logLevel, format, args);
+        }
+
+        private static void Log(string format, params object[] args)
+        {
+            Log(LogLevel.Info, format, args);
+        }
+
         public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness) 
             where TColor : struct, IColor 
             where TDepth : new()
@@ -216,16 +213,6 @@ namespace VTC.Kernel.Vistas
                 return;
 
             MHT.VelocityField.Draw(image, color, thickness);
-        }
-
-        public void DrawVelocityField<TColor, TDepth>(Emgu.CV.Image<TColor, TDepth> image, TColor color, int thickness, int[][][] field)
-            where TColor : struct, IColor
-            where TDepth : new()
-        {
-            if (null == MHT)
-                return;
-
-            MHT.VelocityField.Draw(image, color, thickness, field, OpticalFlowDownsample, OpticalFlowDownsample);
         }
 
         public Emgu.CV.Image<Gray, Byte> VelocityProjection()
@@ -249,36 +236,33 @@ namespace VTC.Kernel.Vistas
         private int numProcessedFrames = 0;
         public void Update(Image<Bgr, Byte> newFrame)
         {
-            numProcessedFrames++;
-            _frame = newFrame;
+            try
+            {
+                numProcessedFrames++;
+                _frame = newFrame;
 
-            if (ColorBackground == null) //we need at least one frame to initialize the background
-            {
-                ColorBackground = newFrame.Convert<Bgr, float>();
-            }
-            else
-            {
-                //if (MoGBackgroundSingleton.BackgroundUpdateMoG != null)
-                //    Movement_MaskMoG = MovementMask(newFrame, MoGBackgroundSingleton.BackgroundUpdateMoG);
+                if (ColorBackground == null)
+                    ColorBackground = newFrame.Convert<Bgr, float>();
+
                 Movement_Mask = EnableMoG ? MovementMaskMoG(newFrame) : MovementMask(newFrame, ColorBackground);
 
                 UpdateBackground(newFrame);
 
-                if(!DisableOpticalFlow)
-                UpdateOpticalFlow(newFrame);
+                if (!DisableOpticalFlow)
+                    UpdateOpticalFlow(newFrame);
 
-                if (numProcessedFrames%Settings.MoGUpdateDownsampling == 0 && EnableMoG)
+                if (numProcessedFrames % Settings.MoGUpdateDownsampling == 0 && EnableMoG)
                     UpdateBackgroundMoG(newFrame);
 
                 TrainingImage = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
 
-                MeasurementsArray = FindClosedBlobCenters(newFrame);
+                MeasurementsArray = FindClosedBlobCenters(newFrame, Movement_Mask, Settings);
                 MeasurementArrayQueue.Enqueue(MeasurementsArray);
                 while (MeasurementArrayQueue.Count > 300)
                     MeasurementArrayQueue.Dequeue();
 
                 MHT.Update(MeasurementsArray);
-
+                
                 // First update base class stats
                 UpdateVistaStats(MHT.DeletedVehicles);
 
@@ -287,6 +271,14 @@ namespace VTC.Kernel.Vistas
 
                 lastFrame = newFrame;
             }
+            catch (Exception e)
+            {
+#if DEBUG
+                throw;           
+#else
+                _logger.Log(LogLevel.Error, "In Vista:Update(), " + e.Message);
+#endif
+            }   
         }
 
         private void UpdateVistaStats(List<Vehicle> deleted)
@@ -402,7 +394,6 @@ namespace VTC.Kernel.Vistas
             return mogMask;
         }
 
-
         //TODO: Clea this function up, too many things happening
         private Image<Gray, Byte> MovementMask(Image<Bgr,Byte> frame, Image<Bgr, float> background)
         {
@@ -418,7 +409,7 @@ namespace VTC.Kernel.Vistas
             return movementMask;
         }
 
-
+        //TODO: rewrite this method (efficiency, correctness)
         /// <summary>
         /// Sample evenly-spaced points in image and compare to background. Determine average error in % on each channel (R,G,B). Apply inverse
         /// tranform to bring corrected frame nearer to background. 
@@ -427,7 +418,8 @@ namespace VTC.Kernel.Vistas
         /// <param name="background">Reference for correction</param>
         private void ApplyColorCorrection(Image<Bgr, byte> frame, Image<Bgr, float> background)
         {
-        //Adjust incoming frame by white-balancing to match background image
+            throw new NotImplementedException();
+            //Adjust incoming frame by white-balancing to match background image
             Image<Bgr, float> whiteBalancedFrame = new Image<Bgr, float>(frame.Width, frame.Height);
             int numColorSamples = 20;
             int sampleSpacing = (Math.Min(frame.Width, frame.Height)/numColorSamples) - 1;
@@ -495,18 +487,20 @@ namespace VTC.Kernel.Vistas
             }
         }
 
-        private Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
+        private static Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
         {
             var mask = new Image<Gray, Byte>(frame.Size);
             var center = new PointF((float)x, (float)y);
             var circle = new CircleF(center, (float)radius);
             mask.Draw(circle, new Gray(255), 0);
-
             return frame.GetAverage(mask);
         }
 
+
+        //TODO: rewrite this method (efficiency, correctness)
         private Measurement[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
         {
+            throw new NotImplementedException();
 			Measurement[] coordinates;
             using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
             {
@@ -534,52 +528,56 @@ namespace VTC.Kernel.Vistas
             return coordinates;
         }
 
-        private Measurement[] FindClosedBlobCenters(Image<Bgr, Byte> frame)
+        private static Measurement[] FindClosedBlobCenters(Image<Bgr, Byte> frame, Image<Gray, byte> movementMask, ISettings settings)
         {
-            Measurement[] coordinates;
+            Measurement[] coordinates = new Measurement[0];
             var w_orig = frame.Width;
             var h_orig = frame.Height;
 
-            using (Image<Gray, Byte> tempMovementMask = Movement_Mask.Clone())
+            using (Image<Gray, Byte> tempMovementMask = movementMask.Clone())
             {
-                //var bf = new BlobFinder();
-                //BlobsWithArea = bf.FindBlobs(tempMovement_Mask, Settings.MinObjectSize);
-                var resultingImgBlobs = new CvBlobs();
-                var bDetect = new CvBlobDetector();
-                bDetect.Detect(tempMovementMask, resultingImgBlobs);
-
-                var areaComparer = new BlobAreaComparer();
-                BlobsWithArea = new SortedList<CvBlob, int>(areaComparer);
-                foreach (
-                    var targetBlob in
-                        resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area >= Settings.MinObjectSize))
+                try
                 {
-                    BlobsWithArea.Add(targetBlob, targetBlob.Area);
-                    Movement_Mask.FillConvexPoly(targetBlob.GetContour(), new Gray(255));
-                }
+                    var resultingImgBlobs = new CvBlobs();
+                    var bDetect = new CvBlobDetector();
+                    bDetect.Detect(tempMovementMask, resultingImgBlobs);
 
-                MorphologyMask = new Image<Gray, byte>(tempMovementMask.Width, tempMovementMask.Height,new Gray(255));
-                foreach (var targetBlob in resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area < Settings.MinObjectSize))
-                    MorphologyMask.FillConvexPoly(targetBlob.GetContour(),new Gray(0));
+                    var areaComparer = new BlobAreaComparer();
+                    var BlobsWithArea = new SortedList<CvBlob, int>(areaComparer);
 
-                int numWebcamBlobsFound = BlobsWithArea.Count();
-                if (numWebcamBlobsFound > Settings.MaxTargets)
-                    numWebcamBlobsFound = Settings.MaxTargets;
+                    foreach (
+                        var targetBlob in
+                            resultingImgBlobs.Values.Where(targetBlob => targetBlob.Area >= settings.MinObjectSize))
+                        BlobsWithArea.Add(targetBlob, targetBlob.Area);
 
-                coordinates = new Measurement[numWebcamBlobsFound];
-                List<Measurement> coordinatesList = new List<Measurement>();
-                for(int i=0; i<numWebcamBlobsFound; i++)
-                {
-                    if (i < Settings.MaxTargets)
+                    int numWebcamBlobsFound = BlobsWithArea.Count();
+                    if (numWebcamBlobsFound > settings.MaxTargets)
+                        numWebcamBlobsFound = settings.MaxTargets;
+
+                    coordinates = new Measurement[numWebcamBlobsFound];
+                    List<Measurement> coordinatesList = new List<Measurement>();
+                    for (int i = 0; i < numWebcamBlobsFound; i++)
                     {
-                        CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
-                        var colour = GetBlobColour(frame, targetBlob.Centroid.X, targetBlob.Centroid.Y, 3.0);
-                        var coords = new Measurement() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
-                        coordinatesList.Add(coords);
+                        if (i < settings.MaxTargets)
+                        {
+                            CvBlob targetBlob = BlobsWithArea.ElementAt(i).Key;
+                            var colour = GetBlobColour(frame, targetBlob.Centroid.X, targetBlob.Centroid.Y, 3.0);
+                            var coords = new Measurement() { X = targetBlob.Centroid.X, Y = targetBlob.Centroid.Y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
+                            coordinatesList.Add(coords);
+                        }
                     }
-                }
 
-                coordinates = coordinatesList.ToArray();
+                    coordinates = coordinatesList.ToArray();
+                    BlobsWithArea.Clear();
+                    bDetect.Dispose();
+                    resultingImgBlobs.Dispose();
+                }
+                catch(AccessViolationException e) 
+                {
+                    //Accessing targetBlob.Centroid occasionally throws AccessViolationException.
+                    //This appears to be a problem in either Emgu or OpenCV. TODO: investigate.
+                    _logger.Log(LogLevel.Error, "In FindClosedBlobCenters: " + e.Message);
+                }   
             }
 
             return coordinates;
@@ -604,20 +602,16 @@ namespace VTC.Kernel.Vistas
 
         public Image<Bgr, byte> GetCurrentStateImage(Image<Bgr, byte> frame)
         {
-
             var vehicles = MHT.CurrentVehicles;
             Image<Bgr, byte> stateImage = frame.Clone();
 
             vehicles.ForEach(delegate(Vehicle vehicle)
             {
-
                 var lastState = vehicle.StateHistory.Last();
-
                 float x = (float) lastState.X;
                 float y = (float) lastState.Y;
 
                 var validation_region_deviation = MHT.ValidationRegionDeviation;
-
                 float radius = validation_region_deviation*
                                ((float) Math.Sqrt(Math.Pow(lastState.CovX, 2) + (float) Math.Pow(lastState.CovY, 2)));
                 if (radius < 2.0)
@@ -645,16 +639,11 @@ namespace VTC.Kernel.Vistas
                 }
             });
 
-            //foreach (var s in MHT.Trajectories.SelectMany(t => t.stateEstimates))
-            //    frame.Draw(new CircleF(new PointF((float)s.X, (float)s.Y), 1), new Bgr(s.Blue, s.Green, s.Red));
-
-
             double minDistance = 100;
             foreach (var t in MHT.Trajectories)
             {
                 double distance = Math.Sqrt(Math.Pow(t.stateEstimates.First().X - t.stateEstimates.Last().X, 2) +
                                             Math.Pow(t.stateEstimates.First().Y - t.stateEstimates.Last().Y, 2));
-
 
                 if (distance > minDistance)
                 {
@@ -664,8 +653,6 @@ namespace VTC.Kernel.Vistas
                     stateImage.DrawPolyline(trajectoryRendering, false, trajectoryColor);    
                 }
             }
-                
-
             return stateImage;
         }
     }

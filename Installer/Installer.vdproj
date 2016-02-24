@@ -141,24 +141,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_3B2F26EFCC4784A7E99C790DA05AC2D5"
-        "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_3B2F26EFCC4784A7E99C790DA05AC2D5"
-        "OwnerKey" = "8:_265FE6DDFC4EF4B4E234A740C2C34691"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_3B2F26EFCC4784A7E99C790DA05AC2D5"
-        "OwnerKey" = "8:_517ADA528A98D3FEF38E03FAB0DBC0D7"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_3BD7EBF235064975BC2E2F7156BEFA63"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -435,14 +417,14 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_825AFB1E3FB5ED886688EC382EF6A9A6"
-        "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
+        "MsmKey" = "8:_847947A3D1A348A5A700A9607F5976E9"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_847947A3D1A348A5A700A9607F5976E9"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_856745206AD7D3FCCDFDA03F6962D097"
+        "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -496,7 +478,7 @@
         "Entry"
         {
         "MsmKey" = "8:_93715A3089AAB250FA670844288EBC8C"
-        "OwnerKey" = "8:_825AFB1E3FB5ED886688EC382EF6A9A6"
+        "OwnerKey" = "8:_856745206AD7D3FCCDFDA03F6962D097"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -610,7 +592,7 @@
         "Entry"
         {
         "MsmKey" = "8:_B173AC75EA63398CF6B2438EA536EF02"
-        "OwnerKey" = "8:_3B2F26EFCC4784A7E99C790DA05AC2D5"
+        "OwnerKey" = "8:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -729,6 +711,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C59AD0D650624426B2F9EE11FA3C9F6D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -737,6 +725,24 @@
         {
         "MsmKey" = "8:_C7E17EDE24903B30B6A6425DDA7C51D3"
         "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+        "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+        "OwnerKey" = "8:_517ADA528A98D3FEF38E03FAB0DBC0D7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+        "OwnerKey" = "8:_265FE6DDFC4EF4B4E234A740C2C34691"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -802,6 +808,12 @@
         "Entry"
         {
         "MsmKey" = "8:_DD5A91B967604944BF89273613B60EBB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DEB5158F155E46F1B32842903B7123D2"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -916,6 +928,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_856745206AD7D3FCCDFDA03F6962D097"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_D86D60DD3C75492E91616C032491C8B1"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -935,12 +959,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BFF01E2F37C7AC59109C749EBF5EB063"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_825AFB1E3FB5ED886688EC382EF6A9A6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -977,12 +995,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_265FE6DDFC4EF4B4E234A740C2C34691"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_3B2F26EFCC4784A7E99C790DA05AC2D5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1509,37 +1521,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3B2F26EFCC4784A7E99C790DA05AC2D5"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:VTC.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_3B2F26EFCC4784A7E99C790DA05AC2D5"
-                    {
-                    "Name" = "8:VTC.Common.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:VTC.Common.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3BD7EBF235064975BC2E2F7156BEFA63"
@@ -2346,14 +2327,34 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_825AFB1E3FB5ED886688EC382EF6A9A6"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_847947A3D1A348A5A700A9607F5976E9"
+            {
+            "SourcePath" = "8:..\\bin\\x64\\opencv_bgsegm300.dll"
+            "TargetName" = "8:opencv_bgsegm300.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_98DB5031DC18456D8142B9ADB2406458"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_856745206AD7D3FCCDFDA03F6962D097"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:LicenseManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_825AFB1E3FB5ED886688EC382EF6A9A6"
+                    "_856745206AD7D3FCCDFDA03F6962D097"
                     {
                     "Name" = "8:LicenseManager.exe"
                     "Attributes" = "3:512"
@@ -2375,26 +2376,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_847947A3D1A348A5A700A9607F5976E9"
-            {
-            "SourcePath" = "8:..\\bin\\x64\\opencv_bgsegm300.dll"
-            "TargetName" = "8:opencv_bgsegm300.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_98DB5031DC18456D8142B9ADB2406458"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_89062A8DB7C64A54BFE559C27CEFBECC"
@@ -3272,6 +3253,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C476ADEF20E74AF3A465BA12FEE5F6B5"
+            {
+            "SourcePath" = "8:..\\VTC.UI\\BannerBitmap.bmp"
+            "TargetName" = "8:BannerBitmap.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C59AD0D650624426B2F9EE11FA3C9F6D"
             {
             "SourcePath" = "8:..\\bin\\x64\\cvextern_test.exe"
@@ -3306,6 +3307,37 @@
                     }
                 }
             "SourcePath" = "8:DirectShowLib-2005.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:VTC.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_C951C8FBD7BB65E5C4AC152A66B6BAD1"
+                    {
+                    "Name" = "8:VTC.Common.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:VTC.Common.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
@@ -3509,6 +3541,26 @@
             "TargetName" = "8:opencv_imgproc300.dll"
             "Tag" = "8:"
             "Folder" = "8:_CCE2EB55BF044254B12B6F5F6A90511F"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DEB5158F155E46F1B32842903B7123D2"
+            {
+            "SourcePath" = "8:..\\VTC.UI\\Logo.ico"
+            "TargetName" = "8:Logo.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3904,7 +3956,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:VTC"
         "ProductCode" = "8:{F4D1545A-E176-4314-8726-3FAE4BF81161}"
-        "PackageCode" = "8:{7DBDD326-AE45-45AD-8D2A-CA6A033BA594}"
+        "PackageCode" = "8:{98E60797-54A7-450B-B490-8440FFD1EB21}"
         "UpgradeCode" = "8:{8E425EF0-07F6-486D-8C6B-70AC347BF631}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -4024,6 +4076,34 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_059F425CCF4D417B8A5064969A7B7418"
+            {
+            "Name" = "8:VTC"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_D86D60DD3C75492E91616C032491C8B1"
+            "Folder" = "8:_D699F4150C8F41F2AB18B07DCE4CCF7A"
+            "WorkingFolder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
+            "Icon" = "8:_DEB5158F155E46F1B32842903B7123D2"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1107DC22083A442DAFD7C8BD1C61C2A0"
+            {
+            "Name" = "8:VTC"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_D86D60DD3C75492E91616C032491C8B1"
+            "Folder" = "8:_B4F7375BB9A24E25B10302F323CF5C05"
+            "WorkingFolder" = "8:_9CBC64599FE24B118C8307FB84E50E16"
+            "Icon" = "8:_DEB5158F155E46F1B32842903B7123D2"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
@@ -4051,7 +4131,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                         }
@@ -4088,7 +4169,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                         }
@@ -4110,7 +4192,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "CopyrightWarning"
@@ -4158,7 +4241,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                         }
@@ -4195,7 +4279,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "ShowProgress"
@@ -4239,7 +4324,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "ShowProgress"
@@ -4283,7 +4369,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "UpdateText"
@@ -4327,7 +4414,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                         }
@@ -4349,7 +4437,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "CopyrightWarning"
@@ -4397,7 +4486,8 @@
                             "Type" = "3:8"
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
-                            "Setting" = "3:1"
+                            "Setting" = "3:2"
+                            "Value" = "8:_C476ADEF20E74AF3A465BA12FEE5F6B5"
                             "UsePlugInResources" = "11:TRUE"
                             }
                             "InstallAllUsersVisible"
@@ -4425,7 +4515,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D86D60DD3C75492E91616C032491C8B1"
             {
-            "SourcePath" = "8:..\\VTC.UI\\obj\\Debug\\TrafficCounter.exe"
+            "SourcePath" = "8:..\\VTC.UI\\obj\\Release\\TrafficCounter.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_9CBC64599FE24B118C8307FB84E50E16"

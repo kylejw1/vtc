@@ -33,6 +33,7 @@ namespace VTC
             Preview.Size = BgImage.Size;
             Preview.Image = BgImage.ToBitmap();
             panelImage.Controls.Add(Preview);
+            
 
             InitializeToggleButtons();
         }

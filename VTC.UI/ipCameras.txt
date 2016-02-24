@@ -1,7 +1,0 @@
-Alex's Balcony,rtsp://192.168.0.123:554/mpeg4
-Alex's Webcam,http://192.168.0.100:8800/traffic
-Ip - MJPEG,http://96.10.1.168/mjpg/video.mjpg
-Sricam - MJPEG,http://192.168.0.100:8980
-Ip - Quicktime .amp,rtsp://96.10.1.168/axis-media/media.amp
-Ip - Quicktime .3gp,rtsp://96.10.1.168/axis-media/media.3gp
-Ip - H.264 (broken),axrtsp://96.10.1.168/axis-media/media.amp

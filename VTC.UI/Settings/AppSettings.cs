@@ -13,7 +13,6 @@ namespace VTC.Settings
     {
         #region Constants
 
-        private const string PerCarMinKey = "PerCarMin";
         private const string IntersectionIdKey = "IntersectionID";
         private const string FrameWidthKey = "FrameWidth";
         private const string FrameHeightKey = "FrameHeight";
@@ -38,9 +37,7 @@ namespace VTC.Settings
         public int ColorThreshold { get; private set; }
         public int MoGUpdateDownsampling { get; private set; }
 
-        public double NoiseMass { get; private set; }
         public int MaxObjectCount { get; private set; }
-        public double PerCarMinimum { get; set; }
         public int CarRadius { get; set; }
         public int MinObjectSize { get; set; }
         public double Timestep { get; set; }
@@ -50,7 +47,6 @@ namespace VTC.Settings
         public int MaxTargets { get; private set; }
         public int KHypotheses { get; private set; }
         public int ValidationRegionDeviation { get; private set; }
-        public double LambdaX { get; private set; }
         public double LambdaF { get; private set; }
         public double LambdaN { get; private set; }
         public double Pd { get; private set; }
@@ -77,7 +73,6 @@ namespace VTC.Settings
         public String[] Classes { get; private set; }
 
         public string RegionConfigPath { get; private set; }
-        public string LogfilePath { get; private set; }
 
         /// <summary>
         /// Assembly with unit tests to visualize.
@@ -114,8 +109,6 @@ namespace VTC.Settings
 
             CarRadius = Convert.ToInt32(ConfigurationManager.AppSettings[CarRadiusKey]);
             MinObjectSize = Convert.ToInt32(ConfigurationManager.AppSettings["MinObjectSize"]);
-            PerCarMinimum = Convert.ToDouble(ConfigurationManager.AppSettings[PerCarMinKey], CultureInfo.InvariantCulture);
-            NoiseMass = Convert.ToDouble(ConfigurationManager.AppSettings["NoiseMass"], CultureInfo.InvariantCulture);
             Timestep = Convert.ToDouble(ConfigurationManager.AppSettings["Timestep"], CultureInfo.InvariantCulture);
 
             MissThreshold = Convert.ToInt32(ConfigurationManager.AppSettings["MissThreshold"]);
@@ -124,7 +117,6 @@ namespace VTC.Settings
             KHypotheses = Convert.ToInt32(ConfigurationManager.AppSettings["KHypotheses"]);
             ValidationRegionDeviation = Convert.ToInt32(ConfigurationManager.AppSettings["ValRegDeviation"]);
 
-            LambdaX = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaX"], CultureInfo.InvariantCulture);
             LambdaF = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaF"], CultureInfo.InvariantCulture);
             LambdaN = Convert.ToDouble(ConfigurationManager.AppSettings["LambdaN"], CultureInfo.InvariantCulture);
             Pd = Convert.ToDouble(ConfigurationManager.AppSettings["Pd"], CultureInfo.InvariantCulture);
@@ -139,9 +131,6 @@ namespace VTC.Settings
             ClassifierSubframeHeight = Convert.ToInt16(ConfigurationManager.AppSettings["ClassifierSubframeHeight"]);
 
             VelocityFieldResolution = Convert.ToInt16(ConfigurationManager.AppSettings["VelocityFieldResolution"]);
-
-            RegionConfigPath = ConfigurationManager.AppSettings["RegionConfig"];
-            LogfilePath = ConfigurationManager.AppSettings["LogFilePath"];
 
             _config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
@@ -167,7 +156,6 @@ namespace VTC.Settings
         public void Save() // only several parameters can be saved
         {
             _config.AppSettings.Settings[CarRadiusKey].Value = CarRadius.ToString(CultureInfo.InvariantCulture);
-            _config.AppSettings.Settings[PerCarMinKey].Value = PerCarMinimum.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[IntersectionIdKey].Value = IntersectionID;
             _config.AppSettings.Settings[FrameWidthKey].Value = FrameWidth.ToString(CultureInfo.InvariantCulture);
             _config.AppSettings.Settings[FrameHeightKey].Value = FrameHeight.ToString(CultureInfo.InvariantCulture);

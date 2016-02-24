@@ -13,19 +13,6 @@
 
         #endregion
 
-        #region File paths
-
-        /// <summary>
-        /// Pathname of region config file.
-        /// </summary>
-        string RegionConfigPath { get; }
-
-        /// <summary>
-        /// Output path for video count logs.
-        /// </summary>
-        string LogfilePath { get; }
-        #endregion
-
         #region Video stream parameters
         double FrameWidth { get; }
         double FrameHeight { get; }
@@ -57,19 +44,9 @@
 
         #region Object detection parameters
         /// <summary>
-        /// Background movement noise.
-        /// </summary>
-        double NoiseMass { get; }
-
-        /// <summary>
         /// Maximum number of blobs to detect.
         /// </summary>
         int MaxObjectCount { get; }
-
-        /// <summary>
-        /// Minimum number of white pixels per car - handles case when 0 is entered in avg-per-car textbox.
-        /// </summary>
-        double PerCarMinimum { get; }
 
         /// <summary>
         /// Radius of car image in pixels.

@@ -34,11 +34,6 @@ namespace VTC.Common
         int ValidationRegionDeviation { get; }
 
         /// <summary>
-        /// Termination likelihood.
-        /// </summary>
-        double LambdaX { get; }
-
-        /// <summary>
         /// Density of Poisson-distributed false positives.
         /// </summary>
         double LambdaF { get; }
