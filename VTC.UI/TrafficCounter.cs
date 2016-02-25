@@ -198,8 +198,9 @@ namespace VTC
            _mainDisplay = new VideoDisplay("Main", new Point(25,25));
            _movementDisplay = new VideoDisplay("Movement", new Point(50 + _mainDisplay.Width + _mainDisplay.Location.X, 25));
            _backgroundDisplay = new VideoDisplay("Background (average)", new Point(50 + _movementDisplay.Width + _movementDisplay.Location.X, 25));
-           _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
+
 #if DEBUG
+            _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
             _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
@@ -212,8 +213,11 @@ namespace VTC
             _videoMux.AddDisplay(_mainDisplay.ImageBox, _mainDisplay.LayerName);
 			_videoMux.AddDisplay(_movementDisplay.ImageBox, _movementDisplay.LayerName);
 			_videoMux.AddDisplay(_backgroundDisplay.ImageBox, _backgroundDisplay.LayerName);
-			_videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
+           _videoMux._displayLookup.ElementAt(1).Key.Checked = false;
+           _videoMux._displayLookup.ElementAt(2).Key.Checked = false;
+
 #if DEBUG
+            _videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
             _videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);

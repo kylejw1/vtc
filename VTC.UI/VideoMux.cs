@@ -12,7 +12,7 @@ namespace VTC
 {
     public partial class VideoMux : Form
     {
-        private Dictionary<CheckBox, ImageBox> _displayLookup = new Dictionary<CheckBox, ImageBox>();
+        public Dictionary<CheckBox, ImageBox> _displayLookup = new Dictionary<CheckBox, ImageBox>();
         private Timer _updateDebounceTimer;
         private int _displayedRowCount = 0;
         private int _displayedColCount = 0;
