@@ -58,6 +58,7 @@ namespace VTC.Reporting
         {
             LogToTextfile();
             LogWithPOST();
+            LogToCSV();
         }
 
         public void LogToTextfile()
@@ -85,7 +86,32 @@ namespace VTC.Reporting
             
         }
 
-        
+        public void LogToCSV()
+        {
+            try
+            {
+                var logString = "";
+                logString += _time.ToString("yyyy-MM-ddThh:mm:ssss%K,");
+                logString += _objectType + ",";
+                logString += _movementType;
+
+                string filename = "Movement Count " + SanitizeFilename(_source) + ".csv";
+                filename = filename.Replace("file-", "");
+                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), filename);
+                if (!File.Exists(filepath))
+                    File.Create(filepath);
+
+                using (var sw = new StreamWriter(filepath, true))
+                    sw.WriteLine(logString);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("LogToTextfile: e.Message");
+            }
+
+        }
+
+
 
         public void LogWithPOST()
         {
