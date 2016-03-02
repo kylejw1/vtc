@@ -735,7 +735,13 @@ namespace VTC
               string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\VTC\\regionConfig.xml";
               _vista.RegionConfiguration = r.RegionConfig;
               _vista.RegionConfiguration.Save(configFilePath);
-          }
+
+                foreach (var reg in r.RegionConfig.Regions)
+                {
+                    if (reg.Value.PolygonClosed)
+                        reg.Value.UpdateCentroid();
+                }
+            }
       }
 
       private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
