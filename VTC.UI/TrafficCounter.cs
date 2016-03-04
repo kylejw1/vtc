@@ -691,11 +691,19 @@ namespace VTC
                                       "\\VTC\\regionConfig.xml";
               _vista.RegionConfiguration = r.RegionConfig;
               _vista.RegionConfiguration.Save(configFilePath);
-          }
+
+                foreach (var reg in r.RegionConfig.Regions)
+                {
+                    if (reg.Value.PolygonClosed)
+                        reg.Value.UpdateCentroid();
+                }
+
+            }
           else
           {
               MessageBox.Show("Region config failed");
           }
+
       }
 
       private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
