@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -28,7 +27,7 @@ namespace VTC
 {
    public partial class TrafficCounter : Form
    {
-       private static readonly Logger _logger = LogManager.GetLogger("main.form");
+       private static readonly Logger Logger = LogManager.GetLogger("main.form");
 
        private readonly AppSettings _settings;
        private const string IpCamerasFilename = "ipCameras.txt";
@@ -42,23 +41,23 @@ namespace VTC
        private VideoDisplay _3DPointsDisplay;
        private VideoMux _videoMux;
 
-       private readonly DateTime _applicationStartTime;
+        private readonly DateTime _applicationStartTime;
        private DateTime _lastDatasetExportTime;
        
 
        private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
        private ICaptureSource _selectedCamera;
-       private List<string> VideosToProcess;
-       private bool BatchMode;
+       private List<string> _videosToProcess;
+       private bool _batchMode;
 
-       private string _appArgument; //For debugging only, delete this later
-       private bool _isLicensed;
-       private TimeSpan TrialLicenseTimeLimit = TimeSpan.FromMinutes(30);
+       private readonly string _appArgument; //For debugging only, delete this later
+       private readonly bool _isLicensed;
+       private TimeSpan _trialLicenseTimeLimit = TimeSpan.FromMinutes(30);
 
        // unit tests has own settings, so need to store "pairs" (capture, settings)
        private CaptureContext[] _testCaptureContexts;
 
-       public string GetVideoSource()
+       private string GetVideoSource()
        {
            return SelectedCamera.Name;
        }
@@ -73,16 +72,15 @@ namespace VTC
           {
               if (value == _selectedCamera) return;
 
-              if (_selectedCamera != null)
-              {
-                  _selectedCamera.Destroy();
-              }
+              _selectedCamera?.Destroy();
 
               _selectedCamera = value;
               _selectedCamera.Init(_settings);
-                
-              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height);
-              _vista.GetCameraSource = GetVideoSource;
+
+              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height)
+              {
+                  GetCameraSource = GetVideoSource
+              };
 
               SetImageBoxesToVideoSize();
 
@@ -116,6 +114,7 @@ namespace VTC
        /// Constructor.
        /// </summary>
        /// <param name="settings">Application settings.</param>
+       /// <param name="isLicensed">If false, software will shut down after a few minutes</param>
        /// <param name="appArgument">Can mean different things (Local file with video, Unit tests, etc).</param>
        public TrafficCounter(AppSettings settings, bool isLicensed, string appArgument = null)
        {           
@@ -160,7 +159,7 @@ namespace VTC
            _applicationStartTime = DateTime.Now;
            _lastDatasetExportTime = DateTime.Now;
 
-            VideosToProcess = new List<string>();
+            _videosToProcess = new List<string>();
 
            DisableExperimental();
 
@@ -205,14 +204,15 @@ namespace VTC
             _videoMux.AddDisplay(_mainDisplay.ImageBox, _mainDisplay.LayerName);
 			_videoMux.AddDisplay(_movementDisplay.ImageBox, _movementDisplay.LayerName);
 			_videoMux.AddDisplay(_backgroundDisplay.ImageBox, _backgroundDisplay.LayerName);
-           _videoMux._displayLookup.ElementAt(1).Key.Checked = false;
-           _videoMux._displayLookup.ElementAt(2).Key.Checked = false;
 
 #if DEBUG
             _videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
             _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
+#else
+            _videoMux._displayLookup.ElementAt(1).Key.Checked = false;
+           _videoMux._displayLookup.ElementAt(2).Key.Checked = false;
 #endif
             _videoMux.Show();
        }
@@ -253,7 +253,7 @@ namespace VTC
        private static void Log(LogLevel logLevel, string format, params object[] args)
        {
            Console.WriteLine(format, args);
-           _logger.Log(logLevel, format, args);
+           Logger.Log(logLevel, format, args);
        }
 
        private static void Log(string format, params object[] args)
@@ -317,7 +317,7 @@ namespace VTC
               foreach (var str in ipCameraStrings)
               {
                   var split = str.Split(',');
-                  if (split.Count() != 2) continue;
+                  if (split.Length!= 2) continue;
 
                   AddCamera(new IpCamera(split[0], split[1]));
               }
@@ -337,7 +337,6 @@ namespace VTC
        {
            infoBox.AppendText("Video complete" + Environment.NewLine);
            DequeueVideo();
-           return;
        }
 
        /// <summary>
@@ -358,6 +357,7 @@ namespace VTC
                    if (! Path.IsPathRooted(assemblyName))
                    {
                        var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                       if(currentDir != null)
                        assemblyName = Path.Combine(currentDir, assemblyName);
                    }
 
@@ -475,49 +475,48 @@ namespace VTC
                       //TODO: Investigate - why is this necessary?
                       if (frame == null)
                       { 
-                        if(BatchMode)
+                        if(_batchMode)
                         {
-                            if (VideosToProcess.Count > 0)
+                            if (_videosToProcess.Count > 0)
                                 DequeueVideo();
-                            else
-                                return;
                         }
                         else
                         {
                             SelectedCamera = new VideoFileCapture(_appArgument);
                             Debug.WriteLine("Restarting camera: " + DateTime.Now);
-                            return;
                         }
                       }
+                      else
+                      {
+                        Image<Bgr, Byte> frameForProcessing = frame.Clone();
+                        // Necessary so that frame.Data becomes accessible
+                        Image<Bgr, Byte> frameForRendering = frame.Clone();
 
-                      Image<Bgr, Byte> frameForProcessing = frame.Clone();
-                          // Necessary so that frame.Data becomes accessible
-                      Image<Bgr, Byte> frameForRendering = frame.Clone();
+                        // Send the new image frame to the vista for processing
+                        _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
+                        _vista.Update(frameForProcessing);
 
-                      // Send the new image frame to the vista for processing
-                      _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
-                      _vista.Update(frameForProcessing);
+                        // Update image boxes
+                        UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);
 
-                      // Update image boxes
-                      UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);
+                        // Update statistics
+                        trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
+                        tbVistaStats.Text = _vista.GetStatString();
 
-                      // Update statistics
-                      trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
-                      tbVistaStats.Text = _vista.GetStatString();
+                        //Thread.Sleep((int)_settings.Timestep * 1000); 
+                        TimeSpan activeTime = DateTime.Now - _applicationStartTime;
+                        timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
-                      //Thread.Sleep((int)_settings.Timestep * 1000); 
-                      TimeSpan activeTime = (DateTime.Now - _applicationStartTime);
-                      timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
+                        //Export training images
+                        if (DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
+                            TryExportDataset(frameForProcessing);
 
-                      //Export training images
-                      if (DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
-                          TryExportDataset(frameForProcessing);
+                        if (delayProcessingCheckbox.Checked)
+                            Thread.Sleep(500);
 
-                      if (delayProcessingCheckbox.Checked)
-                          Thread.Sleep(500);
-
-                      if (activeTime > TrialLicenseTimeLimit && !_isLicensed)
-                          NotifyLicenseAndExit();
+                        if (activeTime > _trialLicenseTimeLimit && !_isLicensed)
+                            NotifyLicenseAndExit();
+                    }
                   }
                 catch (Exception ex)
                 {
@@ -537,7 +536,7 @@ namespace VTC
        private void NotifyLicenseAndExit()
        {
            MessageBox.Show(
-               "This is only a trial version! Please visit www.traffic-camera.com to use software longer than " + TrialLicenseTimeLimit.Minutes.ToString() + " minutes.");
+               "This is only a trial version! Please visit www.traffic-camera.com to use software longer than " + _trialLicenseTimeLimit.Minutes.ToString() + " minutes.");
            Application.Exit();
        }
 
@@ -669,7 +668,7 @@ namespace VTC
             if (null == _videoMux || _videoMux.IsDisposed)
             {
                 CreateVideoWindows();
-                _videoMux.Show();
+                _videoMux?.Show();
                 return;
             }
             
@@ -787,20 +786,20 @@ namespace VTC
 
        private void LoadVideosFromPath(List<string> videosToProcess )
        {
-           BatchMode = true;
+           _batchMode = true;
            _cameras.Clear();
            CameraComboBox.Items.Clear();
-           VideosToProcess = videosToProcess;
+           _videosToProcess = videosToProcess;
            DequeueVideo();
        }
 
        private void DequeueVideo()
        {
-           if (VideosToProcess.Count > 0)
+           if (_videosToProcess.Count > 0)
            {
                infoBox.AppendText("Loading video from batch" + Environment.NewLine);
-               SelectedCamera = LoadCameraFromFilename(VideosToProcess.First());
-               VideosToProcess.Remove(VideosToProcess.First());
+               SelectedCamera = LoadCameraFromFilename(_videosToProcess.First());
+               _videosToProcess.Remove(_videosToProcess.First());
             }
            else
            {
