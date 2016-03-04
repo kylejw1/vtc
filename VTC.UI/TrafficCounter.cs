@@ -15,7 +15,6 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
 using VTC.CaptureSource;
-using VTC.Kernel;
 using VTC.Kernel.RegionConfig;
 using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
@@ -23,7 +22,6 @@ using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Settings;
 using VTC.Common;
-using SkyXoft.BusinessSolutions.LicenseManager.Protector;
 
 
 namespace VTC
@@ -39,12 +37,9 @@ namespace VTC
        private VideoDisplay _movementDisplay;
        private VideoDisplay _backgroundDisplay;
        private VideoDisplay _velocityFieldDisplay;
-       private VideoDisplay _velocityProjectDisplay;
        private VideoDisplay _mixtureDisplay;
        private VideoDisplay _mixtureMovementDisplay;
        private VideoDisplay _3DPointsDisplay;
-       private VideoDisplay _opticalFlowDisplay;
-       private VideoDisplay _correctedInputDisplay;
        private VideoMux _videoMux;
 
        private readonly DateTime _applicationStartTime;
@@ -201,12 +196,9 @@ namespace VTC
 
 #if DEBUG
             _velocityFieldDisplay = new VideoDisplay("Velocity Field", new Point(_movementDisplay.Location.X, _movementDisplay.Location.Y + _movementDisplay.Size.Height));
-            _velocityProjectDisplay = new VideoDisplay("Velocity Projection", new Point(_backgroundDisplay.Location.X, _backgroundDisplay.Location.Y + _backgroundDisplay.Size.Height));
            _mixtureDisplay = new VideoDisplay("Background (MoG)", new Point(50 + _backgroundDisplay.Width + _backgroundDisplay.Location.X, 25));
            _mixtureMovementDisplay = new VideoDisplay("Movement (MoG)", new Point(50 + _mixtureDisplay.Width + _mixtureDisplay.Location.X, 25));
            _3DPointsDisplay = new VideoDisplay("3D Points", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
-           _opticalFlowDisplay = new VideoDisplay("Optical Flow", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
-            _correctedInputDisplay = new VideoDisplay("Corrected input video", new Point(50 + _mixtureMovementDisplay.Width + _mixtureMovementDisplay.Location.X, 25));
 #endif
 
             _videoMux = new VideoMux();
@@ -218,12 +210,9 @@ namespace VTC
 
 #if DEBUG
             _videoMux.AddDisplay(_velocityFieldDisplay.ImageBox, _velocityFieldDisplay.LayerName);
-            _videoMux.AddDisplay(_velocityProjectDisplay.ImageBox, _velocityProjectDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureDisplay.ImageBox, _mixtureDisplay.LayerName);
 			_videoMux.AddDisplay(_mixtureMovementDisplay.ImageBox, _mixtureMovementDisplay.LayerName);
             _videoMux.AddDisplay(_3DPointsDisplay.ImageBox, _3DPointsDisplay.LayerName);
-            _videoMux.AddDisplay(_opticalFlowDisplay.ImageBox, _opticalFlowDisplay.LayerName);
-            _videoMux.AddDisplay(_correctedInputDisplay.ImageBox, _correctedInputDisplay.LayerName);
 #endif
             _videoMux.Show();
        }
@@ -577,16 +566,6 @@ namespace VTC
 
             _velocityFieldDisplay.Size = videoSize;
             _velocityFieldDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
-
-            _velocityProjectDisplay.Size = videoSize; 
-            _velocityProjectDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
-
-            _opticalFlowDisplay.Size = videoSize; 
-            _opticalFlowDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
-
-            _correctedInputDisplay.Size = videoSize; 
-            _correctedInputDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
-
 #endif
         }
 
@@ -618,35 +597,11 @@ namespace VTC
                 var image = new Image<Bgr, Byte>(800, 600);
                 _vista.DrawVelocityField(image, new Bgr(Color.White), 1);
                 _velocityFieldDisplay.Update(image);
-                Image<Gray, byte> pimage;
-                pimage = _vista.VelocityProjection();
-                _velocityProjectDisplay.Update(pimage.Convert<Bgr, byte>());
-                var opticalFlowImage = RenderOpticalFlowImage();
-                _opticalFlowDisplay.Update(opticalFlowImage);
-                _correctedInputDisplay.Update(_vista._correctedFrame);
             }
 #endif
 
 
         }
-
-        private Image<Bgr, float> RenderOpticalFlowImage()
-       {
-           Image<Bgr, float> opticalFlowImage = new Image<Bgr, float>(new Size(_vista._frame.Width, _vista._frame.Height));
-           if (!disableOpticalFlowCheckbox.Checked)
-           {
-
-               for (int i = 0; i < _vista._frame.Width; i++)
-                   for (int j = 0; j < _vista._frame.Height; j++)
-                   {
-                       opticalFlowImage.Data[j, i, 0] = (float)(Math.Abs(_vista.OpticalFlow[i][j][0]));
-                       opticalFlowImage.Data[j, i, 1] = (float)(Math.Abs(_vista.OpticalFlow[i][j][1]));
-                   }
-               opticalFlowImage = opticalFlowImage.Mul(15);
-               //_vista.DrawVelocityField(opticalFlowImage, new Bgr(Color.White), 1, _vista.OpticalFlow); 
-           }
-           return opticalFlowImage;
-       }
 
        private Image<Bgr, byte> Render3DPoints()
        {
@@ -732,9 +687,14 @@ namespace VTC
           RegionEditor r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
           if (r.ShowDialog() == DialogResult.OK)
           {
-              string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\VTC\\regionConfig.xml";
+              string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                      "\\VTC\\regionConfig.xml";
               _vista.RegionConfiguration = r.RegionConfig;
               _vista.RegionConfiguration.Save(configFilePath);
+          }
+          else
+          {
+              MessageBox.Show("Region config failed");
           }
       }
 
@@ -836,8 +796,10 @@ namespace VTC
             }
            else
            {
-               infoBox.AppendText("Batch complete" + Environment.NewLine);
-               Application.Idle -= ProcessFrame;
+               infoBox.AppendText("Batch complete." + Environment.NewLine);
+               infoBox.AppendText("Movement counts saved to desktop." + Environment.NewLine);
+
+                Application.Idle -= ProcessFrame;
            }
         }
     }

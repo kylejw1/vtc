@@ -89,7 +89,10 @@ namespace VTC.Kernel.Vistas
                 TurnStats[turnString]++;
 
                 var tl = new TrajectoryLogger(Settings, transitionEvent.Value, "vehicle", GetCameraSource.Invoke());
-                tl.LogAndPOST();
+                string filename = "Movement Count " + TrajectoryLogger.SanitizeFilename(GetCameraSource.Invoke());
+                filename = filename.Replace("file-", "");
+                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), filename);
+                tl.LogAndPOST(filepath);
             }
         }
 

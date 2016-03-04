@@ -54,14 +54,14 @@ namespace VTC.Reporting
             _time = DateTime.Now;
         }
 
-        public void LogAndPOST()
+        public void LogAndPOST(string baseFilename)
         {
-            LogToTextfile();
+            LogToTextfile(baseFilename);
             LogWithPOST();
-            LogToCSV();
+            LogToCSV(baseFilename);
         }
 
-        public void LogToTextfile()
+        public void LogToTextfile(string textfilePath)
         {
             try
             {
@@ -70,9 +70,7 @@ namespace VTC.Reporting
                 logString += _objectType + " ";
                 logString += _movementType + " ";
 
-                string filename = "Movement Count " + SanitizeFilename(_source) + ".txt";
-                filename = filename.Replace("file-", "");
-                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), filename);
+                string filepath = textfilePath + ".txt";
                 if (!File.Exists(filepath))
                     File.Create(filepath);
 
@@ -86,7 +84,7 @@ namespace VTC.Reporting
             
         }
 
-        public void LogToCSV()
+        public void LogToCSV(string csvPath)
         {
             try
             {
@@ -95,9 +93,7 @@ namespace VTC.Reporting
                 logString += _objectType + ",";
                 logString += _movementType;
 
-                string filename = "Movement Count " + SanitizeFilename(_source) + ".csv";
-                filename = filename.Replace("file-", "");
-                string filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), filename);
+                string filepath = csvPath + ".csv";
                 if (!File.Exists(filepath))
                     File.Create(filepath);
 
@@ -185,7 +181,7 @@ namespace VTC.Reporting
 
         //Taken from daniweb
         //https://www.daniweb.com/programming/software-development/threads/217968/generate-safe-filenames-with-c
-        private string SanitizeFilename(string filename)
+        public static string SanitizeFilename(string filename)
         {
             // first trim the raw string
             string safe = filename.Trim();
