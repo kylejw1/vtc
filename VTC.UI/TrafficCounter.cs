@@ -421,9 +421,6 @@ namespace VTC
           intersectionIDTextBox.Text = _settings.IntersectionID;
           pushStateTimer.Interval = _settings.StateUploadIntervalMs;
           serverUrlTextBox.Text = _settings.ServerUrl;
-
-          //frameHeightBox.Text = _settings.FrameHeight.ToString(CultureInfo.InvariantCulture);
-          //frameWidthBox.Text = _settings.FrameWidth.ToString(CultureInfo.InvariantCulture);
       }
 
       /// <summary>
@@ -435,10 +432,6 @@ namespace VTC
           {
               _settings.IntersectionID = intersectionIDTextBox.Text;
               _settings.ServerUrl = serverUrlTextBox.Text;
-
-              //_settings.FrameHeight = double.Parse(frameHeightBox.Text);
-              //_settings.FrameWidth = double.Parse(frameWidthBox.Text);
-
               _settings.Save();
           }
           catch (Exception ex)
