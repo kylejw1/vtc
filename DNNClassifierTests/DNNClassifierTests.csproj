@@ -53,12 +53,6 @@
     <Compile Include="DnnUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DNNClassifier\DNNClassifier.csproj">
-      <Project>{783e110c-cc04-4b9e-8f3b-57130606b14d}</Project>
-      <Name>DNNClassifier</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

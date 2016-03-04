@@ -52,7 +52,7 @@ namespace VTC
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
             this.btnToggleVideoMux = new System.Windows.Forms.Button();
-            this.watchdogTimer = new System.Windows.Forms.Timer(this.components);
+            this.heartbeatTimer = new System.Windows.Forms.Timer(this.components);
             this.hideTrackersButton = new System.Windows.Forms.Button();
             this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SelectVideosButton = new System.Windows.Forms.Button();
@@ -261,11 +261,11 @@ namespace VTC
             this.btnToggleVideoMux.UseVisualStyleBackColor = true;
             this.btnToggleVideoMux.Click += new System.EventHandler(this.btnToggleVideoMux_Click);
             // 
-            // watchdogTimer
+            // heartbeatTimer
             // 
-            this.watchdogTimer.Enabled = true;
-            this.watchdogTimer.Interval = 5000;
-            this.watchdogTimer.Tick += new System.EventHandler(this.watchdogTimer_Tick);
+            this.heartbeatTimer.Enabled = true;
+            this.heartbeatTimer.Interval = 5000;
+            this.heartbeatTimer.Tick += new System.EventHandler(this.heartbeatTimer_Tick);
             // 
             // hideTrackersButton
             // 
@@ -381,7 +381,7 @@ namespace VTC
       private CheckBox delayProcessingCheckbox;
       private CheckBox exportDatasetsCheckbox;
 	  private Button btnToggleVideoMux;
-      private Timer watchdogTimer;
+      private Timer heartbeatTimer;
       private Button hideTrackersButton;
       private CheckBox disableOpticalFlowCheckbox;
         private Button SelectVideosButton;
