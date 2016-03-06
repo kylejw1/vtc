@@ -158,7 +158,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="RegionConfig\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

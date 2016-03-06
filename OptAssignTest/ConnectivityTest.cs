@@ -5,12 +5,8 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VTC.Kernel;
 using VTC.Kernel.Vistas;
-using System.ServiceModel.Web;
-using System.Runtime.Serialization.Json;
 using VTC.Common;
 using VTC.Reporting.ReportItems;
 
@@ -80,8 +76,8 @@ namespace OptAssignTest
 
         private static void SendSingleVehicle(int x, int y)
         {
-            TestSettings testSettings = new TestSettings();
-            Vista vista = new IntersectionVista(testSettings, 640, 480);
+            ISettings settings = new AppSettings();
+            Vista vista = new IntersectionVista(settings, 640, 480);
             List<StateEstimate> stateHistory = new List<StateEstimate>();
             StateEstimate[] stateEstimates = new StateEstimate[1];
             stateEstimates[0].X = x;

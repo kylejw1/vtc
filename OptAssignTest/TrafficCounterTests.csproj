@@ -101,7 +101,6 @@
     <Compile Include="ConnectivityTest.cs" />
     <Compile Include="VisibilityLossTests.cs" />
     <Compile Include="TestBase.cs" />
-    <Compile Include="TestSettings.cs" />
     <Compile Include="TrajectoryDetectionTest.cs" />
     <Compile Include="Framework\CircleVehicles.cs" />
     <Compile Include="Framework\AnimationBase.cs" />

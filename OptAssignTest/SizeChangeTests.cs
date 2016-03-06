@@ -14,7 +14,7 @@ namespace OptAssignTest
         {
             var script = SizeChangeScript();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -25,16 +25,16 @@ namespace OptAssignTest
             });
         }
 
-        private static Script SizeChangeScript()
+        private Script SizeChangeScript()
         {
             var script = new Script();
 
             // at the last frame car should be four times bigger
-            var frameSizeDiff = 4.0 / DefaultSettings.FrameHeight;
+            var frameSizeDiff = 4.0 / settings.FrameHeight;
 
             script
                 .CreateCar()
-                .AddVerticalPath(DefaultSettings)
+                .AddVerticalPath(settings)
                 .SetSize(frame => (uint) (VehicleRadius * (1 + frame * frameSizeDiff)));
             return script;
         }
@@ -43,7 +43,7 @@ namespace OptAssignTest
         {
             return new[]
             {
-                new CaptureContext(new CaptureEmulator("Car size change", SizeChangeScript()), DefaultSettings),
+                new CaptureContext(new CaptureEmulator("Car size change", SizeChangeScript()), settings),
             };
         }
     }

@@ -19,7 +19,7 @@ using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
-using VTC.Settings;
+using VTC.Common;
 
 namespace VTC
 {

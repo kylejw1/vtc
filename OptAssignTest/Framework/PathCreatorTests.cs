@@ -14,8 +14,6 @@ namespace OptAssignTest.Framework
         [Description("Path with single path section should detect section bounds correctly.")]
         public void SinglePathCompleteness() 
         {
-            var settings = CreateSettings(VehicleRadius);
-
             // create generator with vertical path
             IPathGenerator generator = Path
                                         .New(settings)
@@ -102,7 +100,6 @@ namespace OptAssignTest.Framework
         [Description("Check points generated for West->East path.")]
         public void FromSouthAndTurnToEast()
         {
-            var settings = CreateSettings(VehicleRadius);
 
             IPathGenerator generator = Path
                 .New(settings)
@@ -127,9 +124,8 @@ namespace OptAssignTest.Framework
             Assert.AreEqual(settings.VerticalPathLength() / 2, (uint)lastPoint.Value.Y, "Middle Y expected.");
         }
 
-        private static void VerifyDirection(Direction direction, Action<Point, Point> validation)
+        private void VerifyDirection(Direction direction, Action<Point, Point> validation)
         {
-            var settings = CreateSettings(VehicleRadius);
 
             IPathGenerator generator = Path
                 .New(settings)
@@ -164,8 +160,6 @@ namespace OptAssignTest.Framework
         {
             const int horizontalOffset = 10;
 
-            var settings = CreateSettings(VehicleRadius);
-
             IPathGenerator generator = Path
                 .New(settings)
                 .StraightFrom(Direction.South, new Path.Vector(horizontalOffset, 0));
@@ -185,9 +179,8 @@ namespace OptAssignTest.Framework
             }
         }
 
-        private static void SingleVerticalPathTest(Direction direction)
+        private void SingleVerticalPathTest(Direction direction)
         {
-            var settings = CreateSettings(VehicleRadius);
 
             // create generator with vertical path
             Script script = new Script();
@@ -198,9 +191,8 @@ namespace OptAssignTest.Framework
             Assert.IsTrue(script.IsDone(settings.VerticalPathLength()), "Should be done for next after the last point.");
         }
 
-        private static void SingleHorizontalPathTest(Direction direction)
+        private void SingleHorizontalPathTest(Direction direction)
         {
-            var settings = CreateSettings(VehicleRadius);
 
             // create generator with horizontal path
             Script script = new Script();

@@ -2,8 +2,8 @@ using System;
 using System.Reflection;
 using System.Windows.Forms;
 using NLog;
-using VTC.Settings;
 using LicenseManager;
+using VTC.Common;
 
 namespace VTC
 {

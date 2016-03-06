@@ -14,7 +14,7 @@ namespace OptAssignTest
         {
             var script = CrossingPathScript();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -26,19 +26,19 @@ namespace OptAssignTest
             });
         }
 
-        private static Script CrossingPathScript()
+        private Script CrossingPathScript()
         {
             var script = new Script();
 
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings);
+                .AddVerticalPath(settings);
 
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddHorizontalPath(DefaultSettings, Direction.East);
+                .AddHorizontalPath(settings, Direction.East);
 
             return script;
         }
@@ -47,7 +47,7 @@ namespace OptAssignTest
         {
             return new[]
             {
-                new CaptureContext(new CaptureEmulator("Crossing paths", CrossingPathScript()), DefaultSettings)
+                new CaptureContext(new CaptureEmulator("Crossing paths", CrossingPathScript()), settings)
             };
         }
     }
