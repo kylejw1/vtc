@@ -234,7 +234,7 @@ namespace VTC.Kernel.Vistas
         }
 
         private int numProcessedFrames = 0;
-        public void Update(Image<Bgr, Byte> newFrame)
+        public void Update(Image<Bgr, Byte> newFrame, bool logState = false)
         {
             try
             {
@@ -255,13 +255,13 @@ namespace VTC.Kernel.Vistas
                     UpdateBackgroundMoG(newFrame);
 
                 TrainingImage = newFrame.And(Movement_Mask.Convert<Bgr, byte>());
-
+                
                 MeasurementsArray = FindClosedBlobCenters(newFrame, Movement_Mask, Settings);
                 MeasurementArrayQueue.Enqueue(MeasurementsArray);
                 while (MeasurementArrayQueue.Count > 300)
                     MeasurementArrayQueue.Dequeue();
 
-                MHT.Update(MeasurementsArray);
+                MHT.Update(MeasurementsArray, logState);
                 
                 // First update base class stats
                 UpdateVistaStats(MHT.DeletedVehicles);

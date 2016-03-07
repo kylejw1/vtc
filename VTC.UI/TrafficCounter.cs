@@ -224,7 +224,7 @@ namespace VTC
 
                         // Send the new image frame to the vista for processing
                         _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
-                        _vista.Update(frameForProcessing);
+                        _vista.Update(frameForProcessing, mhtLogCheckbox.Checked);
 
                         // Update image boxes
                         UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);

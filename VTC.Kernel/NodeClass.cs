@@ -4,22 +4,8 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using VTC.Common;
 
-//using Excel = Microsoft.Office.Interop.Excel;
-
-//TreeLib
-//A tree class with inherited class HypothesisTree for use in Multiple Hypothesis Tracking algorithm. 
-//This code is intended for use in traffic monitoring using a single video camera. 
-//
-//Written by Alexander Farley 
-//alexander.farley@utoronto.ca
-//Tested and compiled in VS2010 for .NET 4 framework
-//Started October 24 2011
-//Updated October 27 2011 - debugging
-//Updated Dec 6 2011 - added initial angle, path length, is_pedestrian states to StateHypothesis struct
-//----------------------------------------------------------------------
 namespace VTC.Kernel
 {
-
     public enum MeasurementSource { FalsePositive, ExistingVehicle, NewVehicle }; 
 
     public class Node<T>
@@ -377,10 +363,8 @@ namespace VTC.Kernel
             var lastFrameVehicle = parentHypothesis.Vehicles[address];
             currentState.IsPedestrian = lastFrameVehicle.StateHistory[lastFrameVehicle.StateHistory.Count - 1].IsPedestrian;
             var updatedVehicle = new Vehicle(lastFrameVehicle.StateHistory, currentState);
-            if (!withMeasurement)
-                currentState.MissedDetections++;
-            else
-                currentState.MissedDetections = 0; 
+            if (withMeasurement)
+                currentState.MissedDetections = 0;
 
             if (currentState.MissedDetections < NodeData.MissDetectionThreshold)
                 NodeData.Vehicles.Add(updatedVehicle);
@@ -400,7 +384,7 @@ namespace VTC.Kernel
             var a = (HypothesisTree)x;
             var b = (HypothesisTree)y;
 
-            if (a.ChildProbability() < b.ChildProbability())
+            if (a.ChildProbability() > b.ChildProbability())
                 return 1;
             return 0;
         }

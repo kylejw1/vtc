@@ -58,6 +58,7 @@ namespace VTC
             this.SelectVideosButton = new System.Windows.Forms.Button();
             this.selectVideoFilesDialog = new System.Windows.Forms.OpenFileDialog();
             this.infoBox = new System.Windows.Forms.TextBox();
+            this.mhtLogCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // pushStateTimer
@@ -145,7 +146,7 @@ namespace VTC
             // SaveParametersBtn
             // 
             this.SaveParametersBtn.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SaveParametersBtn.Location = new System.Drawing.Point(279, 298);
+            this.SaveParametersBtn.Location = new System.Drawing.Point(279, 324);
             this.SaveParametersBtn.Name = "SaveParametersBtn";
             this.SaveParametersBtn.Size = new System.Drawing.Size(193, 22);
             this.SaveParametersBtn.TabIndex = 52;
@@ -245,9 +246,9 @@ namespace VTC
             this.exportDatasetsCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exportDatasetsCheckbox.Location = new System.Drawing.Point(279, 273);
             this.exportDatasetsCheckbox.Name = "exportDatasetsCheckbox";
-            this.exportDatasetsCheckbox.Size = new System.Drawing.Size(176, 19);
+            this.exportDatasetsCheckbox.Size = new System.Drawing.Size(132, 19);
             this.exportDatasetsCheckbox.TabIndex = 72;
-            this.exportDatasetsCheckbox.Text = "Export datasets periodically";
+            this.exportDatasetsCheckbox.Text = "Export image blobs";
             this.exportDatasetsCheckbox.UseVisualStyleBackColor = true;
             // 
             // btnToggleVideoMux
@@ -318,12 +319,24 @@ namespace VTC
             this.infoBox.Size = new System.Drawing.Size(240, 206);
             this.infoBox.TabIndex = 77;
             // 
+            // mhtLogCheckbox
+            // 
+            this.mhtLogCheckbox.AutoSize = true;
+            this.mhtLogCheckbox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mhtLogCheckbox.Location = new System.Drawing.Point(278, 298);
+            this.mhtLogCheckbox.Name = "mhtLogCheckbox";
+            this.mhtLogCheckbox.Size = new System.Drawing.Size(115, 19);
+            this.mhtLogCheckbox.TabIndex = 78;
+            this.mhtLogCheckbox.Text = "Export MHT logs";
+            this.mhtLogCheckbox.UseVisualStyleBackColor = true;
+            // 
             // TrafficCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(484, 530);
+            this.Controls.Add(this.mhtLogCheckbox);
             this.Controls.Add(this.infoBox);
             this.Controls.Add(this.SelectVideosButton);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
@@ -387,5 +400,6 @@ namespace VTC
         private Button SelectVideosButton;
         private OpenFileDialog selectVideoFilesDialog;
         private TextBox infoBox;
+        private CheckBox mhtLogCheckbox;
     }
 }

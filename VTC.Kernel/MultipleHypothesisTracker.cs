@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.Distributions;
@@ -66,9 +67,32 @@ namespace VTC.Kernel
         /// </summary>
         /// <param name="detections">Information about each detected item present in the latest readings.  This 
         /// list is assumed to be complete.</param>
-        public void Update(Measurement[] detections)
+        public void Update(Measurement[] detections, bool logState=false)
         {
             int numDetections = detections.Length;
+
+            string logFilePath;
+            System.IO.StreamWriter logfile = null;
+            if (logState)
+            {
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string logsDirectoryPath = desktopPath + "\\MHTlogs\\";
+                if (!Directory.Exists(logsDirectoryPath))
+                    Directory.CreateDirectory(logsDirectoryPath);
+
+                int fCount = Directory.GetFiles(logsDirectoryPath, "*", SearchOption.AllDirectories).Length;
+                string logFileName = fCount.ToString() + ".txt";
+                logFilePath = Path.Combine(logsDirectoryPath, logFileName);
+                File.Create(logFilePath).Dispose();
+
+                logfile = new System.IO.StreamWriter(logFilePath);
+                foreach (var m in detections)
+                    logfile.WriteLine("Detection: (" + m.X + ", " + m.Y + ")");
+
+                logfile.WriteLine();
+                logfile.WriteLine("MHT initial state:");
+                logfile.Write(SerializeTreeState(_hypothesisTree));
+            }
 
             //Maintain hypothesis tree
             if (_hypothesisTree.Children.Count > 0)
@@ -78,6 +102,13 @@ namespace VTC.Kernel
                     _hypothesisTree.Prune(1);
                     _hypothesisTree = _hypothesisTree.GetChild(0);
                 }
+            }
+
+            if (logState)
+            {
+                logfile.WriteLine();
+                logfile.WriteLine("MHT after pruning:");
+                logfile.Write(SerializeTreeState(_hypothesisTree));
             }
 
             List<Node<StateHypothesis>> childNodeList = _hypothesisTree.GetLeafNodes();
@@ -127,6 +158,14 @@ namespace VTC.Kernel
             VelocityField.TryInsertVelocitiesAsync(pointVelocityDic);
 
             updateTrajectoriesList();
+
+            if (logState)
+            {
+                logfile.WriteLine();
+                logfile.WriteLine("MHT final:");
+                logfile.Write(SerializeTreeState(_hypothesisTree));
+                logfile.Dispose();
+            }
         }
 
         /// <summary>
@@ -183,7 +222,6 @@ namespace VTC.Kernel
         {
             //Calculate K-best assignment using Murty's algorithm
             double[,] costs = hypothesisExpanded.ToArray();
-            //Console.WriteLine("Finding k-best assignment");
             for (int i = 0; i < costs.GetLength(0); i++)
                 for (int j = 0; j < costs.GetLength(1); j++)
                     costs[i, j] = -costs[i, j];
@@ -274,13 +312,10 @@ namespace VTC.Kernel
             {
                 //Expanded hypothesis: targets exist
                 DenseMatrix targetAssignmentMatrix = (DenseMatrix)ambiguityMatrix.SubMatrix(0, numDetections, 1, numExistingTargets);
-
                 hypothesisExpanded = new DenseMatrix(numDetections, 2 * numDetections + numExistingTargets);
-
                 hypothesisExpanded.SetSubMatrix(0, numDetections, 0, numDetections, falseAssignmentMatrix);
                 hypothesisExpanded.SetSubMatrix(0, numDetections, numDetections, numExistingTargets, targetAssignmentMatrix);
                 hypothesisExpanded.SetSubMatrix(0, numDetections, numDetections + numExistingTargets, numDetections, newTargetMatrix);
-
             }
             else
             {
@@ -373,6 +408,53 @@ namespace VTC.Kernel
                 t.stateEstimates = v.StateHistory;
                 Trajectories.Add(t);
             }
+        }
+
+        public string SerializeTreeState(HypothesisTree t)
+        {
+            string tree_state = "========MHT=======" + Environment.NewLine;
+            foreach (var h in t.ToList())
+            {
+                tree_state += "Node depth " + h.NodeDepth() + Environment.NewLine;
+                tree_state += SerializeNodeState(h.NodeData);
+            }
+            return tree_state;
+        }
+
+        public string SerializeNodeState(StateHypothesis h)
+        {
+            string node_state = " -----Node------" + Environment.NewLine;
+            node_state += " p: " + h.Probability + Environment.NewLine;
+            
+            if(h.Vehicles.Count > 0)
+            {
+                node_state += " Vehicles (all): " + Environment.NewLine;
+                foreach (var v in h.Vehicles)
+                    node_state += SerializeTrackerState(v);
+            }
+            
+            if(h.NewVehicles.Count > 0)
+            {
+                node_state += " Vehicles (new): " + Environment.NewLine;
+                foreach (var v in h.NewVehicles)
+                    node_state += SerializeTrackerState(v);
+            }
+            
+            if(h.DeletedVehicles.Count > 0)
+            {
+                node_state += " Vehicles (deleted): " + Environment.NewLine;
+                foreach (var v in h.DeletedVehicles)
+                    node_state += SerializeTrackerState(v);
+            }
+
+            return node_state;
+        }
+
+        public string SerializeTrackerState(Vehicle v)
+        {
+            StateEstimate latest = v.StateHistory.Last();
+            string tracker_state = "  Tracker (" + latest.X + "," + latest.Y + "), " + latest.MissedDetections + " misses" + Environment.NewLine;
+            return tracker_state;
         }
     }
 
