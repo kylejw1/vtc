@@ -19,7 +19,7 @@ namespace OptAssignTest
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(1, vehicles.Count, "Car should be detected all the way.");
                 }
@@ -36,7 +36,7 @@ namespace OptAssignTest
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Cars should be detected all the way.");
 
@@ -55,7 +55,7 @@ namespace OptAssignTest
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Both cars should be tracked all the way.");
 
@@ -74,7 +74,7 @@ namespace OptAssignTest
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Both cars should be tracked all the way.");
 

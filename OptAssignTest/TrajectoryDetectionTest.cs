@@ -41,7 +41,8 @@ namespace OptAssignTest
                 }
             }
         }
-        
+
+        [Ignore]
         [TestMethod]
         public void TwoDiagonalsTrajectories_ShouldDetectTwoVehicles()
         {

@@ -18,7 +18,7 @@ namespace OptAssignTest
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(script.Cars.Count, vehicles.Count, "Both cars should be detected (failed at {0} frame).", frame);
                     // TODO: make sure that each car keeps its direction

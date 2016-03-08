@@ -48,7 +48,7 @@ namespace OptAssignTest.Framework
         public bool IsDone(uint frame)
         {
             // check all cars have finished their paths
-            return _cars.All(car => car.IsDone(frame));
+            return _cars.Any(car => car.IsDone(frame) || car.NearComplete(frame));
         }
     }
 }

@@ -46,7 +46,7 @@ namespace OptAssignTest
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
             uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 10);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 1);
 
             var script = ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence);
 
@@ -60,10 +60,9 @@ namespace OptAssignTest
                     }
 
                     // car should became invisible, but still be tracked 
-                    if (frame == frameWhenDetectionLost + DetectionThreshold)
+                    if (frame == frameWhenDetectionLost + settings.MissThreshold - 2)
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car still should be detected.");
-
                         Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections > 0, "Car visibility loss should be detected.");
                     }
 
@@ -71,7 +70,6 @@ namespace OptAssignTest
                     if (frame == frameWithReappearence + DetectionThreshold)
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected");
-
                         Assert.IsTrue(vehicles[0].StateHistory.Count > frameWithReappearence, "It should be the same car as before.");
                         Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections == 0, "Car visibility reappearence should be detected.");
                     }
@@ -165,7 +163,7 @@ namespace OptAssignTest
                 .CreateCar()
                 .SetSize(VehicleRadius)
                 .AddVerticalPath(settings)
-                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
+                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame >= frameWithReappearence));
             // car hidden in the middle
             return script;
         }

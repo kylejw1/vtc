@@ -41,6 +41,12 @@ namespace OptAssignTest.Framework
             {
                 return frame > _to;
             }
+
+            internal bool NearComplete(uint frame)
+            {
+                var percentage = (double)frame / _to;
+                return (percentage > .98);
+            }
         }
 
         #endregion
@@ -60,6 +66,12 @@ namespace OptAssignTest.Framework
         {
             // check if all sections are finished
             return _sections.All(section => section.IsFinished(frame));
+        }
+
+        public bool NearComplete(uint frame)
+        {
+            // check if all sections are finished
+            return _sections.All(section => section.NearComplete(frame));
         }
 
         public SectionPath AddSegment(uint @from, uint to, Func<uint, Point> pathGenerator, Path.Vector? offset = null)

@@ -15,5 +15,11 @@ namespace OptAssignTest.Framework
         /// </summary>
         /// <returns><c>true</c> for completed path.</returns>
         bool IsDone(uint frame);
+
+        /// <summary>
+        /// Check if path is nearly finished, to allow exclusion of cases where the car is right at the edge of the frame
+        /// </summary>
+        /// <returns><c>true</c> for completed path.</returns>
+        bool NearComplete(uint frame);
     }
 }
