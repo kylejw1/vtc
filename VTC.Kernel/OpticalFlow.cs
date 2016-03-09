@@ -14,8 +14,6 @@ namespace VTC.Kernel
             if (target.Length != input.Length)
                 throw new Exception("Can't compute error of inequal-length vectors.");
 
-            double error = 0;
-
             var targetsAndInputs = target.ToList().Zip(input.ToList(), (x, y) => Math.Pow(x - y, 2));
             var sumSquareError = targetsAndInputs.Sum();
             return sumSquareError;

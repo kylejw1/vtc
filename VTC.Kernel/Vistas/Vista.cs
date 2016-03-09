@@ -409,84 +409,6 @@ namespace VTC.Kernel.Vistas
             return movementMask;
         }
 
-        //TODO: rewrite this method (efficiency, correctness)
-        /// <summary>
-        /// Sample evenly-spaced points in image and compare to background. Determine average error in % on each channel (R,G,B). Apply inverse
-        /// tranform to bring corrected frame nearer to background. 
-        /// </summary>
-        /// <param name="frame">Input frame</param>
-        /// <param name="background">Reference for correction</param>
-        private void ApplyColorCorrection(Image<Bgr, byte> frame, Image<Bgr, float> background)
-        {
-            throw new NotImplementedException();
-            //Adjust incoming frame by white-balancing to match background image
-            Image<Bgr, float> whiteBalancedFrame = new Image<Bgr, float>(frame.Width, frame.Height);
-            int numColorSamples = 20;
-            int sampleSpacing = (Math.Min(frame.Width, frame.Height)/numColorSamples) - 1;
-            double balanceMagnitudeThreshold = 0.5;
-            double bFactorAvg = 0;
-            double gFactorAvg = 0;
-            double rFactorAvg = 0;
-            int numGoodSamples = 0;
-            _correctedFrame = new Image<Bgr, byte>(frame.Width, frame.Height);
-
-            for (int i = 0; i < numColorSamples; i++)
-            {
-                try
-                {
-                    double bFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 0]/
-                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 0]);
-                    double gFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 1]/
-                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 1]);
-                    double rFactor = (double) frame.Data[sampleSpacing*i, sampleSpacing*i, 2]/
-                                     ((int) background.Data[sampleSpacing*i, sampleSpacing*i, 2]);
-                    double magnitude =
-                        Math.Sqrt(Math.Pow(Math.Abs(1.0 - bFactor), 2) + Math.Pow(Math.Abs(1.0 - gFactor), 2) +
-                                  Math.Pow(Math.Abs(1.0 - rFactor), 2));
-                    if (!double.IsNaN(magnitude) && !double.IsInfinity(magnitude) && magnitude < balanceMagnitudeThreshold)
-                    {
-                        bFactorAvg += bFactor;
-                        gFactorAvg += gFactor;
-                        rFactorAvg += rFactor;
-                        numGoodSamples++;
-                    }
-                }
-                catch (DivideByZeroException)
-                {
-                    //No big deal
-                }
-            }
-
-            if (numGoodSamples >= 1)
-            {
-                bFactorAvg = (double) bFactorAvg/numGoodSamples;
-                gFactorAvg = (double) gFactorAvg/numGoodSamples;
-                rFactorAvg = (double) rFactorAvg/numGoodSamples;
-
-                double bCorrection = 1.0/bFactorAvg;
-                double gCorrection = 1.0/gFactorAvg;
-                double rCorrection = 1.0/rFactorAvg;
-
-                for (int i = 0; i < frame.Width; i++)
-                    for (int j = 0; j < frame.Height; j++)
-                    {
-                        double adjustedB = frame.Data[j, i, 0]*bCorrection;
-                        double adjustedG = frame.Data[j, i, 1]*gCorrection;
-                        double adjustedR = frame.Data[j, i, 2]*rCorrection;
-                        double adjustedLimitedB = Math.Min(adjustedB, 255);
-                        double adjustedLimitedG = Math.Min(adjustedG, 255);
-                        double adjustedLimitedR = Math.Min(adjustedR, 255);
-                        frame.Data[j, i, 0] = Convert.ToByte(adjustedLimitedB);
-                        frame.Data[j, i, 1] = Convert.ToByte(adjustedLimitedG);
-                        frame.Data[j, i, 2] = Convert.ToByte(adjustedLimitedR);
-
-                        _correctedFrame.Data[j, i, 0] = Convert.ToByte(adjustedLimitedB);
-                        _correctedFrame.Data[j, i, 1] = Convert.ToByte(adjustedLimitedG);
-                        _correctedFrame.Data[j, i, 2] = Convert.ToByte(adjustedLimitedR);
-                    }
-            }
-        }
-
         private static Bgr GetBlobColour(Image<Bgr, Byte> frame, double x, double y, double radius)
         {
             var mask = new Image<Gray, Byte>(frame.Size);
@@ -494,38 +416,6 @@ namespace VTC.Kernel.Vistas
             var circle = new CircleF(center, (float)radius);
             mask.Draw(circle, new Gray(255), 0);
             return frame.GetAverage(mask);
-        }
-
-
-        //TODO: rewrite this method (efficiency, correctness)
-        private Measurement[] FindBlobCenters(Image<Bgr, Byte> frame, int count)
-        {
-            throw new NotImplementedException();
-			Measurement[] coordinates;
-            using (Image<Gray, Byte> tempMovement_Mask = Movement_Mask.Clone())
-            {
-                coordinates = new Measurement[count];
-                for (int detection_count = 0; detection_count < count; detection_count++)
-                {
-                    double[] minValues;
-                    double[] maxValues;
-                    Point[] minLocations;
-                    Point[] maxLocations;
-                    tempMovement_Mask.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
-                    int[] maxLocation = new int[] { maxLocations[0].X, maxLocations[0].Y };
-                    tempMovement_Mask.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), Settings.CarRadius), TempMovementGray, 0);
-					
-					var x = maxLocation[0];
-					var y = maxLocation[1];
-					var colour = GetBlobColour(frame, x, y, 3.0);
-					var coords = new Measurement() { X = x, Y = y, Red = colour.Red, Green = colour.Green, Blue = colour.Blue };
-					coordinates[detection_count] = coords;
-
-                    //Do this last so that it doesn't interfere with color sampling
-					frame.Draw(new CircleF(new PointF(maxLocation[0], maxLocation[1]), 1), new Bgr(255.0, 255.0, 255.0), 1);
-                }
-            }
-            return coordinates;
         }
 
         private static Measurement[] FindClosedBlobCenters(Image<Bgr, Byte> frame, Image<Gray, byte> movementMask, ISettings settings)

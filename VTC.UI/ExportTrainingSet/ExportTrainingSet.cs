@@ -24,7 +24,6 @@ namespace VTC.ExportTrainingSet
         private PictureBox _subimage = new PictureBox();
         private List<RadioButton> classRadioButtons = new List<RadioButton>();
         private List<Vehicle> _vehicles;
-        private SortedList<CvBlob, int> _blobsWithArea;
 
         private int _unpaddedX;
         private int _unpaddedY;
