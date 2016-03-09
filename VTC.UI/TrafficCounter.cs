@@ -20,6 +20,7 @@ using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Common;
+using VTC.BatchProcessing;
 
 namespace VTC
 {
@@ -54,7 +55,8 @@ namespace VTC
 
         private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
         private ICaptureSource _selectedCamera;
-        private List<string> _videosToProcess;
+
+        private List<BatchVideoJob> _videoJobs; 
 
         private readonly string _appArgument; //For debugging only, delete this later
         private TimeSpan _trialLicenseTimeLimit = TimeSpan.FromMinutes(30);
@@ -161,7 +163,7 @@ namespace VTC
            _applicationStartTime = DateTime.Now;
            _lastDatasetExportTime = DateTime.Now;
 
-            _videosToProcess = new List<string>();
+            _videoJobs = new List<BatchVideoJob>();
 
            DisableExperimental();
 
@@ -207,7 +209,7 @@ namespace VTC
                     {
                         if (_batchMode)
                         {
-                            if (_videosToProcess.Count > 0)
+                            if ( _videoJobs.Count > 0)
                                 DequeueVideo();
                         }
                         else
@@ -508,22 +510,22 @@ namespace VTC
             DequeueVideo();
         }
 
-        private void LoadVideosFromPath(List<string> videosToProcess)
+        private void LoadVideosFromPath(List<BatchVideoJob> videoJobs)
         {
             _batchMode = true;
             _cameras.Clear();
             CameraComboBox.Items.Clear();
-            _videosToProcess = videosToProcess;
+            _videoJobs = videoJobs;
             DequeueVideo();
         }
 
         private void DequeueVideo()
         {
-            if (_videosToProcess.Count > 0)
+            if (_videoJobs.Count > 0)
             {
                 infoBox.AppendText("Loading video from batch" + Environment.NewLine);
-                SelectedCamera = LoadCameraFromFilename(_videosToProcess.First());
-                _videosToProcess.Remove(_videosToProcess.First());
+                SelectedCamera = LoadCameraFromFilename(_videoJobs.First().VideoPath);
+                _videoJobs.Remove(_videoJobs.First());
             }
             else
             {
@@ -776,8 +778,15 @@ namespace VTC
         {
             var dr = selectVideoFilesDialog.ShowDialog();
             if (dr == DialogResult.OK)
-                LoadVideosFromPath(selectVideoFilesDialog.FileNames.ToList());
-
+            {
+                _videoJobs = new List<BatchVideoJob>();
+                var videoPathsList = selectVideoFilesDialog.FileNames.ToList();
+                foreach (var job in videoPathsList.Select(p => new BatchVideoJob {VideoPath = p}))
+                    _videoJobs.Add(job);
+                
+                LoadVideosFromPath(_videoJobs);
+            }
+                
             Application.Idle -= ProcessFrame;
             Application.Idle += ProcessFrame;
         }

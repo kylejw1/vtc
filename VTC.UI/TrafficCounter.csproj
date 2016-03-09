@@ -151,6 +151,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="BatchProcessing\BatchVideoJob.cs" />
     <Compile Include="CaptureSource\SystemCamera.cs" />
     <Compile Include="CaptureSource\VideoFileCapture.cs" />
     <Compile Include="CaptureSource\CaptureSource.cs" />
