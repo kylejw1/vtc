@@ -573,8 +573,6 @@ namespace VTC
            pushStateCheckbox.Visible = false;
            exportDatasetsCheckbox.Visible = false;
            mhtLogCheckbox.Visible = false;
-           SaveParametersBtn.Visible = false;
-           hideTrackersButton.Visible = false;
            disableOpticalFlowCheckbox.Visible = false;
            MoGcheckBox.Visible = false;
            delayProcessingCheckbox.Visible = false;
@@ -667,25 +665,6 @@ namespace VTC
 
         #region Click Handlers
 
-        /// <summary>
-        /// Method to save user settings.
-        /// </summary>
-        private void SaveParametersBtn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _settings.IntersectionID = intersectionIDTextBox.Text;
-                _settings.ServerUrl = serverUrlTextBox.Text;
-                _settings.Save();
-            }
-            catch (Exception ex)
-            {
-                var message = "Cannot save configuration settings. Error: " + ex.Message;
-                Log(LogLevel.Error, message);
-                MessageBox.Show(message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Idle -= ProcessFrame;
@@ -767,11 +746,6 @@ namespace VTC
                 MessageBox.Show("Region configuration failed");
             }
 
-        }
-
-        private void hideTrackersButton_Click(object sender, EventArgs e)
-        {
-            _vista.hide_trackers = !_vista.hide_trackers;
         }
 
         private void SelectVideosButton_Click(object sender, EventArgs e)

@@ -41,7 +41,6 @@ namespace VTC
             this.tbVistaStats = new System.Windows.Forms.TextBox();
             this.intersectionIDLabel = new System.Windows.Forms.Label();
             this.intersectionIDTextBox = new System.Windows.Forms.TextBox();
-            this.SaveParametersBtn = new System.Windows.Forms.Button();
             this.CameraComboBox = new System.Windows.Forms.ComboBox();
             this.btnConfigureRegions = new System.Windows.Forms.Button();
             this.showPolygonsCheckbox = new System.Windows.Forms.CheckBox();
@@ -51,7 +50,6 @@ namespace VTC
             this.exportDatasetsCheckbox = new System.Windows.Forms.CheckBox();
             this.btnToggleVideoMux = new System.Windows.Forms.Button();
             this.heartbeatTimer = new System.Windows.Forms.Timer(this.components);
-            this.hideTrackersButton = new System.Windows.Forms.Button();
             this.disableOpticalFlowCheckbox = new System.Windows.Forms.CheckBox();
             this.SelectVideosButton = new System.Windows.Forms.Button();
             this.selectVideoFilesDialog = new System.Windows.Forms.OpenFileDialog();
@@ -141,17 +139,6 @@ namespace VTC
             this.intersectionIDTextBox.Size = new System.Drawing.Size(93, 21);
             this.intersectionIDTextBox.TabIndex = 53;
             // 
-            // SaveParametersBtn
-            // 
-            this.SaveParametersBtn.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SaveParametersBtn.Location = new System.Drawing.Point(279, 324);
-            this.SaveParametersBtn.Name = "SaveParametersBtn";
-            this.SaveParametersBtn.Size = new System.Drawing.Size(193, 22);
-            this.SaveParametersBtn.TabIndex = 52;
-            this.SaveParametersBtn.Text = "Save configuration";
-            this.SaveParametersBtn.UseVisualStyleBackColor = true;
-            this.SaveParametersBtn.Click += new System.EventHandler(this.SaveParametersBtn_Click);
-            // 
             // CameraComboBox
             // 
             this.CameraComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -234,7 +221,7 @@ namespace VTC
             // btnToggleVideoMux
             // 
             this.btnToggleVideoMux.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnToggleVideoMux.Location = new System.Drawing.Point(278, 363);
+            this.btnToggleVideoMux.Location = new System.Drawing.Point(278, 390);
             this.btnToggleVideoMux.Name = "btnToggleVideoMux";
             this.btnToggleVideoMux.Size = new System.Drawing.Size(193, 22);
             this.btnToggleVideoMux.TabIndex = 63;
@@ -247,17 +234,6 @@ namespace VTC
             this.heartbeatTimer.Enabled = true;
             this.heartbeatTimer.Interval = 5000;
             this.heartbeatTimer.Tick += new System.EventHandler(this.heartbeatTimer_Tick);
-            // 
-            // hideTrackersButton
-            // 
-            this.hideTrackersButton.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.hideTrackersButton.Location = new System.Drawing.Point(278, 391);
-            this.hideTrackersButton.Name = "hideTrackersButton";
-            this.hideTrackersButton.Size = new System.Drawing.Size(193, 22);
-            this.hideTrackersButton.TabIndex = 73;
-            this.hideTrackersButton.Text = "Hide trackers";
-            this.hideTrackersButton.UseVisualStyleBackColor = true;
-            this.hideTrackersButton.Click += new System.EventHandler(this.hideTrackersButton_Click);
             // 
             // disableOpticalFlowCheckbox
             // 
@@ -320,7 +296,6 @@ namespace VTC
             this.Controls.Add(this.infoBox);
             this.Controls.Add(this.SelectVideosButton);
             this.Controls.Add(this.disableOpticalFlowCheckbox);
-            this.Controls.Add(this.hideTrackersButton);
             this.Controls.Add(this.exportDatasetsCheckbox);
             this.Controls.Add(this.delayProcessingCheckbox);
             this.Controls.Add(this.MoGcheckBox);
@@ -333,7 +308,6 @@ namespace VTC
             this.Controls.Add(this.tbVistaStats);
             this.Controls.Add(this.intersectionIDLabel);
             this.Controls.Add(this.intersectionIDTextBox);
-            this.Controls.Add(this.SaveParametersBtn);
             this.Controls.Add(this.CameraComboBox);
             this.Controls.Add(this.btnConfigureRegions);
             this.Controls.Add(this.showPolygonsCheckbox);
@@ -361,7 +335,6 @@ namespace VTC
       private TextBox tbVistaStats;
       private Label intersectionIDLabel;
       private TextBox intersectionIDTextBox;
-      private Button SaveParametersBtn;
       private ComboBox CameraComboBox;
       private Button btnConfigureRegions;
       private CheckBox showPolygonsCheckbox;
@@ -371,7 +344,6 @@ namespace VTC
       private CheckBox exportDatasetsCheckbox;
 	  private Button btnToggleVideoMux;
       private Timer heartbeatTimer;
-      private Button hideTrackersButton;
       private CheckBox disableOpticalFlowCheckbox;
         private Button SelectVideosButton;
         private OpenFileDialog selectVideoFilesDialog;
