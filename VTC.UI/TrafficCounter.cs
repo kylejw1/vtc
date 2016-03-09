@@ -546,6 +546,7 @@ namespace VTC
             _mainDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
             _backgroundDisplay.Size = videoSize;
             _movementDisplay.Size = videoSize;
+            _videoMux.Size = MaximumSize;
 #if DEBUG
 
             _mixtureDisplay.Size = videoSize;
