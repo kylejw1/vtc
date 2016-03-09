@@ -107,9 +107,15 @@ namespace VTC.Kernel.Vistas
             StringBuilder sb = new StringBuilder();
 
             //sb.AppendLine(base.GetStatString());
+            int totalObjects = 0;
             foreach (var kvp in TurnStats) {
                 sb.AppendLine(kvp.Key + ":  " + kvp.Value);
+                totalObjects += (int) kvp.Value;
             }
+
+            sb.AppendLine("");
+            sb.AppendLine("Total objects counted: " + totalObjects);
+            sb.AppendLine("Current objects tracked: " + CurrentVehicles.Count);
 
             return sb.ToString();
         }

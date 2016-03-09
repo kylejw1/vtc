@@ -232,7 +232,6 @@ namespace VTC
                         UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);
 
                         // Update statistics
-                        trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
                         tbVistaStats.Text = _vista.GetStatString();
 
                         //Thread.Sleep((int)_settings.Timestep * 1000); 
@@ -573,6 +572,7 @@ namespace VTC
            serverUrlTextBox.Visible = false;
            pushStateCheckbox.Visible = false;
            exportDatasetsCheckbox.Visible = false;
+           mhtLogCheckbox.Visible = false;
            SaveParametersBtn.Visible = false;
            hideTrackersButton.Visible = false;
            disableOpticalFlowCheckbox.Visible = false;
@@ -791,5 +791,6 @@ namespace VTC
             Application.Idle += ProcessFrame;
         }
         #endregion
+
     }
 }

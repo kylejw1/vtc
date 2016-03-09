@@ -45,8 +45,6 @@ namespace VTC
             this.CameraComboBox = new System.Windows.Forms.ComboBox();
             this.btnConfigureRegions = new System.Windows.Forms.Button();
             this.showPolygonsCheckbox = new System.Windows.Forms.CheckBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.trackCountBox = new System.Windows.Forms.TextBox();
             this.pushStateCheckbox = new System.Windows.Forms.CheckBox();
             this.MoGcheckBox = new System.Windows.Forms.CheckBox();
             this.delayProcessingCheckbox = new System.Windows.Forms.CheckBox();
@@ -186,24 +184,6 @@ namespace VTC
             this.showPolygonsCheckbox.TabIndex = 49;
             this.showPolygonsCheckbox.Text = "Show polygons";
             this.showPolygonsCheckbox.UseVisualStyleBackColor = true;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(379, 145);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(92, 15);
-            this.label10.TabIndex = 48;
-            this.label10.Text = "Objects tracked";
-            // 
-            // trackCountBox
-            // 
-            this.trackCountBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.trackCountBox.Location = new System.Drawing.Point(278, 145);
-            this.trackCountBox.Name = "trackCountBox";
-            this.trackCountBox.Size = new System.Drawing.Size(93, 21);
-            this.trackCountBox.TabIndex = 47;
             // 
             // pushStateCheckbox
             // 
@@ -357,8 +337,6 @@ namespace VTC
             this.Controls.Add(this.CameraComboBox);
             this.Controls.Add(this.btnConfigureRegions);
             this.Controls.Add(this.showPolygonsCheckbox);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.trackCountBox);
             this.Controls.Add(this.pushStateCheckbox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -387,8 +365,6 @@ namespace VTC
       private ComboBox CameraComboBox;
       private Button btnConfigureRegions;
       private CheckBox showPolygonsCheckbox;
-      private Label label10;
-      private TextBox trackCountBox;
       private CheckBox pushStateCheckbox;
       private CheckBox MoGcheckBox;
       private CheckBox delayProcessingCheckbox;
