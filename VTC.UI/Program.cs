@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using NLog;
 using LicenseManager;
 using VTC.Common;
+using VTC.RegionConfiguration;
 
 namespace VTC
 {
@@ -21,6 +22,21 @@ namespace VTC
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
+            var form = new Form();
+            var capture = new CaptureSource.VideoFileCapture(@"C:\vtc\bin\traffic.wmv");
+            capture.Init(new AppSettings() {
+                FrameHeight=200,
+                FrameWidth=200
+            });
+            var videoFiles = new CaptureSource.CaptureSource[] {
+                capture
+            };
+            var control = new WinformHostingControl(new RegionSelectorView(videoFiles, ));
+            form.Controls.Add(control);
+            form.Size = new System.Drawing.Size(600, 400);
+            control.Dock = DockStyle.Fill;
+            form.ShowDialog();
+            return;
 
             int delayMs = 5000;
             var ss = new SplashScreen(delayMs);

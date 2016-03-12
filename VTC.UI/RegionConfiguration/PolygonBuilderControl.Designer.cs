@@ -1,4 +1,4 @@
-﻿namespace VTC
+﻿namespace VTC.RegionConfiguration
 {
     partial class PolygonBuilderControl
     {
