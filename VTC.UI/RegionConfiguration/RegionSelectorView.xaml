@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="VTC.RegionConfiguration.RegionSelectorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VTC.RegionConfiguration"
+             mc:Ignorable="d" 
+             d:DesignHeight="380" d:DesignWidth="783">
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Right" Margin="10,0">
+            <StackPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="0,0,0,5" />
+                </Style>
+            </StackPanel.Resources>
+            <TextBlock FontWeight="Bold" Margin="0,0,0,10">ListBox selection</TextBlock>
+            <Button Name="btnShowSelectedItem" Click="btnShowSelectedItem_Click">Show selected</Button>
+            <Button Name="btnSelectLast" Click="btnSelectLast_Click">Select last</Button>
+            <Button Name="btnSelectNext" Click="btnSelectNext_Click">Select next</Button>
+            <Button Name="btnSelectCSharp" Click="btnSelectCSharp_Click">Select C#</Button>
+            <Button Name="btnSelectAll" Click="btnSelectAll_Click">Select all</Button>
+        </StackPanel>
+        <ListBox Name="lbTodoList" HorizontalContentAlignment="Stretch" SelectionMode="Extended" SelectionChanged="lbTodoList_SelectionChanged" >
+            <ListBox.ItemTemplate BorderThickness="1" BorderBrush="Black">
+                <DataTemplate>
+                    <Grid Margin="5,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="200" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="100" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Text="{Binding Title}" />
+                        <ListBox Name="lbIntersections"  Margin="5" Grid.Column="1" ItemsSource="{Binding RegionConfigs}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Title}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Button Margin="5" Grid.Column="2" Height="24">New...</Button>
+                        <Image Margin="5" Source="{Binding Thumbnail}" Stretch="Fill" Grid.Column="3"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBoxItem BorderThickness="1" BorderBrush="Black">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="200" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="5" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold"><Run Text="Test Item #1"/></TextBlock>
+                    <ListBox Margin="5" Grid.Column="1">
+                        <ListBoxItem>Intersection #1</ListBoxItem>
+                        <ListBoxItem>Intersection #2</ListBoxItem>
+                        <ListBoxItem>Intersection #3</ListBoxItem>
+                        <ListBoxItem>Intersection #4</ListBoxItem>
+                        <ListBoxItem>Intersection #5</ListBoxItem>
+                        <ListBoxItem>Intersection #6</ListBoxItem>
+                        <ListBoxItem>Intersection #7</ListBoxItem>
+                        <ListBoxItem>Intersection #8</ListBoxItem>
+                    </ListBox>
+                    <Button Margin="5" Grid.Column="2" Height="24">New...</Button>
+                    <Image Margin="5" Source="C:\Users\Public\Pictures\Sample Pictures\Desert.jpg" Stretch="Fill" Grid.Column="3"/>
+                </Grid>
+            </ListBoxItem>
+        </ListBox>
+    </DockPanel>
+</UserControl>

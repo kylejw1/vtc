@@ -13,6 +13,7 @@ namespace VTC.Kernel.RegionConfig
         public Dictionary<string, Polygon> Regions;
         [DataMember]
         private int ConfigVersion = 0;
+        public string Title { get; set; }
 
         // Required to update this class.  See "Load"
         private static readonly int CurrentConfigVersion = 1;

@@ -10,7 +10,7 @@ using System.Text;
 using System.Windows.Forms;
 using VTC.Kernel.RegionConfig;
 
-namespace VTC
+namespace VTC.RegionConfiguration
 {
     public partial class RegionEditor : Form
     {

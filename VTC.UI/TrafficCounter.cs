@@ -21,6 +21,7 @@ using VTC.Reporting;
 using VTC.Reporting.ReportItems;
 using VTC.Common;
 using VTC.BatchProcessing;
+using VTC.RegionConfiguration;
 
 namespace VTC
 {
@@ -180,7 +181,7 @@ namespace VTC
          catch (Exception e)
          {
              Console.WriteLine(e.Message);
-             throw;
+         //    throw;
          }
          
          Application.Idle += ProcessFrame;
@@ -200,6 +201,9 @@ namespace VTC
 
         private void ProcessFrame(object sender, EventArgs e)
         {
+            if (null == SelectedCamera)
+                return;
+
             using (var frame = SelectedCamera.QueryFrame())
             {
                 try
