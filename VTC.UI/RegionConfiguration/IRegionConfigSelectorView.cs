@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VTC.RegionConfiguration
 {
-    interface IRegionSelectorView
+    interface IRegionConfigSelectorView
     {
     }
 }

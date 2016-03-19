@@ -5,6 +5,7 @@ using NLog;
 using LicenseManager;
 using VTC.Common;
 using VTC.RegionConfiguration;
+using System.Collections.Generic;
 
 namespace VTC
 {
@@ -24,18 +25,33 @@ namespace VTC
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
             var form = new Form();
             var capture = new CaptureSource.VideoFileCapture(@"C:\vtc\bin\traffic.wmv");
-            capture.Init(new AppSettings() {
-                FrameHeight=200,
-                FrameWidth=200
+            capture.Init(new AppSettings()
+            {
+                FrameHeight = 200,
+                FrameWidth = 200
             });
             var videoFiles = new CaptureSource.CaptureSource[] {
                 capture
             };
-            var control = new WinformHostingControl(new RegionSelectorView(videoFiles, ));
-            form.Controls.Add(control);
-            form.Size = new System.Drawing.Size(600, 400);
-            control.Dock = DockStyle.Fill;
-            form.ShowDialog();
+            var cs = new List<CaptureSource.CaptureSource>();
+            for(int i = 0; i < 20; i++)
+            {
+                var c = new CaptureSource.VideoFileCapture(@"C:\vtc\bin\traffic.wmv");
+                c.Init(new AppSettings()
+                {
+                    FrameHeight = 200,
+                    FrameWidth = 200
+                });
+                cs.Add(c);
+            }
+
+            var regions = new System.Collections.Generic.List<Kernel.RegionConfig.RegionConfig>();
+            regions.Add(Kernel.RegionConfig.RegionConfig.Load(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                        "\\VTC\\regionConfig.xml"));
+
+            var rcsv = new RegionConfigSelectorView();
+            rcsv.SetData(cs, regions);
+            rcsv.ShowDialog();
             return;
 
             int delayMs = 5000;
