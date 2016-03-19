@@ -177,6 +177,7 @@
     <Compile Include="RegionConfiguration\RegionConfigSelectorControl.Designer.cs">
       <DependentUpon>RegionConfigSelectorControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="RegionConfiguration\RegionConfigSelectorModel.cs" />
     <Compile Include="RegionConfiguration\RegionConfigSelectorView.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -189,7 +190,7 @@
     <Compile Include="RegionConfiguration\RegionEditor.Designer.cs">
       <DependentUpon>RegionEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="RegionConfiguration\RegionSelectorController.cs" />
+    <Compile Include="RegionConfiguration\RegionConfigSelectorPresenter.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>

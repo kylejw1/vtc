@@ -101,6 +101,7 @@
             this.btnCreateNewRegionConfig.TabIndex = 3;
             this.btnCreateNewRegionConfig.Text = "Create New...";
             this.btnCreateNewRegionConfig.UseVisualStyleBackColor = true;
+            this.btnCreateNewRegionConfig.Click += new System.EventHandler(this.btnCreateNewRegionConfig_Click);
             // 
             // RegionConfigSelectorControl
             // 

@@ -50,7 +50,18 @@ namespace VTC
                                         "\\VTC\\regionConfig.xml"));
 
             var rcsv = new RegionConfigSelectorView();
-            rcsv.SetData(cs, regions);
+            var models = new List<RegionConfigSelectorModel>();
+            foreach(var s in cs)
+            {
+                models.Add(new RegionConfigSelectorModel()
+                {
+                    CaptureSource = s,
+                    RegionConfigs = regions,
+                    Thumbnail = s.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>()
+                });
+            }
+            var presenter = new RegionConfigSelectorPresenter(models, rcsv);
+            
             rcsv.ShowDialog();
             return;
 
