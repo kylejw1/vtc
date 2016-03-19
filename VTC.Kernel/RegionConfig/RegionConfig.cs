@@ -77,6 +77,8 @@ namespace VTC.Kernel.RegionConfig
                         r.Value.UpdateCentroid();
                     }
 
+                    pgr.Title = System.IO.Path.GetFileNameWithoutExtension(path);
+
                     return pgr;
                 }
             }
