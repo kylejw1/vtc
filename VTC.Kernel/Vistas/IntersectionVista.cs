@@ -24,8 +24,8 @@ namespace VTC.Kernel.Vistas
 
         private Dictionary<string, long> TurnStats = new Dictionary<string, long>();
 
-        public IntersectionVista(ISettings settings, int Width, int Height)
-            : base(settings, Width, Height)
+        public IntersectionVista(ISettings settings, int Width, int Height, RegionConfig.RegionConfig regionConfig)
+            : base(settings, Width, Height, regionConfig)
         {
             for (int i = 1; i <= 4; i++) {
                 var approachName = ApproachName(i);

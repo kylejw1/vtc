@@ -9,14 +9,12 @@ namespace VTC.Kernel.RegionConfig
     {
         [DataMember]
         public Polygon RoiMask;
+
         [DataMember]
         public Dictionary<string, Polygon> Regions;
-        [DataMember]
-        private int ConfigVersion = 0;
-        public string Title { get; set; }
 
-        // Required to update this class.  See "Load"
-        private static readonly int CurrentConfigVersion = 1;
+        [DataMember]
+        public string Title { get; set; }
 
         public RegionConfig()
         {
@@ -45,47 +43,6 @@ namespace VTC.Kernel.RegionConfig
             }
 
             return copy;
-        }
-
-        public void Save(string path)
-        {
-            using (var f = System.IO.File.Create(path))
-            {
-                this.ConfigVersion = CurrentConfigVersion;
-                DataContractSerializer s = new DataContractSerializer(this.GetType());
-                s.WriteObject(f, this);
-            }
-        }
-
-        public static RegionConfig Load(string path)
-        {
-            try
-            {
-                using (var f = System.IO.File.OpenRead(path))
-                {
-                    DataContractSerializer s = new DataContractSerializer(typeof(RegionConfig));
-                    var pgr = (RegionConfig)s.ReadObject(f);
-
-                    if (pgr.ConfigVersion < CurrentConfigVersion)
-                    {
-                        return null;
-                    }
-
-                    foreach(var r in pgr.Regions)
-                    {
-                        if(r.Value.PolygonClosed)
-                        r.Value.UpdateCentroid();
-                    }
-
-                    pgr.Title = System.IO.Path.GetFileNameWithoutExtension(path);
-
-                    return pgr;
-                }
-            }
-            catch
-            {
-                return null;
-            }
         }
 
     }

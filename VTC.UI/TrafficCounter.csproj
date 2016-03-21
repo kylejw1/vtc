@@ -162,6 +162,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RegionConfiguration\FileRegionConfigDAL.cs" />
+    <Compile Include="RegionConfiguration\IRegionConfigDataAccessLayer.cs" />
     <Compile Include="RegionConfiguration\IRegionConfigSelectorView.cs" />
     <Compile Include="RegionConfiguration\PolygonBuilderControl.cs">
       <SubType>UserControl</SubType>

@@ -77,7 +77,7 @@ namespace OptAssignTest
         private static void SendSingleVehicle(int x, int y)
         {
             ISettings settings = new AppSettings();
-            Vista vista = new IntersectionVista(settings, 640, 480);
+            Vista vista = new IntersectionVista(settings, 640, 480, new VTC.Kernel.RegionConfig.RegionConfig());
             List<StateEstimate> stateHistory = new List<StateEstimate>();
             StateEstimate[] stateEstimates = new StateEstimate[1];
             stateEstimates[0] = new StateEstimate();

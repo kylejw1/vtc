@@ -6,6 +6,7 @@ using LicenseManager;
 using VTC.Common;
 using VTC.RegionConfiguration;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VTC
 {
@@ -44,14 +45,14 @@ namespace VTC
                 });
                 cs.Add(c);
             }
-
-            var regions = new System.Collections.Generic.List<Kernel.RegionConfig.RegionConfig>();
-            regions.Add(Kernel.RegionConfig.RegionConfig.Load(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                        "\\VTC\\regionConfig.xml"));
+            
+            var rcDal = new FileRegionConfigDAL(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                        "\\VTC\\regionConfig.xml");
+            var regions = rcDal.LoadRegionConfigList().ToList();
 
             var rcsv = new RegionConfigSelectorView();
             var models = new List<RegionConfigSelectorModel>();
-            foreach(var s in cs)
+            foreach (var s in cs)
             {
                 models.Add(new RegionConfigSelectorModel()
                 {
@@ -60,8 +61,8 @@ namespace VTC
                     Thumbnail = s.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>()
                 });
             }
-            var presenter = new RegionConfigSelectorPresenter(models, rcsv);
-            
+            var presenter = new RegionConfigSelectorPresenter(regions, models, rcDal, rcsv);
+
             rcsv.ShowDialog();
             return;
 

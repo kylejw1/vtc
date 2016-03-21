@@ -27,7 +27,7 @@ namespace VTC.RegionConfiguration
             tlpControls.Controls.Add(control);
         }
 
-        public void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail, IEnumerable<RegionConfig> regionConfigs)
+        public void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail, IEnumerable<RegionConfig> regionConfigs, RegionConfig selectedRegionConfig)
         {
             if (!_controlLookup.ContainsKey(model))
                 return;
@@ -40,6 +40,11 @@ namespace VTC.RegionConfiguration
             if (null != regionConfigs)
             {
                 _controlLookup[model].RegionConfigurations = regionConfigs;
+            }
+
+            if (null != selectedRegionConfig)
+            {
+                _controlLookup[model].SelectedRegionConfig = selectedRegionConfig;
             }
         }
 
@@ -62,12 +67,13 @@ namespace VTC.RegionConfiguration
             return control;
         }
 
-        private void OnCreateNewRegionConfigClicked(object sender, EventArgs e)
+        private void OnCreateNewRegionConfigClicked(object sender, RegionConfigSelectorEventArgs e)
         {
-            throw new NotImplementedException();
+            if (null != CreateNewRegionConfigClicked)
+                CreateNewRegionConfigClicked(sender, e);
         }
 
-        private void OnSelectedRegionConfigChanged(object sender, SelectedRegionConfigChangedEventArgs e)
+        private void OnSelectedRegionConfigChanged(object sender, RegionConfigSelectorEventArgs e)
         {
             if (null != SelectedRegionConfigChanged)
                 SelectedRegionConfigChanged(sender, e);
