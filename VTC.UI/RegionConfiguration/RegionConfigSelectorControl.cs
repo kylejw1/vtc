@@ -23,7 +23,7 @@ namespace VTC.RegionConfiguration
                 {
                     lblName.Text = Model.CaptureSource.Name;
                     pbThumbnail.Image = Model.Thumbnail.ToBitmap();
-                    RegionConfigurations = Model.RegionConfigs;
+                    SelectedRegionConfig = Model.SelectedRegionConfig;
                 }
             }
         }
@@ -72,6 +72,12 @@ namespace VTC.RegionConfiguration
             get { return lbRegionConfigs.SelectedItem as RegionConfig; }
             set
             {
+                if (null == lbRegionConfigs || null == lbRegionConfigs.Items || null == value)
+                    return;
+
+                if (lbRegionConfigs.SelectedItem == value)
+                    return;
+
                 if (lbRegionConfigs.Items.Contains(value))
                     lbRegionConfigs.SelectedItem = value;
             }
@@ -85,8 +91,10 @@ namespace VTC.RegionConfiguration
 
             var item = lb.SelectedItem as RegionConfig;
 
+            Model.SelectedRegionConfig = item;
+
             if (null != SelectedRegionConfigChanged)
-                SelectedRegionConfigChanged(sender, new RegionConfigSelectorEventArgs() { Model = Model, SelectedRegionConfig = item });
+                SelectedRegionConfigChanged(sender, new RegionConfigSelectorEventArgs() { Model = Model });
         }
 
         private void btnCreateNewRegionConfig_Click(object sender, EventArgs e)
@@ -98,7 +106,7 @@ namespace VTC.RegionConfiguration
             var item = lb.SelectedItem as RegionConfig;
 
             if (null != CreateNewRegionConfigClicked)
-                CreateNewRegionConfigClicked(sender, new RegionConfigSelectorEventArgs() { Model = Model, SelectedRegionConfig = item });
+                CreateNewRegionConfigClicked(sender, new RegionConfigSelectorEventArgs() { Model = Model });
         }
 
 

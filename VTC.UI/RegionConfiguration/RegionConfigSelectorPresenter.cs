@@ -35,20 +35,23 @@ namespace VTC.RegionConfiguration
             {
                 _view.AddCaptureSource(model);
             }
+
+            _view.UpdateRegionConfigs(_regionConfigs);
         }
 
         private void _view_SelectedRegionConfigChanged(object sender, RegionConfigSelectorEventArgs e)
         {
             Image thumbnail;
-            if (null == e.SelectedRegionConfig)
+
+            if (null == e.Model.SelectedRegionConfig)
             {
                 thumbnail = e.Model.Thumbnail.ToBitmap();
             } else
             {
-                thumbnail = CreateMaskedThumbnail(e.Model.Thumbnail, e.SelectedRegionConfig.RoiMask);
+                thumbnail = CreateMaskedThumbnail(e.Model.Thumbnail, e.Model.SelectedRegionConfig.RoiMask);
             }
 
-            _view.UpdateCaptureSource(e.Model, thumbnail, null, null);
+            _view.UpdateCaptureSource(e.Model, thumbnail);
         }
 
         private void _view_CreateNewRegionConfigClicked(object sender, RegionConfigSelectorEventArgs e)
@@ -60,7 +63,9 @@ namespace VTC.RegionConfiguration
                 _regionConfigs.Add(newRegionConfig);
                 _regionConfigDAL.SaveRegionConfigList(_regionConfigs);
 
-                _view.UpdateCaptureSource(e.Model, null, _regionConfigs, newRegionConfig);
+                _view.UpdateRegionConfigs(_regionConfigs);
+                e.Model.SelectedRegionConfig = newRegionConfig;
+                _view.UpdateCaptureSource(e.Model, null);
             }
         }
 

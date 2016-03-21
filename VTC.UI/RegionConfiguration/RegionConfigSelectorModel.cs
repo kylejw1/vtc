@@ -9,6 +9,6 @@ namespace VTC.RegionConfiguration
     {
         public CaptureSource CaptureSource;
         public Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> Thumbnail;
-        public IEnumerable<RegionConfig> RegionConfigs;
+        public RegionConfig SelectedRegionConfig;
     }
 }

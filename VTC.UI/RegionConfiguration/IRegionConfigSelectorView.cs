@@ -12,13 +12,13 @@ namespace VTC.RegionConfiguration
     public class RegionConfigSelectorEventArgs : EventArgs
     {
         public RegionConfigSelectorModel Model { get; set; }
-        public RegionConfig SelectedRegionConfig { get; set; }
     }
 
     public interface IRegionConfigSelectorView
     {
         void AddCaptureSource(RegionConfigSelectorModel model);
-        void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail, IEnumerable<RegionConfig> regionConfigs, RegionConfig selectedRegionConfig);
+        void UpdateRegionConfigs(IEnumerable<RegionConfig> regionConfigs);
+        void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail);
         event SelectedRegionConfigChangedEventHandler SelectedRegionConfigChanged;
         event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
     }

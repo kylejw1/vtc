@@ -57,7 +57,6 @@ namespace VTC
                 models.Add(new RegionConfigSelectorModel()
                 {
                     CaptureSource = s,
-                    RegionConfigs = regions,
                     Thumbnail = s.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>()
                 });
             }
