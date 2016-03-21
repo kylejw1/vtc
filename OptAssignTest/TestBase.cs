@@ -36,7 +36,7 @@ namespace OptAssignTest
                 RoiMask = polygon
             };
 
-            return new IntersectionVista(settings, (int) settings.FrameWidth, (int) settings.FrameHeight)
+            return new IntersectionVista(settings, (int) settings.FrameWidth, (int) settings.FrameHeight, new RegionConfig())
             {
                 RegionConfiguration = regionConfig
             };

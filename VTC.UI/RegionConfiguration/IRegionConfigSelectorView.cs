@@ -6,10 +6,10 @@ using VTC.Kernel.RegionConfig;
 namespace VTC.RegionConfiguration
 {
     // Event Delegates
-    public delegate void SelectedRegionConfigChangedEventHandler(object sender, SelectedRegionConfigChangedEventArgs e);
-    public delegate void CreateNewRegionConfigClickedEventHandler(object sender, EventArgs e);
+    public delegate void SelectedRegionConfigChangedEventHandler(object sender, RegionConfigSelectorEventArgs e);
+    public delegate void CreateNewRegionConfigClickedEventHandler(object sender, RegionConfigSelectorEventArgs e);
 
-    public class SelectedRegionConfigChangedEventArgs : EventArgs
+    public class RegionConfigSelectorEventArgs : EventArgs
     {
         public RegionConfigSelectorModel Model { get; set; }
         public RegionConfig SelectedRegionConfig { get; set; }
@@ -18,7 +18,7 @@ namespace VTC.RegionConfiguration
     public interface IRegionConfigSelectorView
     {
         void AddCaptureSource(RegionConfigSelectorModel model);
-        void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail, IEnumerable<RegionConfig> regionConfigs);
+        void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail, IEnumerable<RegionConfig> regionConfigs, RegionConfig selectedRegionConfig);
         event SelectedRegionConfigChangedEventHandler SelectedRegionConfigChanged;
         event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
     }

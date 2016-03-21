@@ -57,6 +57,11 @@ namespace VTC
         private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
         private ICaptureSource _selectedCamera;
 
+        private static readonly string RegionConfigSavePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                            "\\VTC\\regionConfig.xml";
+        private IRegionConfigDataAccessLayer _regionConfigDataAccessLayer = new FileRegionConfigDAL(RegionConfigSavePath);
+        private List<RegionConfig> _regionConfigs;
+
         private List<BatchVideoJob> _videoJobs; 
 
         private readonly string _appArgument; //For debugging only, delete this later
@@ -85,7 +90,7 @@ namespace VTC
               _selectedCamera = value;
               _selectedCamera.Init(_settings);
 
-              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height)
+              _vista = new IntersectionVista(_settings, _selectedCamera.Width, _selectedCamera.Height, _regionConfigs.FirstOrDefault())
               {
                   GetCameraSource = GetVideoSource
               };
@@ -136,6 +141,8 @@ namespace VTC
            {
                _unitTestsMode = DetectTestScenarios(settings.UnitTestsDll);
            }
+
+            _regionConfigs = _regionConfigDataAccessLayer.LoadRegionConfigList().ToList();
 
            // otherwise - run in standard mode
            if (! _unitTestsMode)
@@ -738,10 +745,12 @@ namespace VTC
             var r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
             if (r.ShowDialog() == DialogResult.OK)
             {
-                var configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                        "\\VTC\\regionConfig.xml";
                 _vista.RegionConfiguration = r.RegionConfig;
-                _vista.RegionConfiguration.Save(configFilePath);
+
+                _regionConfigs.Remove(_vista.RegionConfiguration);
+                _regionConfigs.Add(r.RegionConfig);
+
+                _regionConfigDataAccessLayer.SaveRegionConfigList(_regionConfigs);
 
                 foreach (var reg in r.RegionConfig.Regions.Where(reg => reg.Value.PolygonClosed))
                     reg.Value.UpdateCentroid();

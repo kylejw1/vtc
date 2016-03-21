@@ -9,11 +9,19 @@ namespace VTC.RegionConfiguration
     {
         private IEnumerable<RegionConfigSelectorModel> _models;
         private IRegionConfigSelectorView _view;
+        private IRegionConfigDataAccessLayer _regionConfigDAL;
+        private List<RegionConfig> _regionConfigs;
 
-        public RegionConfigSelectorPresenter(IEnumerable<RegionConfigSelectorModel> models, IRegionConfigSelectorView view)
+        public RegionConfigSelectorPresenter(
+            List<RegionConfig> regionConfigs,
+            IEnumerable<RegionConfigSelectorModel> models, 
+            IRegionConfigDataAccessLayer regionConfigDal, 
+            IRegionConfigSelectorView view)
         {
             _models = models;
             _view = view;
+            _regionConfigDAL = regionConfigDal;
+            _regionConfigs = regionConfigs;
 
             InitializeView();
         }
@@ -29,15 +37,31 @@ namespace VTC.RegionConfiguration
             }
         }
 
-        private void _view_SelectedRegionConfigChanged(object sender, SelectedRegionConfigChangedEventArgs e)
+        private void _view_SelectedRegionConfigChanged(object sender, RegionConfigSelectorEventArgs e)
         {
-            var maskedThumbnail = CreateMaskedThumbnail(e.Model.Thumbnail, e.SelectedRegionConfig.RoiMask);
-            _view.UpdateCaptureSource(e.Model, maskedThumbnail, null);
+            Image thumbnail;
+            if (null == e.SelectedRegionConfig)
+            {
+                thumbnail = e.Model.Thumbnail.ToBitmap();
+            } else
+            {
+                thumbnail = CreateMaskedThumbnail(e.Model.Thumbnail, e.SelectedRegionConfig.RoiMask);
+            }
+
+            _view.UpdateCaptureSource(e.Model, thumbnail, null, null);
         }
 
-        private void _view_CreateNewRegionConfigClicked(object sender, EventArgs e)
+        private void _view_CreateNewRegionConfigClicked(object sender, RegionConfigSelectorEventArgs e)
         {
-            throw new NotImplementedException();
+            var createRegionConfigForm = new RegionEditor(e.Model.Thumbnail, new RegionConfig());
+            if (createRegionConfigForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var newRegionConfig = createRegionConfigForm.RegionConfig;
+                _regionConfigs.Add(newRegionConfig);
+                _regionConfigDAL.SaveRegionConfigList(_regionConfigs);
+
+                _view.UpdateCaptureSource(e.Model, null, _regionConfigs, newRegionConfig);
+            }
         }
 
         private Image CreateMaskedThumbnail(Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> background, Polygon polygon)

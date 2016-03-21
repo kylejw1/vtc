@@ -151,15 +151,14 @@ namespace VTC.Kernel.Vistas
             get { return MHT.CurrentVehicles; }
         }
 
-        protected Vista(ISettings settings, int width, int height)
+        protected Vista(ISettings settings, int width, int height, RegionConfig.RegionConfig regionConfiguration)
         {
             Settings = settings;
             _width = width;
             _height = height;
 
-            string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                    "\\VTC\\regionConfig.xml";
-            RegionConfiguration = RegionConfig.RegionConfig.Load(configFilePath);
+            RegionConfiguration = regionConfiguration;
+
             if (null == RegionConfiguration)
                 RegionConfiguration = new RegionConfig.RegionConfig();
 

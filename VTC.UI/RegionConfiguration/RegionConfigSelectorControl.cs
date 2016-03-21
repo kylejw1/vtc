@@ -86,13 +86,19 @@ namespace VTC.RegionConfiguration
             var item = lb.SelectedItem as RegionConfig;
 
             if (null != SelectedRegionConfigChanged)
-                SelectedRegionConfigChanged(sender, new SelectedRegionConfigChangedEventArgs() { Model = Model, SelectedRegionConfig = item });
+                SelectedRegionConfigChanged(sender, new RegionConfigSelectorEventArgs() { Model = Model, SelectedRegionConfig = item });
         }
 
         private void btnCreateNewRegionConfig_Click(object sender, EventArgs e)
         {
+            var lb = this.lbRegionConfigs;
+            if (null == lb)
+                return;
+
+            var item = lb.SelectedItem as RegionConfig;
+
             if (null != CreateNewRegionConfigClicked)
-                CreateNewRegionConfigClicked(sender, EventArgs.Empty);
+                CreateNewRegionConfigClicked(sender, new RegionConfigSelectorEventArgs() { Model = Model, SelectedRegionConfig = item });
         }
 
 
