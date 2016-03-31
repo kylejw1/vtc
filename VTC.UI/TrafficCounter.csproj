@@ -192,7 +192,6 @@
     <Compile Include="RegionConfiguration\RegionEditor.Designer.cs">
       <DependentUpon>RegionEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="RegionConfiguration\RegionConfigSelectorPresenter.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -10,26 +10,23 @@ namespace VTC.RegionConfiguration
 {
     public partial class RegionConfigSelectorControl : UserControl
     {
-        public event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
+        public event EventHandler CreateNewRegionConfigClicked;
 
-        private Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> _baseThumbnail;
+        public Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> BaseThumbnail
+        {
+            get; private set;
+        }
 
         public RegionConfigSelectorControl(BindingList<RegionConfig> regionConfigs, Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> baseThumbnail, string name)
         {
             InitializeComponent();
 
-            _baseThumbnail = baseThumbnail;
-            pbThumbnail.Image = _baseThumbnail.ToBitmap();
+            BaseThumbnail = baseThumbnail;
+            pbThumbnail.Image = BaseThumbnail.ToBitmap();
 
             lbRegionConfigs.DataSource = regionConfigs;
             lbRegionConfigs.DisplayMember = "Title";
             lblName.Text = name;
-        }
-
-        public Image Thumbnail
-        {
-            get { return pbThumbnail.Image; }
-            set { pbThumbnail.Image = value; }
         }
         
         public RegionConfig SelectedRegionConfig
@@ -41,15 +38,15 @@ namespace VTC.RegionConfiguration
         {
             var regionConfig = lbRegionConfigs.SelectedItem as RegionConfig;
 
-            var maskedThumbnail = regionConfig.RoiMask.GetMask(_baseThumbnail.Width, _baseThumbnail.Height, new Emgu.CV.Structure.Bgr(Color.Blue));
+            var maskedThumbnail = regionConfig.RoiMask.GetMask(BaseThumbnail.Width, BaseThumbnail.Height, new Emgu.CV.Structure.Bgr(Color.Blue));
 
-            pbThumbnail.Image = _baseThumbnail.Add(maskedThumbnail).ToBitmap();
+            pbThumbnail.Image = BaseThumbnail.Add(maskedThumbnail).ToBitmap();
         }
 
         private void btnCreateNewRegionConfig_Click(object sender, EventArgs e)
         {
             if (null != CreateNewRegionConfigClicked)
-                CreateNewRegionConfigClicked(this, new RegionConfigSelectorEventArgs { Thumbnail = _baseThumbnail });
+                CreateNewRegionConfigClicked(this, EventArgs.Empty);
         }
 
 

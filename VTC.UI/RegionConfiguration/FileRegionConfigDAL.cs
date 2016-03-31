@@ -8,7 +8,6 @@ namespace VTC.RegionConfiguration
 {
     public class FileRegionConfigDAL : IRegionConfigDataAccessLayer
     {
-        public int CurrentConfigVersion { get; private set; }
         private readonly string Path;
 
         public FileRegionConfigDAL(string path)
@@ -56,11 +55,18 @@ namespace VTC.RegionConfiguration
 
         public void SaveRegionConfigList(IEnumerable<RegionConfig> regionConfigs)
         {
-            using (var file = File.OpenWrite(Path))
+            byte[] serialized;
+
+            // Ensure the new items can be serialized successfully before deleting the old file
+            using (var stream = new MemoryStream())
             {
                 DataContractSerializer s = new DataContractSerializer(typeof(IEnumerable<RegionConfig>));
-                s.WriteObject(file, regionConfigs);
+                s.WriteObject(stream, regionConfigs);
+
+                serialized = stream.ToArray();
             }
+
+            File.WriteAllBytes(Path, serialized);
         }
     }
 }
