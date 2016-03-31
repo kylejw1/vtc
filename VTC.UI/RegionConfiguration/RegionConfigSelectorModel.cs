@@ -1,14 +1,19 @@
-﻿using System.Collections.Generic;
-using VTC.Kernel.RegionConfig;
+﻿using VTC.Kernel.RegionConfig;
 
 namespace VTC.RegionConfiguration
 {
+    using System.Collections.Generic;
     using CaptureSource = CaptureSource.CaptureSource;
 
     public class RegionConfigSelectorModel
     {
-        public CaptureSource CaptureSource;
-        public Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> Thumbnail;
-        public RegionConfig SelectedRegionConfig;
+        public readonly List<CaptureSource> CaptureSources;
+        public readonly List<RegionConfig> RegionConfigs;
+
+        public RegionConfigSelectorModel(List<CaptureSource> captureSources, List<RegionConfig> regionConfigs)
+        {
+            CaptureSources = captureSources;
+            RegionConfigs = regionConfigs;
+        }
     }
 }

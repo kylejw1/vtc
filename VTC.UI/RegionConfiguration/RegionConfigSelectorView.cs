@@ -1,56 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using VTC.Kernel.RegionConfig;
 
 namespace VTC.RegionConfiguration
 {
+    using CaptureSource = CaptureSource.CaptureSource;
+
     public partial class RegionConfigSelectorView : Form, IRegionConfigSelectorView
     {
-        public RegionConfigSelectorView()
+        private BindingList<RegionConfig> _regionConfigs;
+        private Dictionary<RegionConfigSelectorControl, CaptureSource> _captureSourceLookup = new Dictionary<RegionConfigSelectorControl, CaptureSource>();
+
+        public RegionConfigSelectorView() 
         {
             InitializeComponent();
         }
 
         public event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
-        public event SelectedRegionConfigChangedEventHandler SelectedRegionConfigChanged;
 
         private Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl> _controlLookup = new Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl>();
-        
-        public void AddCaptureSource(RegionConfigSelectorModel model)
+
+        private RegionConfigSelectorControl CreateRegionConfigSelectorControl(BindingList<RegionConfig> regionConfigs, CaptureSource captureSource)
         {
-            var control = CreateRegionConfigSelectorControl();
-            _controlLookup[model] = control;
-            control.Model = model;
-            tlpControls.RowCount++;
-            tlpControls.Controls.Add(control);
-        }
-
-        public void UpdateRegionConfigs(IEnumerable<RegionConfig> regionConfigs)
-        {
-            foreach (var control in _controlLookup.Values)
-            {
-                control.RegionConfigurations = regionConfigs;
-            }
-        }
-
-        public void UpdateCaptureSource(RegionConfigSelectorModel model, Image thumbnail)
-        {
-            if (!_controlLookup.ContainsKey(model))
-                return;
-
-            if (null != thumbnail)
-            {
-                _controlLookup[model].Thumbnail = thumbnail;
-            }
-
-            _controlLookup[model].SelectedRegionConfig = model.SelectedRegionConfig;
-        }
-
-        private RegionConfigSelectorControl CreateRegionConfigSelectorControl()
-        {
-            var control = new RegionConfigSelectorControl();
+            var control = new RegionConfigSelectorControl(regionConfigs, captureSource.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>(), captureSource.Name);
 
             control.BorderStyle = BorderStyle.FixedSingle;
 
@@ -61,7 +36,6 @@ namespace VTC.RegionConfiguration
 
             control.Anchor =  AnchorStyles.Left | AnchorStyles.Right;
 
-            control.SelectedRegionConfigChanged += OnSelectedRegionConfigChanged;
             control.CreateNewRegionConfigClicked += OnCreateNewRegionConfigClicked;
 
             return control;
@@ -73,10 +47,26 @@ namespace VTC.RegionConfiguration
                 CreateNewRegionConfigClicked(sender, e);
         }
 
-        private void OnSelectedRegionConfigChanged(object sender, RegionConfigSelectorEventArgs e)
+        public void SetModel(RegionConfigSelectorModel model)
         {
-            if (null != SelectedRegionConfigChanged)
-                SelectedRegionConfigChanged(sender, e);
+            _regionConfigs = new BindingList<RegionConfig>(model.RegionConfigs);
+
+            _captureSourceLookup.Clear();
+            tlpControls.Controls.Clear();
+            tlpControls.RowCount = 0;
+
+            foreach (var captureSource in model.CaptureSources)
+            {
+                var control = CreateRegionConfigSelectorControl(_regionConfigs, captureSource);
+                _captureSourceLookup[control] = captureSource;
+                tlpControls.RowCount++;
+                tlpControls.Controls.Add(control);
+            }
+        }
+
+        public void AddRegionConfig(RegionConfig regionConfig)
+        {
+            _regionConfigs.Add(regionConfig);
         }
     }
 }

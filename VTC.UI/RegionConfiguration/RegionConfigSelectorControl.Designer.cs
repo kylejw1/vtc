@@ -90,7 +90,7 @@
             this.lbRegionConfigs.Name = "lbRegionConfigs";
             this.lbRegionConfigs.Size = new System.Drawing.Size(244, 166);
             this.lbRegionConfigs.TabIndex = 2;
-            this.lbRegionConfigs.SelectedValueChanged += new System.EventHandler(this.lbRegionConfigs_SelectedValueChanged);
+            this.lbRegionConfigs.SelectedIndexChanged += new System.EventHandler(this.lbRegionConfigs_SelectedValueChanged);
             // 
             // btnCreateNewRegionConfig
             // 
