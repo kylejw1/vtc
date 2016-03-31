@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 using VTC.Kernel.RegionConfig;
 
 namespace VTC.RegionConfiguration
 {
+    using System.Linq;
     using CaptureSource = CaptureSource.CaptureSource;
 
     public partial class RegionConfigSelectorView : Form, IRegionConfigSelectorView
@@ -18,8 +18,6 @@ namespace VTC.RegionConfiguration
         {
             InitializeComponent();
         }
-
-        public event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
 
         private Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl> _controlLookup = new Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl>();
 
@@ -41,10 +39,16 @@ namespace VTC.RegionConfiguration
             return control;
         }
 
-        private void OnCreateNewRegionConfigClicked(object sender, RegionConfigSelectorEventArgs e)
+        private void OnCreateNewRegionConfigClicked(object sender, EventArgs e)
         {
-            if (null != CreateNewRegionConfigClicked)
-                CreateNewRegionConfigClicked(sender, e);
+            var control = sender as RegionConfigSelectorControl;
+
+            var createRegionConfigForm = new RegionEditor(control.BaseThumbnail, new RegionConfig());
+            if (createRegionConfigForm.ShowDialog() == DialogResult.OK)
+            {
+                var newRegionConfig = createRegionConfigForm.RegionConfig;
+                AddRegionConfig(newRegionConfig);
+            }
         }
 
         public void SetModel(RegionConfigSelectorModel model)
@@ -64,9 +68,41 @@ namespace VTC.RegionConfiguration
             }
         }
 
-        public void AddRegionConfig(RegionConfig regionConfig)
+        private void AddRegionConfig(RegionConfig regionConfig)
         {
             _regionConfigs.Add(regionConfig);
+        }
+
+        public Dictionary<CaptureSource, RegionConfig> GetRegionConfigSelections()
+        {
+            var result = new Dictionary<CaptureSource, RegionConfig>();
+
+            foreach(var kvp in _captureSourceLookup)
+            {
+                var captureSource = kvp.Value;
+                var regionConfig = kvp.Key.SelectedRegionConfig;
+
+                result[captureSource] = regionConfig;
+            }
+
+            return result;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+
+        public RegionConfigSelectorModel GetModel()
+        {
+            return new RegionConfigSelectorModel(_captureSourceLookup.Values.ToList(), _regionConfigs.ToList());
         }
     }
 }

@@ -41,12 +41,20 @@ namespace VTC
             
             var rcDal = new FileRegionConfigDAL(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                         "\\VTC\\regionConfigs.xml");
-            var regions = new BindingList<RegionConfig>(rcDal.LoadRegionConfigList().ToList());
+            var regions = rcDal.LoadRegionConfigList().ToList();
+            var view = new RegionConfigSelectorView();
+            var model = new RegionConfigSelectorModel(cs, regions);
+            view.SetModel(model);
 
-            var rcsv = new RegionConfigSelectorView(regions, cs);
-            var presenter = new RegionConfigSelectorPresenter(regions, rcDal, rcsv);
+            if (view.ShowDialog() == DialogResult.OK)
+            {
+                // Save any region config changes
+                var regionConfigs = view.GetModel();
+                rcDal.SaveRegionConfigList(regionConfigs.RegionConfigs);
 
-            rcsv.ShowDialog();
+                // Get results
+                var results = view.GetRegionConfigSelections();
+            }
             return;
 
             int delayMs = 5000;
