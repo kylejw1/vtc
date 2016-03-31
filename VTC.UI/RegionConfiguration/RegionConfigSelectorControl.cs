@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -9,104 +10,46 @@ namespace VTC.RegionConfiguration
 {
     public partial class RegionConfigSelectorControl : UserControl
     {
-        public event SelectedRegionConfigChangedEventHandler SelectedRegionConfigChanged;
         public event CreateNewRegionConfigClickedEventHandler CreateNewRegionConfigClicked;
 
-        private RegionConfigSelectorModel _model;
-        public RegionConfigSelectorModel Model
-        {
-            get { return _model; }
-            set
-            {
-                _model = value;
-                if (null != _model)
-                {
-                    lblName.Text = Model.CaptureSource.Name;
-                    pbThumbnail.Image = Model.Thumbnail.ToBitmap();
-                    SelectedRegionConfig = Model.SelectedRegionConfig;
-                }
-            }
-        }
+        private Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> _baseThumbnail;
 
-        public RegionConfigSelectorControl()
+        public RegionConfigSelectorControl(BindingList<RegionConfig> regionConfigs, Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> baseThumbnail, string name)
         {
             InitializeComponent();
-        }
 
-        private IEnumerable<RegionConfig> _regionConfigurations = new List<RegionConfig>();
-        public IEnumerable<RegionConfig> RegionConfigurations
-        {
-            get
-            {
-                return _regionConfigurations;
-            }
-            set
-            {
-                var oldSelected = lbRegionConfigs.SelectedItem;
+            _baseThumbnail = baseThumbnail;
+            pbThumbnail.Image = _baseThumbnail.ToBitmap();
 
-                _regionConfigurations = value;
-                lbRegionConfigs.DataSource = _regionConfigurations;
-                lbRegionConfigs.DisplayMember = "Title";
-
-                if (_regionConfigurations.Contains(oldSelected))
-                {
-                    lbRegionConfigs.SelectedItem = oldSelected;
-                }
-            }
+            lbRegionConfigs.DataSource = regionConfigs;
+            lbRegionConfigs.DisplayMember = "Title";
+            lblName.Text = name;
         }
 
         public Image Thumbnail
         {
-            get
-            {
-                return pbThumbnail.Image;
-            }
-            set
-            {
-                pbThumbnail.Image = value;
-            }
+            get { return pbThumbnail.Image; }
+            set { pbThumbnail.Image = value; }
         }
-
+        
         public RegionConfig SelectedRegionConfig
         {
             get { return lbRegionConfigs.SelectedItem as RegionConfig; }
-            set
-            {
-                if (null == lbRegionConfigs || null == lbRegionConfigs.Items || null == value)
-                    return;
-
-                if (lbRegionConfigs.SelectedItem == value)
-                    return;
-
-                if (lbRegionConfigs.Items.Contains(value))
-                    lbRegionConfigs.SelectedItem = value;
-            }
         }
 
         private void lbRegionConfigs_SelectedValueChanged(object sender, EventArgs e)
         {
-            var lb = sender as ListBox;
-            if (null == lb)
-                return;
+            var regionConfig = lbRegionConfigs.SelectedItem as RegionConfig;
 
-            var item = lb.SelectedItem as RegionConfig;
+            var maskedThumbnail = regionConfig.RoiMask.GetMask(_baseThumbnail.Width, _baseThumbnail.Height, new Emgu.CV.Structure.Bgr(Color.Blue));
 
-            Model.SelectedRegionConfig = item;
-
-            if (null != SelectedRegionConfigChanged)
-                SelectedRegionConfigChanged(sender, new RegionConfigSelectorEventArgs() { Model = Model });
+            pbThumbnail.Image = _baseThumbnail.Add(maskedThumbnail).ToBitmap();
         }
 
         private void btnCreateNewRegionConfig_Click(object sender, EventArgs e)
         {
-            var lb = this.lbRegionConfigs;
-            if (null == lb)
-                return;
-
-            var item = lb.SelectedItem as RegionConfig;
-
             if (null != CreateNewRegionConfigClicked)
-                CreateNewRegionConfigClicked(sender, new RegionConfigSelectorEventArgs() { Model = Model });
+                CreateNewRegionConfigClicked(this, new RegionConfigSelectorEventArgs { Thumbnail = _baseThumbnail });
         }
 
 

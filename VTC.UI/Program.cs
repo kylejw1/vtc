@@ -7,6 +7,8 @@ using VTC.Common;
 using VTC.RegionConfiguration;
 using System.Collections.Generic;
 using System.Linq;
+using System.ComponentModel;
+using VTC.Kernel.RegionConfig;
 
 namespace VTC
 {
@@ -24,16 +26,7 @@ namespace VTC
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
-            var form = new Form();
-            var capture = new CaptureSource.VideoFileCapture(@"C:\vtc\bin\traffic.wmv");
-            capture.Init(new AppSettings()
-            {
-                FrameHeight = 200,
-                FrameWidth = 200
-            });
-            var videoFiles = new CaptureSource.CaptureSource[] {
-                capture
-            };
+
             var cs = new List<CaptureSource.CaptureSource>();
             for(int i = 0; i < 20; i++)
             {
@@ -47,20 +40,11 @@ namespace VTC
             }
             
             var rcDal = new FileRegionConfigDAL(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                        "\\VTC\\regionConfig.xml");
-            var regions = rcDal.LoadRegionConfigList().ToList();
+                                        "\\VTC\\regionConfigs.xml");
+            var regions = new BindingList<RegionConfig>(rcDal.LoadRegionConfigList().ToList());
 
-            var rcsv = new RegionConfigSelectorView();
-            var models = new List<RegionConfigSelectorModel>();
-            foreach (var s in cs)
-            {
-                models.Add(new RegionConfigSelectorModel()
-                {
-                    CaptureSource = s,
-                    Thumbnail = s.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>()
-                });
-            }
-            var presenter = new RegionConfigSelectorPresenter(regions, models, rcDal, rcsv);
+            var rcsv = new RegionConfigSelectorView(regions, cs);
+            var presenter = new RegionConfigSelectorPresenter(regions, rcDal, rcsv);
 
             rcsv.ShowDialog();
             return;
