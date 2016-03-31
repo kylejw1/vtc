@@ -70,6 +70,11 @@ namespace VTC.RegionConfiguration
 
         private void AddRegionConfig(RegionConfig regionConfig)
         {
+            // TODO: Hack until the region editor is fixed
+            if (string.IsNullOrEmpty(regionConfig.Title))
+            {
+                regionConfig.Title = "(new regionConfig)";
+            }
             _regionConfigs.Add(regionConfig);
         }
 
