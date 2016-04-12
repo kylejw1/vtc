@@ -27,6 +27,8 @@ namespace VTC
             Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
 
+            
+
             var cs = new List<CaptureSource.CaptureSource>();
             for(int i = 0; i < 20; i++)
             {
@@ -42,6 +44,14 @@ namespace VTC
             var rcDal = new FileRegionConfigDAL(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                         "\\VTC\\regionConfigs.xml");
             var regions = rcDal.LoadRegionConfigList().ToList();
+
+            var RegionEditor = new RegionEditor(cs.First().QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>(), regions.First());
+            if (RegionEditor.ShowDialog() == DialogResult.OK)
+            {
+                
+            }
+            return;
+
             var view = new RegionConfigSelectorView();
             var model = new RegionConfigSelectorModel(cs, regions);
             view.SetModel(model);
