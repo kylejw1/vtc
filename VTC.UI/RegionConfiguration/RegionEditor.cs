@@ -40,43 +40,80 @@ namespace VTC.RegionConfiguration
 
         private void InitializeToggleButtons()
         {
+            if (null == RegionConfig)
+                return;
+
+            tlpPolygonToggles.RowStyles.Clear();
+            tlpPolygonToggles.RowStyles.Add(new RowStyle() { SizeType=SizeType.AutoSize });
             tlpPolygonToggles.Controls.Clear();
+            tlpPolygonToggles.RowCount = 1;
 
-            if (null == RegionConfig) return;
+            var roiButton = CreateEditRegionButton("ROI");
+            AddEditAndDeleteButtons(roiButton, null);
 
-            // Set table rows
-            var rows = ((RegionConfig.Regions.Count() + 1) / 2) + 1;
-            tlpPolygonToggles.RowCount = rows;
-
-            PolygonLookup = new Dictionary<Button, Polygon>();
-
-            var rb = BuildEditButton("ROI Mask");
-            PolygonLookup[rb] = RegionConfig.RoiMask;
-            tlpPolygonToggles.Controls.Add(rb);
-            tlpPolygonToggles.SetColumnSpan(rb, 2);
-            
             foreach (var regionKvp in RegionConfig.Regions)
             {
-                rb = BuildEditButton(regionKvp.Key);
-                PolygonLookup[rb] = regionKvp.Value;
-                tlpPolygonToggles.Controls.Add(rb);
+                var edit = CreateEditRegionButton(regionKvp.Key);
+                var delete = CreateDeleteButton(regionKvp.Value);
+                AddEditAndDeleteButtons(edit, delete);
             }
         }
 
-        private Button BuildEditButton(string text)
+        private Button CreateEditRegionButton(string text)
         {
-            var tb = new Button();
+            var button = new Button();
 
-            tb.Text = text;
-            tb.Dock  = DockStyle.Fill;
-            tb.AutoSize = true;
-            tb.TextAlign = ContentAlignment.MiddleCenter;
+            button.Text = text;
+            button.Dock = DockStyle.Fill;
+            button.AutoSize = true;
+            button.TextAlign = ContentAlignment.MiddleCenter;
 
-            tb.MouseEnter += tb_MouseEnter;
-            tb.MouseLeave += tb_MouseLeave;
-            tb.Click += tb_Clicked;
-            
-            return tb;
+     //       button.MouseEnter += tb_MouseEnter;
+     //       button.MouseLeave += tb_MouseLeave;
+     //       button.Click += tb_Clicked;
+
+            return button;
+        }
+
+        private Button CreateDeleteButton(Polygon polygon)
+        {
+            var deleteButton = new Button();
+
+          //  deleteButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+      //      deleteButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+        //    deleteButton.Size = new System.Drawing.Size(23, 23);
+            deleteButton.FlatStyle = FlatStyle.Flat;
+            deleteButton.ForeColor = Color.Red;
+            deleteButton.TabIndex = 6;
+            deleteButton.Text = "Delete";
+            deleteButton.UseVisualStyleBackColor = false;
+
+            deleteButton.BackColor = System.Drawing.SystemColors.ControlLight;
+
+            deleteButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            deleteButton.Text = "X";
+            deleteButton.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+
+            deleteButton.Click += (sender, args) =>
+            {
+
+            };
+
+            return deleteButton;
+        }
+
+
+
+        private void AddEditAndDeleteButtons(Button edit, Button delete)
+        {
+            tlpPolygonToggles.Controls.Remove(btnAddApproachExit);
+            if (null != edit)
+                tlpPolygonToggles.Controls.Add(edit, 0, tlpPolygonToggles.RowCount - 1);
+            if (null != delete) 
+                tlpPolygonToggles.Controls.Add(delete, 1, tlpPolygonToggles.RowCount - 1);
+
+            tlpPolygonToggles.RowCount++;
+            tlpPolygonToggles.Controls.Add(btnAddApproachExit, 0, tlpPolygonToggles.RowCount - 1);
         }
 
         void tb_MouseLeave(object sender, EventArgs e)
@@ -108,8 +145,13 @@ namespace VTC.RegionConfiguration
             if (editing)
             {
                 // Disable all buttons while editing
-                foreach (var button in PolygonLookup.Keys)
+                foreach (var ctrl in tlpPolygonToggles.Controls)
                 {
+                    var button = ctrl as Button;
+
+                    if (null == button)
+                        continue;
+
                     button.Enabled = false;
                 }
 
@@ -159,6 +201,14 @@ namespace VTC.RegionConfiguration
         void control_OnCancelClicked(object sender, EventArgs e)
         {
             SetEditing(false, null);
+        }
+
+        private void btnAddApproachExit_Click(object sender, EventArgs e)
+        {
+            var polygon = new Polygon();
+            var edit = CreateEditRegionButton("new region");
+            var delete = CreateDeleteButton(polygon);
+            AddEditAndDeleteButtons(edit, delete);
         }
     }
 }
