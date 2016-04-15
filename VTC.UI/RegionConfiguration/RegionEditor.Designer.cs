@@ -37,9 +37,9 @@
             this.btnAdd = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblTitle = new System.Windows.Forms.Label();
             this.tlpPolygonToggles = new System.Windows.Forms.TableLayoutPanel();
             this.btnAddApproachExit = new System.Windows.Forms.Button();
+            this.tbRegionConfigName = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -48,14 +48,12 @@
             // 
             // panelImage
             // 
-            this.panelImage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelImage.AutoScroll = true;
             this.panelImage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelImage.Location = new System.Drawing.Point(236, 37);
+            this.panelImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelImage.Location = new System.Drawing.Point(236, 29);
             this.panelImage.Name = "panelImage";
-            this.panelImage.Size = new System.Drawing.Size(538, 478);
+            this.panelImage.Size = new System.Drawing.Size(538, 486);
             this.panelImage.TabIndex = 3;
             // 
             // btnOK
@@ -150,9 +148,9 @@
             this.tableLayoutPanel3.ColumnCount = 2;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
-            this.tableLayoutPanel3.Controls.Add(this.lblTitle, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.panelImage, 1, 1);
+            this.tableLayoutPanel3.Controls.Add(this.tbRegionConfigName, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.tlpPolygonToggles, 0, 1);
+            this.tableLayoutPanel3.Controls.Add(this.panelImage, 1, 1);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(263, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -162,27 +160,15 @@
             this.tableLayoutPanel3.Size = new System.Drawing.Size(777, 518);
             this.tableLayoutPanel3.TabIndex = 4;
             // 
-            // lblTitle
-            // 
-            this.lblTitle.AutoSize = true;
-            this.tableLayoutPanel3.SetColumnSpan(this.lblTitle, 2);
-            this.lblTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTitle.Location = new System.Drawing.Point(3, 0);
-            this.lblTitle.Margin = new System.Windows.Forms.Padding(3, 0, 3, 5);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(79, 29);
-            this.lblTitle.TabIndex = 4;
-            this.lblTitle.Text = "label1";
-            // 
             // tlpPolygonToggles
             // 
             this.tlpPolygonToggles.AutoSize = true;
             this.tlpPolygonToggles.ColumnCount = 2;
             this.tlpPolygonToggles.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpPolygonToggles.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpPolygonToggles.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 28F));
             this.tlpPolygonToggles.Controls.Add(this.btnAddApproachExit, 0, 0);
             this.tlpPolygonToggles.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tlpPolygonToggles.Location = new System.Drawing.Point(3, 44);
+            this.tlpPolygonToggles.Location = new System.Drawing.Point(3, 36);
             this.tlpPolygonToggles.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
             this.tlpPolygonToggles.Name = "tlpPolygonToggles";
             this.tlpPolygonToggles.RowCount = 1;
@@ -194,7 +180,6 @@
             // btnAddApproachExit
             // 
             this.btnAddApproachExit.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.tlpPolygonToggles.SetColumnSpan(this.btnAddApproachExit, 2);
             this.btnAddApproachExit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnAddApproachExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAddApproachExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -202,12 +187,22 @@
             this.btnAddApproachExit.Location = new System.Drawing.Point(15, 3);
             this.btnAddApproachExit.Margin = new System.Windows.Forms.Padding(15, 3, 15, 3);
             this.btnAddApproachExit.Name = "btnAddApproachExit";
-            this.btnAddApproachExit.Size = new System.Drawing.Size(197, 28);
+            this.btnAddApproachExit.Size = new System.Drawing.Size(169, 28);
             this.btnAddApproachExit.TabIndex = 1;
             this.btnAddApproachExit.Text = "+";
             this.btnAddApproachExit.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.btnAddApproachExit.UseVisualStyleBackColor = false;
             this.btnAddApproachExit.Click += new System.EventHandler(this.btnAddApproachExit_Click);
+            // 
+            // tbRegionConfigName
+            // 
+            this.tableLayoutPanel3.SetColumnSpan(this.tbRegionConfigName, 2);
+            this.tbRegionConfigName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbRegionConfigName.Location = new System.Drawing.Point(3, 3);
+            this.tbRegionConfigName.Name = "tbRegionConfigName";
+            this.tbRegionConfigName.ReadOnly = true;
+            this.tbRegionConfigName.Size = new System.Drawing.Size(771, 20);
+            this.tbRegionConfigName.TabIndex = 6;
             // 
             // RegionEditor
             // 
@@ -235,7 +230,6 @@
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.TableLayoutPanel tlpPolygonToggles;
         private System.Windows.Forms.ListBox lbRegionConfigurations;
         private System.Windows.Forms.Button btnAdd;
@@ -243,5 +237,6 @@
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Button btnAddApproachExit;
+        private System.Windows.Forms.TextBox tbRegionConfigName;
     }
 }

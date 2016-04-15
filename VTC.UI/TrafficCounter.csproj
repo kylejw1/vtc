@@ -163,6 +163,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RegionConfiguration\FileRegionConfigDAL.cs" />
+    <Compile Include="RegionConfiguration\InputPrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RegionConfiguration\InputPrompt.Designer.cs">
+      <DependentUpon>InputPrompt.cs</DependentUpon>
+    </Compile>
     <Compile Include="RegionConfiguration\IRegionConfigDataAccessLayer.cs" />
     <Compile Include="RegionConfiguration\IRegionConfigSelectorView.cs" />
     <Compile Include="RegionConfiguration\PolygonBuilderControl.cs">
@@ -224,6 +230,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RegionConfiguration\InputPrompt.resx">
+      <DependentUpon>InputPrompt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="RegionConfiguration\PolygonBuilderControl.resx">
       <DependentUpon>PolygonBuilderControl.cs</DependentUpon>
