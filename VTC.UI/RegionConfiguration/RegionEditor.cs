@@ -17,7 +17,7 @@ namespace VTC.RegionConfiguration
         private Image<Bgr, float> BgImage { get; set; }
         public RegionConfig RegionConfig { get; private set; }
 
-        private Dictionary<Button, Polygon> PolygonLookup;
+        private Dictionary<Button, Polygon> PolygonLookup = new Dictionary<Button, Polygon>();
         private Button ActiveButton = null;
 
         private PictureBox Preview = new PictureBox();
@@ -30,10 +30,12 @@ namespace VTC.RegionConfiguration
             RegionConfig = regionConfig.DeepCopy();
             BgImage = bgImage;
 
+            RegionConfig.Title = RegionConfig.Title ?? "Region Config";
+
             Preview.Size = BgImage.Size;
             Preview.Image = BgImage.ToBitmap();
             panelImage.Controls.Add(Preview);
-            
+            tbRegionConfigName.DataBindings.Add("Text", RegionConfig, "Title");
 
             InitializeToggleButtons();
         }
@@ -49,13 +51,13 @@ namespace VTC.RegionConfiguration
             tlpPolygonToggles.RowCount = 1;
 
             var roiButton = CreateEditRegionButton("ROI");
-            AddEditAndDeleteButtons(roiButton, null);
+            AddEditAndDeleteButtons(roiButton, null, RegionConfig.RoiMask);
 
             foreach (var regionKvp in RegionConfig.Regions)
             {
                 var edit = CreateEditRegionButton(regionKvp.Key);
-                var delete = CreateDeleteButton(regionKvp.Value);
-                AddEditAndDeleteButtons(edit, delete);
+                var delete = CreateDeleteButton(edit);
+                AddEditAndDeleteButtons(edit, delete, regionKvp.Value);
             }
         }
 
@@ -68,35 +70,36 @@ namespace VTC.RegionConfiguration
             button.AutoSize = true;
             button.TextAlign = ContentAlignment.MiddleCenter;
 
-     //       button.MouseEnter += tb_MouseEnter;
-     //       button.MouseLeave += tb_MouseLeave;
-     //       button.Click += tb_Clicked;
+            button.MouseEnter += tb_MouseEnter;
+            button.MouseLeave += tb_MouseLeave;
+            button.Click += (sender, args) =>
+            {
+                SetEditing(true, button);
+            };
 
             return button;
         }
 
-        private Button CreateDeleteButton(Polygon polygon)
+        private Button CreateDeleteButton(Button editButton)
         {
             var deleteButton = new Button();
 
-          //  deleteButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-      //      deleteButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
-        //    deleteButton.Size = new System.Drawing.Size(23, 23);
             deleteButton.FlatStyle = FlatStyle.Flat;
+            deleteButton.BackColor = SystemColors.ControlLight;
             deleteButton.ForeColor = Color.Red;
-            deleteButton.TabIndex = 6;
-            deleteButton.Text = "Delete";
-            deleteButton.UseVisualStyleBackColor = false;
-
-            deleteButton.BackColor = System.Drawing.SystemColors.ControlLight;
-
-            deleteButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            deleteButton.Font = new Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            deleteButton.Size = new Size(23, 23);
             deleteButton.Text = "X";
-            deleteButton.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            deleteButton.UseVisualStyleBackColor = false;
 
             deleteButton.Click += (sender, args) =>
             {
-
+                if (DialogResult.Yes == MessageBox.Show("Remove region " + editButton.Text + "?", string.Empty, MessageBoxButtons.YesNo))
+                {
+                    tlpPolygonToggles.Controls.Remove(deleteButton);
+                    tlpPolygonToggles.Controls.Remove(editButton);
+                    PolygonLookup.Remove(editButton);
+                }
             };
 
             return deleteButton;
@@ -104,8 +107,11 @@ namespace VTC.RegionConfiguration
 
 
 
-        private void AddEditAndDeleteButtons(Button edit, Button delete)
+        private void AddEditAndDeleteButtons(Button edit, Button delete, Polygon polygon)
         {
+            if (null != polygon)
+                PolygonLookup[edit] = polygon;
+
             tlpPolygonToggles.Controls.Remove(btnAddApproachExit);
             if (null != edit)
                 tlpPolygonToggles.Controls.Add(edit, 0, tlpPolygonToggles.RowCount - 1);
@@ -135,8 +141,6 @@ namespace VTC.RegionConfiguration
         {
             var b = sender as Button;
 
-            ActiveButton = b;
-
             SetEditing(true, ActiveButton);            
         }
 
@@ -144,6 +148,9 @@ namespace VTC.RegionConfiguration
         {
             if (editing)
             {
+                tbRegionConfigName.ReadOnly = false;
+
+                ActiveButton = activeButton;
                 // Disable all buttons while editing
                 foreach (var ctrl in tlpPolygonToggles.Controls)
                 {
@@ -171,9 +178,16 @@ namespace VTC.RegionConfiguration
             }
             else
             {
+                tbRegionConfigName.ReadOnly = true;
+                ActiveButton = null;
                 // Enable all buttons for future edits
-                foreach (var button in PolygonLookup.Keys)
+                foreach (var ctrl in tlpPolygonToggles.Controls)
                 {
+                    var button = ctrl as Button;
+
+                    if (null == button)
+                        continue;
+
                     button.Enabled = true;
                 }
 
@@ -205,10 +219,14 @@ namespace VTC.RegionConfiguration
 
         private void btnAddApproachExit_Click(object sender, EventArgs e)
         {
+            var input = new InputPrompt("Region Name", "Enter Region Name:");
+            if (DialogResult.OK != input.ShowDialog())
+                return;
+
             var polygon = new Polygon();
-            var edit = CreateEditRegionButton("new region");
-            var delete = CreateDeleteButton(polygon);
-            AddEditAndDeleteButtons(edit, delete);
+            var edit = CreateEditRegionButton(input.InputString);
+            var delete = CreateDeleteButton(edit);
+            AddEditAndDeleteButtons(edit, delete, polygon);
         }
     }
 }
