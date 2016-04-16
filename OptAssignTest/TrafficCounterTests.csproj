@@ -101,7 +101,6 @@
     <Compile Include="ConnectivityTest.cs" />
     <Compile Include="VisibilityLossTests.cs" />
     <Compile Include="TestBase.cs" />
-    <Compile Include="TestSettings.cs" />
     <Compile Include="TrajectoryDetectionTest.cs" />
     <Compile Include="Framework\CircleVehicles.cs" />
     <Compile Include="Framework\AnimationBase.cs" />
@@ -121,6 +120,11 @@
       <Name>VTC.Reporting</Name>
       <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

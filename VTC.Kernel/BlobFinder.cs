@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Configuration;
 using Emgu.CV;
 using Emgu.CV.Cvb;
 using Emgu.CV.Structure;
-using VTC.Kernel;
 
 namespace VTC.Kernel
 {

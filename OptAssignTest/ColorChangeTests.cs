@@ -3,6 +3,7 @@ using Emgu.CV.Structure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptAssignTest.Framework;
 using VTC.Kernel.Video;
+using VTC.Common;
 
 namespace OptAssignTest
 {
@@ -21,8 +22,10 @@ namespace OptAssignTest
         [Description("Vehicle might (slightly?) change color, and it should not affect recognition")]
         public void OftenChangedCarColor_ShouldNotAffectTracking()
         {
+            
             var script = OftenColorChangeScript();
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -38,7 +41,7 @@ namespace OptAssignTest
         public void SlowlyChangedCarColor_ShouldNotAffectTracking()
         {
             var script = SlowlyChangedColorScript();
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
@@ -53,32 +56,32 @@ namespace OptAssignTest
         {
             return new[]
             {
-                new CaptureContext(new CaptureEmulator("Often color change", OftenColorChangeScript()), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Slowly color change", SlowlyChangedColorScript()), DefaultSettings)
+                new CaptureContext(new CaptureEmulator("Often color change", OftenColorChangeScript()), new AppSettings()),
+                new CaptureContext(new CaptureEmulator("Slowly color change", SlowlyChangedColorScript()), new AppSettings())
             };
         }
 
-        private static Script OftenColorChangeScript()
+        private Script OftenColorChangeScript()
         {
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
+                .AddVerticalPath(settings)
                 .CarColor(frame => _colors[frame%_colors.Length]); // car slightly changes color *each* frame
             return script;
         }
 
-        private static Script SlowlyChangedColorScript()
+        private Script SlowlyChangedColorScript()
         {
             // car changes color on each segment
-            var segmentLength = DefaultSettings.VerticalPathLength()/_colors.Length;
+            var segmentLength = (int) settings.FrameHeight/_colors.Length;
 
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
+                .AddVerticalPath(settings)
                 .CarColor(frame => _colors[frame/segmentLength]);
             return script;
         }

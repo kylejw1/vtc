@@ -79,7 +79,7 @@ namespace VTC.Reporting
             }
             catch (Exception e)
             {
-                Debug.WriteLine("LogToTextfile: e.Message");
+                Debug.WriteLine("LogToTextfile:" + e.Message);
             }
             
         }
@@ -102,7 +102,7 @@ namespace VTC.Reporting
             }
             catch (Exception e)
             {
-                Debug.WriteLine("LogToTextfile: e.Message");
+                Debug.WriteLine("LogToTextfile:" + e.Message);
             }
 
         }

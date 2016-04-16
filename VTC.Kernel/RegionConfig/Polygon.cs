@@ -64,8 +64,6 @@ namespace VTC.Kernel.RegionConfig
 
             image.DrawPolyline(coords.ToArray(), true, new Bgr(Color.Black), 1);
 
-            MCvConnectedComp comp = new MCvConnectedComp();
-
             MCvScalar lo = new MCvScalar(1, 1, 1);
             MCvScalar up = new MCvScalar(1, 1, 1);
 
@@ -82,9 +80,7 @@ namespace VTC.Kernel.RegionConfig
             //    new IntPtr());
             IInputOutputArray iioArray = image;
             var rect = new Rectangle();
-            var ioArray = image.GetInputOutputArray();
             var mask = new Image<Gray, byte>(new Size(image.Width + 2, image.Height + 2));
-            IInputOutputArray iioMask = mask;
             try
             {
                 CvInvoke.FloodFill(iioArray, mask, new Point(0, 0), new MCvScalar(0, 0, 0), out rect, lo, up,
@@ -92,7 +88,7 @@ namespace VTC.Kernel.RegionConfig
             }
             catch(Emgu.CV.Util.CvException e)
             {
-                Debug.WriteLine("Exception in GetMask:CvInvoke.FloodFill");
+                Debug.WriteLine("Exception in GetMask:CvInvoke.FloodFill:" + e.ErrorMessage);
             }
             
 

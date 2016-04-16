@@ -332,7 +332,6 @@ namespace OptAssignTest
         public void findBestNodeTest()
         {
             int[,] costs = { {3,1,5}, {0,0,2}, {2,1,6}  };
-            int[,] updated_costs = null;
             int[] optimal_assignment = OptAssign.BestAssignment(costs);
             List<MurtyNode> partition = OptAssign.partition_assignment(optimal_assignment); // TODO: Initialize to an appropriate value
 

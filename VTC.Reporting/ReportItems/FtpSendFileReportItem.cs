@@ -33,7 +33,6 @@ namespace VTC.Reporting.ReportItems
 
         void wc_UploadDataCompleted(object sender, UploadDataCompletedEventArgs e)
         {
-            bool finished = true;
         }
     }
 }

@@ -90,8 +90,6 @@ namespace LicenseManager
                     throw new Exception("License Genuine check failed: " + ex.Message, ex);
                 }
 
-                var retVal = false;
-
                 if (result == GenuineResult.InternetError)
                 {
                     // TODO: Handle connection errors

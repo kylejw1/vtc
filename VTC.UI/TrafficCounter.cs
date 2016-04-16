@@ -19,7 +19,8 @@ using VTC.Kernel.Video;
 using VTC.Kernel.Vistas;
 using VTC.Reporting;
 using VTC.Reporting.ReportItems;
-using VTC.Settings;
+using VTC.Common;
+using VTC.BatchProcessing;
 
 namespace VTC
 {
@@ -54,7 +55,8 @@ namespace VTC
 
         private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
         private ICaptureSource _selectedCamera;
-        private List<string> _videosToProcess;
+
+        private List<BatchVideoJob> _videoJobs; 
 
         private readonly string _appArgument; //For debugging only, delete this later
         private TimeSpan _trialLicenseTimeLimit = TimeSpan.FromMinutes(30);
@@ -162,7 +164,7 @@ namespace VTC
            _applicationStartTime = DateTime.Now;
            _lastDatasetExportTime = DateTime.Now;
 
-            _videosToProcess = new List<string>();
+            _videoJobs = new List<BatchVideoJob>();
 
            DisableExperimental();
 
@@ -208,7 +210,7 @@ namespace VTC
                     {
                         if (_batchMode)
                         {
-                            if (_videosToProcess.Count > 0)
+                            if ( _videoJobs.Count > 0)
                                 DequeueVideo();
                         }
                         else
@@ -225,13 +227,12 @@ namespace VTC
 
                         // Send the new image frame to the vista for processing
                         _vista.DisableOpticalFlow = disableOpticalFlowCheckbox.Checked;
-                        _vista.Update(frameForProcessing);
+                        _vista.Update(frameForProcessing, mhtLogCheckbox.Checked);
 
                         // Update image boxes
                         UpdateImageBoxes(frameForRendering, _vista.Movement_Mask);
 
                         // Update statistics
-                        trackCountBox.Text = _vista.CurrentVehicles.Count.ToString();
                         tbVistaStats.Text = _vista.GetStatString();
 
                         //Thread.Sleep((int)_settings.Timestep * 1000); 
@@ -511,22 +512,22 @@ namespace VTC
             DequeueVideo();
         }
 
-        private void LoadVideosFromPath(List<string> videosToProcess)
+        private void LoadVideosFromPath(List<BatchVideoJob> videoJobs)
         {
             _batchMode = true;
             _cameras.Clear();
             CameraComboBox.Items.Clear();
-            _videosToProcess = videosToProcess;
+            _videoJobs = videoJobs;
             DequeueVideo();
         }
 
         private void DequeueVideo()
         {
-            if (_videosToProcess.Count > 0)
+            if (_videoJobs.Count > 0)
             {
                 infoBox.AppendText("Loading video from batch" + Environment.NewLine);
-                SelectedCamera = LoadCameraFromFilename(_videosToProcess.First());
-                _videosToProcess.Remove(_videosToProcess.First());
+                SelectedCamera = LoadCameraFromFilename(_videoJobs.First().VideoPath);
+                _videoJobs.Remove(_videoJobs.First());
             }
             else
             {
@@ -548,6 +549,7 @@ namespace VTC
             _mainDisplay.ImageBox.SetZoomScale(1.0, new Point(0, 0));
             _backgroundDisplay.Size = videoSize;
             _movementDisplay.Size = videoSize;
+            _videoMux.Size = MaximumSize;
 #if DEBUG
 
             _mixtureDisplay.Size = videoSize;
@@ -574,8 +576,7 @@ namespace VTC
            serverUrlTextBox.Visible = false;
            pushStateCheckbox.Visible = false;
            exportDatasetsCheckbox.Visible = false;
-           SaveParametersBtn.Visible = false;
-           hideTrackersButton.Visible = false;
+           mhtLogCheckbox.Visible = false;
            disableOpticalFlowCheckbox.Visible = false;
            MoGcheckBox.Visible = false;
            delayProcessingCheckbox.Visible = false;
@@ -668,25 +669,6 @@ namespace VTC
 
         #region Click Handlers
 
-        /// <summary>
-        /// Method to save user settings.
-        /// </summary>
-        private void SaveParametersBtn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _settings.IntersectionID = intersectionIDTextBox.Text;
-                _settings.ServerUrl = serverUrlTextBox.Text;
-                _settings.Save();
-            }
-            catch (Exception ex)
-            {
-                var message = "Cannot save configuration settings. Error: " + ex.Message;
-                Log(LogLevel.Error, message);
-                MessageBox.Show(message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void TrafficCounter_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Idle -= ProcessFrame;
@@ -770,17 +752,19 @@ namespace VTC
 
         }
 
-        private void hideTrackersButton_Click(object sender, EventArgs e)
-        {
-            _vista.hide_trackers = !_vista.hide_trackers;
-        }
-
         private void SelectVideosButton_Click(object sender, EventArgs e)
         {
             var dr = selectVideoFilesDialog.ShowDialog();
             if (dr == DialogResult.OK)
-                LoadVideosFromPath(selectVideoFilesDialog.FileNames.ToList());
-
+            {
+                _videoJobs = new List<BatchVideoJob>();
+                var videoPathsList = selectVideoFilesDialog.FileNames.ToList();
+                foreach (var job in videoPathsList.Select(p => new BatchVideoJob {VideoPath = p}))
+                    _videoJobs.Add(job);
+                
+                LoadVideosFromPath(_videoJobs);
+            }
+                
             Application.Idle -= ProcessFrame;
             Application.Idle += ProcessFrame;
         }

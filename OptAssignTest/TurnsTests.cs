@@ -15,11 +15,11 @@ namespace OptAssignTest
         {
             var script = LeftTurnScript();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(1, vehicles.Count, "Car should be detected all the way.");
                 }
@@ -32,11 +32,11 @@ namespace OptAssignTest
         {
             var script = RightAndTurnScript();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Cars should be detected all the way.");
 
@@ -51,11 +51,11 @@ namespace OptAssignTest
         {
             var script = DualTurnScript();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Both cars should be tracked all the way.");
 
@@ -70,11 +70,11 @@ namespace OptAssignTest
         {
             var script = DualTurnWithDetectionLoss();
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
             {
                 var vehicles = vista.CurrentVehicles;
 
-                if (frame > DetectionThreshold)
+                if (frame > DetectionThreshold && !script.IsDone(frame))
                 {
                     Assert.AreEqual(2, vehicles.Count, "Both cars should be tracked all the way.");
 
@@ -95,24 +95,24 @@ namespace OptAssignTest
         {
             return new[]
             {
-                new CaptureContext(new CaptureEmulator("Left turn", LeftTurnScript()), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Right and turn", RightAndTurnScript()), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Dual turn", DualTurnScript()), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Dual turn (with detection loss)", DualTurnWithDetectionLoss()), DefaultSettings)
+                new CaptureContext(new CaptureEmulator("Left turn", LeftTurnScript()), settings),
+                new CaptureContext(new CaptureEmulator("Right and turn", RightAndTurnScript()), settings),
+                new CaptureContext(new CaptureEmulator("Dual turn", DualTurnScript()), settings),
+                new CaptureContext(new CaptureEmulator("Dual turn (with detection loss)", DualTurnWithDetectionLoss()), settings)
             };
         }
 
-        private static Script LeftTurnScript()
+        private Script LeftTurnScript()
         {
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.South, Direction.West);
+                .AddTurn(settings, Direction.South, Direction.West);
             return script;
         }
 
-        private static Script RightAndTurnScript()
+        private Script RightAndTurnScript()
         {
             var script = new Script();
 
@@ -120,18 +120,18 @@ namespace OptAssignTest
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.South, Direction.East, new Path.Vector(2*VehicleRadius + 1, 0));
+                .AddTurn(settings, Direction.South, Direction.East, new Path.Vector(2*VehicleRadius + 1, 0));
 
             // vehicle goes from bottom to up
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings, Direction.South, new Path.Vector(-2*VehicleRadius, 0));
+                .AddVerticalPath(settings, Direction.South, new Path.Vector(-2*VehicleRadius, 0));
             return script;
         }
 
 
-        private static Script DualTurnScript()
+        private Script DualTurnScript()
         {
             var script = new Script();
 
@@ -139,34 +139,34 @@ namespace OptAssignTest
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
+                .AddTurn(settings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
 
             // vehicle enters at top and turns right at center
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1));
+                .AddTurn(settings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1));
             return script;
         }
 
-        private static Script DualTurnWithDetectionLoss()
+        private Script DualTurnWithDetectionLoss()
         {
             var script = new Script();
 
-            var expectedFrames = (uint) (DefaultSettings.FrameWidth + DefaultSettings.FrameHeight);
+            var expectedFrames = (uint) (settings.FrameWidth + settings.FrameHeight);
             var expectedTurnFrame = expectedFrames/2;
 
             // vehicle enters at bottom and turns left at center
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
+                .AddTurn(settings, Direction.South, Direction.West, new Path.Vector(0, -VehicleRadius));
 
             // vehicle enters at top and turns right at center
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddTurn(DefaultSettings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1))
+                .AddTurn(settings, Direction.North, Direction.East, new Path.Vector(0, VehicleRadius + 1))
                 .Visibility(frame => Math.Abs(expectedTurnFrame - frame) > 5); // loss of detection during turn
             return script;
         }

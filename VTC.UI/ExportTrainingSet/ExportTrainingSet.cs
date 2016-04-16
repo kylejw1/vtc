@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using VTC.Settings;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using Emgu.CV.UI;
 using System.IO;
 using Emgu.CV.Cvb;
 using Emgu.CV.CvEnum;
 using VTC.Kernel;
-
+using VTC.Common;
 
 namespace VTC.ExportTrainingSet
 {
@@ -28,7 +24,6 @@ namespace VTC.ExportTrainingSet
         private PictureBox _subimage = new PictureBox();
         private List<RadioButton> classRadioButtons = new List<RadioButton>();
         private List<Vehicle> _vehicles;
-        private SortedList<CvBlob, int> _blobsWithArea;
 
         private int _unpaddedX;
         private int _unpaddedY;

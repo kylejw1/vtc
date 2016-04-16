@@ -110,5 +110,10 @@ namespace OptAssignTest.Framework
         {
             return _path.IsDone(frame);
         }
+
+        public bool NearComplete(uint frame)
+        {
+            return _path.NearComplete(frame);
+        }
     }
 }

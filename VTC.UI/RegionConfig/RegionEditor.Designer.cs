@@ -254,9 +254,10 @@
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.panelImage);
             this.Controls.Add(this.panel1);
-            this.MinimumSize = new System.Drawing.Size(200, 38);
+            this.MinimumSize = new System.Drawing.Size(200, 39);
             this.Name = "RegionEditor";
             this.Text = "RegionEditor";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.tlpPolygonToggles.ResumeLayout(false);
             this.tlpPolygonToggles.PerformLayout();
             this.panel1.ResumeLayout(false);

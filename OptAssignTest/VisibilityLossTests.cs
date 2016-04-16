@@ -13,10 +13,10 @@ namespace OptAssignTest
         [Description("Car should be tracked after visibility loss until threshold happens.")]
         public void VisibilityLoss_ShouldBeDetected()
         {
-            uint frameWhenDetectionLost = (uint) (DefaultSettings.FrameHeight / 2);
+            uint frameWhenDetectionLost = (uint) (settings.FrameHeight / 2);
             var script = VisibilityLossScript(frameWhenDetectionLost);
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
                 {
                     // the car should be detected at that point
                     if (frame == DetectionThreshold)
@@ -34,7 +34,7 @@ namespace OptAssignTest
                     }
 
                     // car should not be tracked anymore
-                    if (frame == frameWhenDetectionLost + DefaultSettings.MissThreshold + DetectionThreshold)
+                    if (frame == frameWhenDetectionLost + settings.MissThreshold + DetectionThreshold)
                     {
                         Assert.AreEqual(0, vista.CurrentVehicles.Count, "No cars should be detected after certain number of misses");
                     }
@@ -45,12 +45,12 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as the same after loss and reappearence within threshold.")]
         public void ReappearenceWithinThreshold_ShouldBeDetected()
         {
-            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold - 10);
+            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 1);
 
             var script = ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence);
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
                 {
                     var vehicles = vista.CurrentVehicles;
 
@@ -60,10 +60,9 @@ namespace OptAssignTest
                     }
 
                     // car should became invisible, but still be tracked 
-                    if (frame == frameWhenDetectionLost + DetectionThreshold)
+                    if (frame == frameWhenDetectionLost + settings.MissThreshold - 2)
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car still should be detected.");
-
                         Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections > 0, "Car visibility loss should be detected.");
                     }
 
@@ -71,7 +70,6 @@ namespace OptAssignTest
                     if (frame == frameWithReappearence + DetectionThreshold)
                     {
                         Assert.AreEqual(script.Cars.Count, vehicles.Count, "Car should be detected");
-
                         Assert.IsTrue(vehicles[0].StateHistory.Count > frameWithReappearence, "It should be the same car as before.");
                         Assert.IsTrue(vehicles[0].StateHistory.Last().MissedDetections == 0, "Car visibility reappearence should be detected.");
                     }
@@ -82,13 +80,13 @@ namespace OptAssignTest
         [Description("Vehicle should be recognized as a new one after loss and reappearence after threshold.")]
         public void ReappearenceAfterThreshold_ShouldBeDetected()
         {
-            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
+            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
 
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold + 10);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold + 10);
 
             var script = ReappearenceAfterThresholdScript(frameWhenDetectionLost, frameWithReappearence);
 
-            RunScript(DefaultSettings, script, (vista, frame) =>
+            RunScript(script, (vista, frame) =>
                 {
                     var vehicles = vista.CurrentVehicles;
 
@@ -123,49 +121,49 @@ namespace OptAssignTest
             // ER: dislike that it's calculated in different places (need it because it's reused in RunScript). 
             // Possible source of future errors.
             // think - maybe script should expose it somehow?
-            uint frameWhenDetectionLost = (uint)(DefaultSettings.FrameHeight / 2);
-            var frameWithReappearence = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold - 10);
-            var frameWithReappearenceTooLate = (uint)(frameWhenDetectionLost + DefaultSettings.MissThreshold + 10);
+            uint frameWhenDetectionLost = (uint)(settings.FrameHeight / 2);
+            var frameWithReappearence = (uint)(frameWhenDetectionLost + settings.MissThreshold - 10);
+            var frameWithReappearenceTooLate = (uint)(frameWhenDetectionLost + settings.MissThreshold + 10);
 
             return new[]
             {
-                new CaptureContext(new CaptureEmulator("Visibility loss", VisibilityLossScript(frameWhenDetectionLost)), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Reappearence (within threshold)", ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence)), DefaultSettings),
-                new CaptureContext(new CaptureEmulator("Reappearence (after threshold)", ReappearenceAfterThresholdScript(frameWhenDetectionLost, frameWithReappearenceTooLate)), DefaultSettings),
+                new CaptureContext(new CaptureEmulator("Visibility loss", VisibilityLossScript(frameWhenDetectionLost)), settings),
+                new CaptureContext(new CaptureEmulator("Reappearence (within threshold)", ReappearenceWithinThresholdScript(frameWhenDetectionLost, frameWithReappearence)), settings),
+                new CaptureContext(new CaptureEmulator("Reappearence (after threshold)", ReappearenceAfterThresholdScript(frameWhenDetectionLost, frameWithReappearenceTooLate)), settings),
             };
         }
 
-        private static Script ReappearenceAfterThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
+        private Script ReappearenceAfterThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
         {
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
+                .AddVerticalPath(settings)
                 .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
                 // car hidden in the middle
             return script;
         }
 
-        private static Script VisibilityLossScript(uint frameWhenDetectionLost)
+        private Script VisibilityLossScript(uint frameWhenDetectionLost)
         {
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
+                .AddVerticalPath(settings)
                 .Visibility(frame => frame < frameWhenDetectionLost); // car visible only in beginning
             return script;
         }
 
-        private static Script ReappearenceWithinThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
+        private Script ReappearenceWithinThresholdScript(uint frameWhenDetectionLost, uint frameWithReappearence)
         {
             var script = new Script();
             script
                 .CreateCar()
                 .SetSize(VehicleRadius)
-                .AddVerticalPath(DefaultSettings)
-                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame > frameWithReappearence));
+                .AddVerticalPath(settings)
+                .Visibility(frame => (frame < frameWhenDetectionLost) || (frame >= frameWithReappearence));
             // car hidden in the middle
             return script;
         }

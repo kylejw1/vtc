@@ -51,73 +51,7 @@
         /// <summary>
         /// Radius of car image in pixels.
         /// </summary>
-        int CarRadius { get; }
-
-        /// <summary>
-        /// Radius of car image in pixels.
-        /// </summary>
-        int MinObjectSize { get; }
-
-        /// <summary>
-        /// Background movement noise.
-        /// </summary>
-        double Timestep { get; }
-
-        /// <summary>
-        /// Process noise matrix multipler - position
-        /// </summary>
-        double Q_position { get; }
-
-        /// <summary>
-        /// Process noise matrix multipler - color
-        /// </summary>
-        double Q_color { get; }
-
-        /// <summary>
-        /// Measurement noise matrix multipler - position
-        /// </summary>
-        double R_position { get; }
-
-        /// <summary>
-        /// Measurement noise matrix multipler - color
-        /// </summary>
-        double R_color { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovX { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovY { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovVX { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovVY { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovR { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovG { get; }
-
-        /// <summary>
-        /// Initial X Covariance for vehicles
-        /// </summary>
-        double VehicleInitialCovB { get; }
-
+        int CarRadius { get; }        
         
 
         #endregion

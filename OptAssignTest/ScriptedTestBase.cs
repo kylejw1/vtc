@@ -21,11 +21,14 @@ namespace OptAssignTest
         /// </summary>
         protected const int DetectionThreshold = 10;
 
+        
+
         /// <summary>
         /// Execute script against the test action.
         /// </summary>
-        protected static void RunScript(ISettings settings, Script script, Action<Vista, uint> testAction)
+        protected static void RunScript(Script script, Action<Vista, uint> testAction)
         {
+            ISettings settings = new AppSettings();
             var vista = CreateVista(settings);
 
             // initialize background
