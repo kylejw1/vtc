@@ -15,7 +15,7 @@ namespace OptAssignTest
 
         public int MaxHypothesisTreeDepth
         {
-            get { return 2; }
+            get { return 4; }
         }
 
         public int MaxTargets
@@ -25,7 +25,7 @@ namespace OptAssignTest
 
         public int MinObjectSize
         {
-            get { return 10; }
+            get { return 5; }
         }
 
         public int MoGUpdateDownsampling
@@ -40,12 +40,12 @@ namespace OptAssignTest
 
         public int KHypotheses
         {
-            get { return 2; }
+            get { return 4; }
         }
 
         public int ValidationRegionDeviation
         {
-            get { return 7; }
+            get { return 3; }
         }
 
         public double LambdaF
@@ -147,7 +147,7 @@ namespace OptAssignTest
 
         public double Q_position
         {
-            get { return 200; }
+            get { return 5; }
         }
 
         public double R_color
@@ -157,7 +157,7 @@ namespace OptAssignTest
 
         public double R_position
         {
-            get { return 50; }
+            get { return 5; }
         }
 
         public double Timestep

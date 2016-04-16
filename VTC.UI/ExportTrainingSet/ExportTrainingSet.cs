@@ -134,14 +134,14 @@ namespace VTC.ExportTrainingSet
         {
             string examplesDirectory = createExamplesDirectoryIfNotExists();
             string classDirectory = createClassDirectoryIfNotExists(classString, examplesDirectory);
-            List<Int16> filenamesToNumbers =
+            List<Int64> filenamesToNumbers =
                 Directory.GetFiles(classDirectory)
                     .ToList<String>()
-                    .Select(s => Convert.ToInt16(System.IO.Path.GetFileNameWithoutExtension(s)))
+                    .Select(s => Convert.ToInt64(System.IO.Path.GetFileNameWithoutExtension(s)))
                     .ToList();
             filenamesToNumbers.Add(0);
             filenamesToNumbers.Sort();
-            int newExampleNum = filenamesToNumbers.Last() + 1;
+            var newExampleNum = filenamesToNumbers.Last() + 1;
             string examplePath = classDirectory + "\\" + newExampleNum + ".bmp";
             return examplePath;
         }
