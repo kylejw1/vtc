@@ -27,6 +27,46 @@ namespace VTC
             Application.ThreadException += (_, e) => _logger.Error(e.Exception, "Thread exception");
             AppDomain.CurrentDomain.UnhandledException += (_, e) => _logger.Error((Exception)e.ExceptionObject, "Unhandled exception");
 
+            
+
+            var cs = new List<CaptureSource.CaptureSource>();
+            for(int i = 0; i < 20; i++)
+            {
+                var c = new CaptureSource.VideoFileCapture(@"C:\vtc\bin\traffic.wmv");
+                c.Init(new AppSettings()
+                {
+                    FrameHeight = 200,
+                    FrameWidth = 200
+                });
+                cs.Add(c);
+            }
+            
+            var rcDal = new FileRegionConfigDAL(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                        "\\VTC\\regionConfigs.xml");
+            var regions = rcDal.LoadRegionConfigList().ToList();
+
+            var RegionEditor = new RegionEditor(cs.First().QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>(), regions.First());
+            if (RegionEditor.ShowDialog() == DialogResult.OK)
+            {
+                
+            }
+            return;
+
+            var view = new RegionConfigSelectorView();
+            var model = new RegionConfigSelectorModel(cs, regions);
+            view.SetModel(model);
+
+            if (view.ShowDialog() == DialogResult.OK)
+            {
+                // Save any region config changes
+                var regionConfigs = view.GetModel();
+                rcDal.SaveRegionConfigList(regionConfigs.RegionConfigs);
+
+                // Get results
+                var results = view.GetRegionConfigSelections();
+            }
+            return;
+
             int delayMs = 5000;
             var ss = new SplashScreen(delayMs);
             ss.Show();
