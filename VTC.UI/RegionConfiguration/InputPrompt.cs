@@ -26,6 +26,10 @@ namespace VTC.RegionConfiguration
 
             this.Text = caption;
             this.lblMessage.Text = message;
+            tbInput.TextChanged += (sender, args) =>
+            {
+                btnOK.Enabled = !string.IsNullOrWhiteSpace(tbInput.Text);
+            };
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

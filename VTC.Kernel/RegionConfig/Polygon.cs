@@ -28,6 +28,10 @@ namespace VTC.Kernel.RegionConfig
 
         public void UpdateCentroid()
         {
+            // TODO: Handle centroid of empty polygon
+            if (this.Count == 0)
+                return;
+
             var points = this.Select(x => new GeoAPI.Geometries.Coordinate(x.X, x.Y)).ToArray();
             NetTopologySuite.Geometries.LinearRing ring = new NetTopologySuite.Geometries.LinearRing(points);
             NetTopologySuite.Geometries.Polygon ntsPoly = new NetTopologySuite.Geometries.Polygon(ring);

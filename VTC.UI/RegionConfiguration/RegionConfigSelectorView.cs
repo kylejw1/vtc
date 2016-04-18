@@ -43,12 +43,12 @@ namespace VTC.RegionConfiguration
         {
             var control = sender as RegionConfigSelectorControl;
 
-            var createRegionConfigForm = new RegionEditor(control.BaseThumbnail, new RegionConfig());
-            if (createRegionConfigForm.ShowDialog() == DialogResult.OK)
-            {
-                var newRegionConfig = createRegionConfigForm.RegionConfig;
-                AddRegionConfig(newRegionConfig);
-            }
+            //var createRegionConfigForm = new RegionEditor(control.BaseThumbnail, new RegionConfig());
+            //if (createRegionConfigForm.ShowDialog() == DialogResult.OK)
+            //{
+            //    var newRegionConfig = createRegionConfigForm.RegionConfig;
+            //    AddRegionConfig(newRegionConfig);
+            //}
         }
 
         public void SetModel(RegionConfigSelectorModel model)

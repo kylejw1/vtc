@@ -45,7 +45,7 @@ namespace VTC
                                         "\\VTC\\regionConfigs.xml");
             var regions = rcDal.LoadRegionConfigList().ToList();
 
-            var RegionEditor = new RegionEditor(cs.First().QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>(), regions.First());
+            var RegionEditor = new RegionEditor(cs, rcDal);
             if (RegionEditor.ShowDialog() == DialogResult.OK)
             {
                 

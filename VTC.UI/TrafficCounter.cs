@@ -745,23 +745,23 @@ namespace VTC
 
         private void btnConfigureRegions_Click(object sender, EventArgs e)
         {
-            var r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
-            if (r.ShowDialog() == DialogResult.OK)
-            {
-                _vista.RegionConfiguration = r.RegionConfig;
+            //var r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
+            //if (r.ShowDialog() == DialogResult.OK)
+            //{
+            //    _vista.RegionConfiguration = r.RegionConfig;
 
-                _regionConfigs.Remove(_vista.RegionConfiguration);
-                _regionConfigs.Add(r.RegionConfig);
+            //    _regionConfigs.Remove(_vista.RegionConfiguration);
+            //    _regionConfigs.Add(r.RegionConfig);
 
-                _regionConfigDataAccessLayer.SaveRegionConfigList(_regionConfigs);
+            //    _regionConfigDataAccessLayer.SaveRegionConfigList(_regionConfigs);
 
-                foreach (var reg in r.RegionConfig.Regions.Where(reg => reg.Value.PolygonClosed))
-                    reg.Value.UpdateCentroid();
-            }
-            else
-            {
-                MessageBox.Show("Region configuration failed");
-            }
+            //    foreach (var reg in r.RegionConfig.Regions.Where(reg => reg.Value.PolygonClosed))
+            //        reg.Value.UpdateCentroid();
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Region configuration failed");
+            //}
 
         }
 
