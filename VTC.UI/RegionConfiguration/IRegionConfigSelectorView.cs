@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using VTC.Kernel.RegionConfig;
+using VTC.Kernel.Video;
 
 namespace VTC.RegionConfiguration
 {
@@ -7,6 +8,6 @@ namespace VTC.RegionConfiguration
     {
         void SetModel(RegionConfigSelectorModel model);
         RegionConfigSelectorModel GetModel();
-        Dictionary<CaptureSource.CaptureSource, RegionConfig> GetRegionConfigSelections();
+        Dictionary<ICaptureSource, RegionConfig> GetRegionConfigSelections();
     }
 }

@@ -59,6 +59,11 @@ namespace VTC.RegionConfiguration
 
                 Thumbnails[name] = cs.QueryFrame().Convert<Bgr, float>();
             }
+            if (!Thumbnails.Any())
+            {
+                Thumbnails["No capture sources found!"] = new ThumbnailImage(640, 480, new Bgr(Color.White));
+            }
+
             var thumbnailBindingSource = new BindingSource();
             thumbnailBindingSource.DataSource = Thumbnails;
             cbCaptureSource.DataSource = thumbnailBindingSource;
@@ -251,7 +256,7 @@ namespace VTC.RegionConfiguration
                         {
                             EditingPolygon.Add(coord);
                         }
-
+                        polygon.UpdateCentroid();
                         SetEditing(false, null, null);
                     };
                     control.OnCancelClicked += (sender, args) =>

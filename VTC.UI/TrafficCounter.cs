@@ -54,8 +54,8 @@ namespace VTC
         private readonly DateTime _applicationStartTime;
         private DateTime _lastDatasetExportTime;
 
-        private readonly List<ICaptureSource> _cameras = new List<ICaptureSource>(); //List of all video input devices. Index, file location, name
-        private ICaptureSource _selectedCamera;
+        private readonly List<Kernel.Video.ICaptureSource> _cameras = new List<Kernel.Video.ICaptureSource>(); //List of all video input devices. Index, file location, name
+        private Kernel.Video.ICaptureSource _selectedCamera;
 
         private static readonly string RegionConfigSavePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                             "\\VTC\\regionConfig.xml";
@@ -366,7 +366,7 @@ namespace VTC
             _vista.InitializeBackground(frame);
         }
 
-        private void AddCamera(ICaptureSource camera)
+        private void AddCamera(Kernel.Video.ICaptureSource camera)
         {
             _cameras.Add(camera);
             CameraComboBox.Items.Add(camera.Name);
@@ -745,24 +745,43 @@ namespace VTC
 
         private void btnConfigureRegions_Click(object sender, EventArgs e)
         {
-            //var r = new RegionEditor(_vista.ColorBackground, _vista.RegionConfiguration);
-            //if (r.ShowDialog() == DialogResult.OK)
-            //{
-            //    _vista.RegionConfiguration = r.RegionConfig;
+            try
+            {
+                if (_videoJobs.Count == 0)
+                {
+                    var regionEditor = new RegionEditor(_cameras, _regionConfigDataAccessLayer);
+                    regionEditor.ShowDialog();
+                }
+                else
+                {
+                    var captureSourceLookup = _videoJobs.ToDictionary(v => v, v => new VideoFileCapture(v.VideoPath));
+                    captureSourceLookup.Values.ToList().ForEach(c => c.Init(_settings));
 
-            //    _regionConfigs.Remove(_vista.RegionConfiguration);
-            //    _regionConfigs.Add(r.RegionConfig);
+                    var view = new RegionConfigSelectorView(_regionConfigDataAccessLayer);
+                    var model = new RegionConfigSelectorModel(captureSourceLookup.Values.ToList<ICaptureSource>(), _regionConfigs);
+                    view.SetModel(model);
 
-            //    _regionConfigDataAccessLayer.SaveRegionConfigList(_regionConfigs);
+                    if (view.ShowDialog() == DialogResult.OK)
+                    {
+                        // Get results
+                        var results = view.GetRegionConfigSelections();
 
-            //    foreach (var reg in r.RegionConfig.Regions.Where(reg => reg.Value.PolygonClosed))
-            //        reg.Value.UpdateCentroid();
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Region configuration failed");
-            //}
+                        foreach(var job in _videoJobs)
+                        {
+                            var captureSource = captureSourceLookup[job];
+                            job.RegionConfiguration = results[captureSource];
+                        }
+                    }
+                    return;
+                }
 
+                // Update regionconfigs with any possible changes
+                _regionConfigs = _regionConfigDataAccessLayer.LoadRegionConfigList().ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Region configuration failed");
+            }
         }
 
         private void SelectVideosButton_Click(object sender, EventArgs e)
