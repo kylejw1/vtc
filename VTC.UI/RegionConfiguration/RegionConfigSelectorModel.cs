@@ -2,15 +2,15 @@
 
 namespace VTC.RegionConfiguration
 {
+    using Kernel.Video;
     using System.Collections.Generic;
-    using CaptureSource = CaptureSource.CaptureSource;
 
     public class RegionConfigSelectorModel
     {
-        public readonly List<CaptureSource> CaptureSources;
+        public readonly List<ICaptureSource> CaptureSources;
         public readonly List<RegionConfig> RegionConfigs;
 
-        public RegionConfigSelectorModel(List<CaptureSource> captureSources, List<RegionConfig> regionConfigs)
+        public RegionConfigSelectorModel(List<ICaptureSource> captureSources, List<RegionConfig> regionConfigs)
         {
             CaptureSources = captureSources;
             RegionConfigs = regionConfigs;

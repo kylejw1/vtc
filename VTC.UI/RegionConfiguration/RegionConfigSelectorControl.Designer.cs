@@ -99,7 +99,7 @@
             this.btnCreateNewRegionConfig.Name = "btnCreateNewRegionConfig";
             this.btnCreateNewRegionConfig.Size = new System.Drawing.Size(167, 23);
             this.btnCreateNewRegionConfig.TabIndex = 3;
-            this.btnCreateNewRegionConfig.Text = "Create New...";
+            this.btnCreateNewRegionConfig.Text = "Manage Region Configs...";
             this.btnCreateNewRegionConfig.UseVisualStyleBackColor = true;
             this.btnCreateNewRegionConfig.Click += new System.EventHandler(this.btnCreateNewRegionConfig_Click);
             // 

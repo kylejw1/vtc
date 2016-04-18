@@ -8,7 +8,7 @@ using VTC.Kernel.Video;
 
 namespace VTC.CaptureSource
 {
-    public abstract class CaptureSource : ICaptureSource
+    public abstract class CaptureSource : Kernel.Video.ICaptureSource
     {
         private readonly string _name;
         private Capture _cameraCapture;
@@ -72,7 +72,8 @@ namespace VTC.CaptureSource
                     captureCompleteEvent?.Invoke();
                 }
 
-                return null;
+                // Return a dummy image
+                return new Image<Bgr, byte>(640, 480, new Bgr(System.Drawing.Color.White));
             }
             return frame.ToImage<Bgr,byte>();
         }

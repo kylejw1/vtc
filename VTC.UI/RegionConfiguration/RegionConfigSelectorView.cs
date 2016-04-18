@@ -6,22 +6,25 @@ using VTC.Kernel.RegionConfig;
 
 namespace VTC.RegionConfiguration
 {
+    using Kernel.Video;
     using System.Linq;
-    using CaptureSource = CaptureSource.CaptureSource;
 
     public partial class RegionConfigSelectorView : Form, IRegionConfigSelectorView
     {
-        private BindingList<RegionConfig> _regionConfigs;
-        private Dictionary<RegionConfigSelectorControl, CaptureSource> _captureSourceLookup = new Dictionary<RegionConfigSelectorControl, CaptureSource>();
+        private List<RegionConfig> _regionConfigs;
+        private Dictionary<RegionConfigSelectorControl, ICaptureSource> _captureSourceLookup = new Dictionary<RegionConfigSelectorControl, ICaptureSource>();
+        private IRegionConfigDataAccessLayer _regionConfigDal;
 
-        public RegionConfigSelectorView() 
+        public RegionConfigSelectorView(IRegionConfigDataAccessLayer regionConfigDal) 
         {
             InitializeComponent();
+
+            _regionConfigDal = regionConfigDal;
         }
 
         private Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl> _controlLookup = new Dictionary<RegionConfigSelectorModel, RegionConfigSelectorControl>();
 
-        private RegionConfigSelectorControl CreateRegionConfigSelectorControl(BindingList<RegionConfig> regionConfigs, CaptureSource captureSource)
+        private RegionConfigSelectorControl CreateRegionConfigSelectorControl(List<RegionConfig> regionConfigs, ICaptureSource captureSource)
         {
             var control = new RegionConfigSelectorControl(regionConfigs, captureSource.QueryFrame().Convert<Emgu.CV.Structure.Bgr, float>(), captureSource.Name);
 
@@ -43,17 +46,23 @@ namespace VTC.RegionConfiguration
         {
             var control = sender as RegionConfigSelectorControl;
 
-            var createRegionConfigForm = new RegionEditor(control.BaseThumbnail, new RegionConfig());
+            var captureSourceList = new List<ICaptureSource>();
+            captureSourceList.Add(_captureSourceLookup[control]);
+
+            var createRegionConfigForm = new RegionEditor(captureSourceList, _regionConfigDal);
             if (createRegionConfigForm.ShowDialog() == DialogResult.OK)
             {
-                var newRegionConfig = createRegionConfigForm.RegionConfig;
-                AddRegionConfig(newRegionConfig);
+                _regionConfigs = _regionConfigDal.LoadRegionConfigList().ToList();
+                foreach(var c in _captureSourceLookup.Keys)
+                {
+                    c.UpdateRegionConfigs(_regionConfigs);
+                }
             }
         }
 
         public void SetModel(RegionConfigSelectorModel model)
         {
-            _regionConfigs = new BindingList<RegionConfig>(model.RegionConfigs);
+            _regionConfigs = model.RegionConfigs;
 
             _captureSourceLookup.Clear();
             tlpControls.Controls.Clear();
@@ -68,19 +77,9 @@ namespace VTC.RegionConfiguration
             }
         }
 
-        private void AddRegionConfig(RegionConfig regionConfig)
+        public Dictionary<ICaptureSource, RegionConfig> GetRegionConfigSelections()
         {
-            // TODO: Hack until the region editor is fixed
-            if (string.IsNullOrEmpty(regionConfig.Title))
-            {
-                regionConfig.Title = "(new regionConfig)";
-            }
-            _regionConfigs.Add(regionConfig);
-        }
-
-        public Dictionary<CaptureSource, RegionConfig> GetRegionConfigSelections()
-        {
-            var result = new Dictionary<CaptureSource, RegionConfig>();
+            var result = new Dictionary<ICaptureSource, RegionConfig>();
 
             foreach(var kvp in _captureSourceLookup)
             {

@@ -17,7 +17,7 @@ namespace VTC.RegionConfiguration
             get; private set;
         }
 
-        public RegionConfigSelectorControl(BindingList<RegionConfig> regionConfigs, Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> baseThumbnail, string name)
+        public RegionConfigSelectorControl(List<RegionConfig> regionConfigs, Emgu.CV.Image<Emgu.CV.Structure.Bgr, float> baseThumbnail, string name)
         {
             InitializeComponent();
 
@@ -27,6 +27,19 @@ namespace VTC.RegionConfiguration
             lbRegionConfigs.DataSource = regionConfigs;
             lbRegionConfigs.DisplayMember = "Title";
             lblName.Text = name;
+        }
+
+        public void UpdateRegionConfigs(List<RegionConfig> newRegionConfigs)
+        {
+            var selectedTitle = SelectedRegionConfig.Title;
+
+            lbRegionConfigs.DataSource = newRegionConfigs;
+
+            var selected = newRegionConfigs.FirstOrDefault(r => r.Title.Equals(selectedTitle));
+            if (null != selected)
+            {
+                lbRegionConfigs.SelectedItem = selected;
+            }
         }
         
         public RegionConfig SelectedRegionConfig
