@@ -66,6 +66,7 @@ namespace VTC
 
         private readonly string _appArgument; //For debugging only, delete this later
         private TimeSpan _trialLicenseTimeLimit = TimeSpan.FromMinutes(30);
+       private Int64 numProcessedFrames = 0;
 
         // unit tests has own settings, so need to store "pairs" (capture, settings)
         private CaptureContext[] _testCaptureContexts;
@@ -250,7 +251,7 @@ namespace VTC
                         timeActiveTextBox.Text = activeTime.ToString(@"dd\.hh\:mm\:ss");
 
                         //Export training images
-                        if (DateTime.Now - _lastDatasetExportTime > TimeSpan.FromSeconds(10))
+                        if (numProcessedFrames % 10 == 0)
                             TryExportDataset(frameForProcessing);
 
                         if (delayProcessingCheckbox.Checked)
@@ -258,6 +259,8 @@ namespace VTC
 
                         if (activeTime > _trialLicenseTimeLimit && !_isLicensed)
                             NotifyLicenseAndExit();
+
+                        numProcessedFrames++;
                     }
                 }
                 catch (Exception ex)
